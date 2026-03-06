@@ -1,0 +1,275 @@
+@if (isLoading) {
+  <div class="loading-container">
+    <p>Cargando...</p>
+  </div>
+} @else if (notFound) {
+  <div class="not-found-container">
+    <p class="not-found-text">Reembolso no encontrado</p>
+    <a routerLink="/" class="back-link">Volver al dashboard</a>
+  </div>
+} @else if (detalle) {
+  <div class="detail-container">
+    <!-- Header -->
+    <div class="detail-header">
+      <a routerLink="/" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Volver al dashboard
+      </a>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>{{ detalle.asunto }}</h1>
+          <p class="subtitle">Detalle de la solicitud de reembolso</p>
+        </div>
+        <span class="estado-badge" [ngClass]="getEstadoClass(estadoActual)">
+          {{ estadoActual }}
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Columna principal -->
+      <div class="main-column">
+        <!-- Información general -->
+        <div class="card">
+          <h2 class="card-title">Información General</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-icon blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <div class="info-content">
+                <p class="info-label">Fecha de solicitud</p>
+                <p class="info-value">{{ formatDate(detalle.fecha) }}</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                </svg>
+              </div>
+              <div class="info-content">
+                <p class="info-label">Solicitante</p>
+                <p class="info-value">{{ detalle.remitente }}</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="9" x2="20" y2="9"/>
+                  <line x1="4" y1="15" x2="20" y2="15"/>
+                  <line x1="10" y1="3" x2="8" y2="21"/>
+                  <line x1="16" y1="3" x2="14" y2="21"/>
+                </svg>
+              </div>
+              <div class="info-content">
+                <p class="info-label">UUID</p>
+                <p class="info-value uuid">{{ detalle.uuid }}</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon orange">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"/>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div class="info-content">
+                <p class="info-label">Monto total</p>
+                <p class="info-value total">${{ formatCurrency(detalle.total) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="description-section">
+            <p class="info-label">Descripción</p>
+            <p class="description-text">{{ detalle.descripcion }}</p>
+          </div>
+        </div>
+
+        <!-- Conceptos -->
+        <div class="card">
+          <h2 class="card-title">Conceptos</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">Descripción</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-right">Precio Unitario</th>
+                  <th class="text-right">Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (concepto of detalle.conceptos; track $index) {
+                  <tr>
+                    <td>{{ concepto.descripcion }}</td>
+                    <td class="text-center">{{ concepto.cantidad }}</td>
+                    <td class="text-right">${{ formatCurrency(concepto.precioUnitario) }}</td>
+                    <td class="text-right font-medium">${{ formatCurrency(calcularImporte(concepto.cantidad, concepto.precioUnitario)) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right font-semibold">Total:</td>
+                  <td class="text-right total-value">${{ formatCurrency(detalle.total) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar derecha -->
+      <div class="sidebar-column">
+        <!-- Documentos -->
+        <div class="card">
+          <h2 class="card-title">Documentos</h2>
+          <div class="documents-list">
+            <button class="document-btn" (click)="descargarXML()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <div class="document-info">
+                <p class="document-title">Descargar XML</p>
+                <p class="document-subtitle">Factura electrónica</p>
+              </div>
+            </button>
+
+            <button class="document-btn" (click)="descargarPDF(1)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <div class="document-info">
+                <p class="document-title">Descargar PDF 1</p>
+                <p class="document-subtitle">Representación impresa</p>
+              </div>
+            </button>
+
+            <button class="document-btn" (click)="descargarPDF(2)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <div class="document-info">
+                <p class="document-title">Descargar PDF 2</p>
+                <p class="document-subtitle">Comprobante adicional</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Información fiscal -->
+        <div class="card">
+          <h2 class="card-title">Información Fiscal</h2>
+          <div class="fiscal-info">
+            <div class="fiscal-item">
+              <p class="info-label">RFC Emisor</p>
+              <p class="info-value mono">{{ detalle.rfcEmisor }}</p>
+            </div>
+
+            <div class="fiscal-item">
+              <p class="info-label">RFC Receptor</p>
+              <p class="info-value mono">{{ detalle.rfcReceptor }}</p>
+            </div>
+
+            <div class="fiscal-item">
+              <p class="info-label">Fecha de Timbrado</p>
+              <p class="info-value">{{ formatDateTime(detalle.fechaTimbrado) }}</p>
+            </div>
+
+            <div class="fiscal-item">
+              <p class="info-label">Monto Total</p>
+              <p class="info-value total">${{ formatCurrency(detalle.total) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="card">
+          <h2 class="card-title">Cambiar Estado</h2>
+          <div class="action-buttons">
+            <button
+              class="action-btn aprobar"
+              [class.disabled]="estadoActual === 'Aprobado'"
+              [disabled]="estadoActual === 'Aprobado'"
+              (click)="cambiarEstado('Aprobado')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+              </svg>
+              Aprobar
+            </button>
+
+            <button
+              class="action-btn revision"
+              [class.disabled]="estadoActual === 'En revisión'"
+              [disabled]="estadoActual === 'En revisión'"
+              (click)="cambiarEstado('En revisión')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+              </svg>
+              En revisión
+            </button>
+
+            <button
+              class="action-btn rechazar"
+              [class.disabled]="estadoActual === 'Rechazado'"
+              [disabled]="estadoActual === 'Rechazado'"
+              (click)="cambiarEstado('Rechazado')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              Rechazar
+            </button>
+
+            <button
+              class="action-btn pendiente"
+              [class.disabled]="estadoActual === 'Pendiente'"
+              [disabled]="estadoActual === 'Pendiente'"
+              (click)="cambiarEstado('Pendiente')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+              </svg>
+              Pendiente
+            </button>
+          </div>
+
+          @if (estadoActual !== estadoOriginal) {
+            <div class="status-change-notice">
+              <p>
+                <strong>Estado actualizado:</strong> El reembolso ahora está marcado como "{{ estadoActual }}"
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
