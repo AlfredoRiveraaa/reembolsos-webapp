@@ -1,34 +1,39 @@
 <div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed">
+
   <!-- Header -->
   <header class="header">
     <div class="header-left">
-      <button class="menu-toggle" (click)="toggleSidebar()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button class="menu-toggle" (click)="toggleSidebar()" aria-label="Toggle menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="6" x2="21" y2="6"/>
           <line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
       </button>
       <div class="logo-section">
-        <img src="assets/buap-logo.png" alt="BUAP Logo" class="buap-logo" onerror="this.style.display='none'">
+        <img src="images/logo%20blanco.jpg" alt="BUAP" class="buap-logo">
         <div class="header-titles">
           <h1>Benemérita Universidad Autónoma de Puebla</h1>
           <span class="department">Dirección de Recursos Humanos</span>
         </div>
       </div>
     </div>
+
     <div class="header-right">
       <div class="system-title">
         <span class="system-name">Sistema de Reembolsos</span>
       </div>
       <div class="user-section">
         <div class="user-avatar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <span class="user-name">Usuario</span>
+        <span class="user-name">{{ userDisplayName }}</span>
+        <button type="button" class="logout-btn" (click)="logout()" aria-label="Cerrar sesion">
+          Salir
+        </button>
       </div>
     </div>
   </header>
@@ -36,23 +41,21 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <nav class="sidebar-nav">
+      
       <ul class="nav-list">
         <li class="nav-item">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7"/>
-              <rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/>
-              <rect x="3" y="14" width="7" height="7"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
             </svg>
             <span class="nav-text">Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
           <a routerLink="/historial" routerLinkActive="active" class="nav-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12,6 12,12 16,14"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
             </svg>
             <span class="nav-text">Historial</span>
           </a>
@@ -61,14 +64,12 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="sidebar-info">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="16" x2="12" y2="12"/>
-          <line x1="12" y1="8" x2="12.01" y2="8"/>
-        </svg>
-        <span class="nav-text">v1.0.0</span>
-      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span class="sidebar-ver">v2.0.0 · Rama UI-v2</span>
     </div>
   </aside>
 
@@ -81,23 +82,19 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-left">
-        <p class="footer-text">
-          <strong>Benemérita Universidad Autónoma de Puebla</strong>
-        </p>
-        <p class="footer-address">
-          4 Sur 104, Centro Histórico, 72000 Puebla, Pue.
-        </p>
+        <img src="images/logo%20blanco.jpg" alt="BUAP" class="footer-logo">
+        <div>
+          <p class="footer-text">Benemérita Universidad Autónoma de Puebla</p>
+          <p class="footer-address">4 Sur 104, Centro Histórico, 72000 Puebla, Pue.</p>
+        </div>
       </div>
       <div class="footer-center">
-        <p class="footer-department">
-          Dirección de Recursos Humanos - Sistema de Gestión de Reembolsos
-        </p>
+        <p class="footer-department">Dirección de Recursos Humanos · Sistema de Gestión de Reembolsos</p>
       </div>
       <div class="footer-right">
-        <p class="footer-copyright">
-          &copy; {{ currentYear }} BUAP. Todos los derechos reservados.
-        </p>
+        <p class="footer-copyright">&copy; {{ currentYear }} BUAP. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>
+
 </div>

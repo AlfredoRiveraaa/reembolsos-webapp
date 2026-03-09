@@ -18,6 +18,9 @@ export class ReimbursementDetailComponent implements OnInit {
   isLoading = true;
   notFound = false;
 
+  /** Which PDF is open in the viewer (null = none) */
+  activePdf: number | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private reimbursementService: ReimbursementService
@@ -46,31 +49,27 @@ export class ReimbursementDetailComponent implements OnInit {
     });
   }
 
+  previewPdf(n: number): void {
+    this.activePdf = this.activePdf === n ? null : n;
+  }
+
   cambiarEstado(nuevoEstado: ReimbursementStatus): void {
     if (this.detalle && this.estadoActual !== nuevoEstado) {
       this.reimbursementService.updateReimbursementStatus(this.detalle.id, nuevoEstado)
         .subscribe(success => {
-          if (success) {
-            this.estadoActual = nuevoEstado;
-            console.log(`Estado cambiado de "${this.estadoOriginal}" a "${nuevoEstado}"`);
-          }
+          if (success) this.estadoActual = nuevoEstado;
         });
     }
   }
 
   getEstadoClass(estado: string): string {
-    switch (estado) {
-      case 'Aprobado':
-        return 'estado-aprobado';
-      case 'Pendiente':
-        return 'estado-pendiente';
-      case 'En revisión':
-        return 'estado-revision';
-      case 'Rechazado':
-        return 'estado-rechazado';
-      default:
-        return 'estado-default';
-    }
+    const map: Record<string, string> = {
+      'Aprobado':   'estado-aprobado',
+      'Pendiente':  'estado-pendiente',
+      'En revisión':'estado-revision',
+      'Rechazado':  'estado-rechazado',
+    };
+    return map[estado] ?? 'estado-default';
   }
 
   formatCurrency(value: number): string {
@@ -78,32 +77,25 @@ export class ReimbursementDetailComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    return new Date(dateString).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
   formatDateTime(dateString: string): string {
     return new Date(dateString).toLocaleString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   }
 
-  calcularImporte(cantidad: number, precioUnitario: number): number {
-    return cantidad * precioUnitario;
+  calcularImporte(cantidad: number, precio: number): number {
+    return cantidad * precio;
   }
 
   descargarXML(): void {
-    console.log('Descargando XML...');
+    console.log('Descargando XML…');
   }
 
   descargarPDF(numero: number): void {
-    console.log(`Descargando PDF ${numero}...`);
+    console.log(`Descargando PDF ${numero}…`);
   }
 }

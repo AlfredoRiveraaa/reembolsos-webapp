@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+$primary:    #003B5C;
+$primary-dk: #002a43;
+$cyan:       #00B5E2;
+$slate-50: #f8fafc;
+$slate-100: #f1f5f9;
+$slate-200: #e2e8f0;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-700: #334155;
+$slate-900: #0f172a;
+$white: #ffffff;
+$gold: #c9a227;
+$red: #dc2626;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.login-page {
+  min-height: 100vh;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 59, 92, 0.2), transparent 40%),
+    linear-gradient(160deg, #eef2ff 0%, #f8fafc 100%);
+  display: grid;
+  place-items: center;
+}
+
+.login-shell {
+  width: min(980px, 100%);
+  background: $white;
+  border: 1px solid $slate-200;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.brand-panel {
+  background:
+    url('/images/torre%20de%20rectoria.jpg') center / cover no-repeat;
+  color: $white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  min-height: 320px;
+
+  h1 {
+    margin: 0.35rem 0 0.75rem;
+    font-size: clamp(1.45rem, 2.3vw, 1.85rem);
+    line-height: 1.2;
+  }
+}
+
+.brand-overlay {
+  padding: 2.5rem 2rem;
+  background: linear-gradient(0deg, rgba($primary-dk, 0.92) 0%, rgba($primary, 0.72) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.brand-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.brand-copy {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  max-width: 28ch;
+}
+
+.brand-pill {
+  margin-top: 1.25rem;
+  width: fit-content;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: $gold;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.login-card {
+  padding: 2.1rem 1.8rem;
+  background: $white;
+
+  @media (max-width: 540px) {
+    padding: 1.4rem 1.1rem;
+  }
+}
+
+.login-logo {
+  height: 200px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 1rem;
+}
+
+.card-head {
+  text-align: center;
+  margin-bottom: 1.25rem;
+
+  h2 {
+    margin: 0;
+    color: $slate-900;
+    font-size: 1.35rem;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: $slate-500;
+    font-size: 0.87rem;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.36rem;
+
+  span {
+    font-size: 0.82rem;
+    color: $slate-700;
+    font-weight: 500;
+  }
+
+  input {
+    border: 1px solid $slate-200;
+    border-radius: 10px;
+    padding: 0.7rem 0.78rem;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(0, 59, 92, 0.15);
+    }
+  }
+}
+
+.password-input-wrap {
+  position: relative;
+
+  input {
+    width: 100%;
+    padding-right: 2.5rem;
+  }
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: $slate-400;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: $slate-700;
+    background: $slate-50;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(0, 59, 92, 0.35);
+    outline-offset: 1px;
+  }
+}
+
+.field-error {
+  font-size: 0.74rem;
+  color: $red;
+}
+
+.auth-error {
+  margin: 0;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.btn-login {
+  margin-top: 0.2rem;
+  border: none;
+  border-radius: 10px;
+  padding: 0.72rem 0.9rem;
+  background: linear-gradient(135deg, $primary 0%, $primary-dk 100%);
+  color: $white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+
+  &:hover:enabled {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.demo-box {
+  margin-top: 1rem;
+  border: 1px dashed $slate-200;
+  background: $slate-50;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: $slate-500;
+
+  p {
+    margin: 0.2rem 0;
+  }
+}
+
+.demo-title {
+  color: $slate-900;
+  font-weight: 600;
+}
+
+code {
+  background: $slate-100;
+  padding: 0.08rem 0.35rem;
+  border-radius: 4px;
+}
