@@ -1,8 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
-$primary:     #1e3a5f;
-$primary-dk:  #152d47;
-$primary-lt:  #2a4a73;
+$primary:     #003B5C;
+$primary-dk:  #002a43;
+$primary-lt:  #00506e;
+$cyan:        #00B5E2;
+$cyan-lt:     #b3eafb;
 $gold:        #c9a227;
 $slate-50:    #f8fafc;
 $slate-100:   #f1f5f9;
@@ -62,6 +64,7 @@ $footer-h:    72px;
   color: $white;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  border-bottom: 3px solid $cyan;
 }
 
 .header-left {
@@ -95,7 +98,7 @@ $footer-h:    72px;
 }
 
 .buap-logo {
-  height: 38px;
+  height: 60px;
   width: auto;
 }
 
@@ -113,7 +116,7 @@ $footer-h:    72px;
 
   .department {
     font-size: 0.6875rem;
-    color: $gold;
+    color: $cyan;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -145,7 +148,7 @@ $footer-h:    72px;
 
 .user-avatar {
   width: 30px; height: 30px;
-  background: $gold;
+  background: $cyan;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -158,14 +161,32 @@ $footer-h:    72px;
   font-weight: 600;
 }
 
+.logout-btn {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: $white;
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.45);
+  }
+}
+
 // ── Sidebar ────────────────────────────────────────────────────────
 .sidebar {
   grid-area: sidebar;
   width: $sidebar-w;
   display: flex;
   flex-direction: column;
-  background: $white;
-  border-right: 1px solid $slate-200;
+  background: $primary;
+  border-right: none;
   overflow: hidden;
   transition: width 0.25s ease;
 }
@@ -178,7 +199,7 @@ $footer-h:    72px;
 .nav-section-label {
   font-size: 0.6875rem;
   font-weight: 700;
-  color: $slate-400;
+  color: rgba(255,255,255,.45);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0 0.75rem;
@@ -198,22 +219,22 @@ $footer-h:    72px;
   align-items: center;
   gap: 0.75rem;
   padding: 0.6875rem 0.875rem;
-  color: $slate-600;
+  color: rgba(255,255,255,.7);
   text-decoration: none;
   border-radius: 9px;
   transition: all 0.15s;
   position: relative;
 
   &:hover {
-    background: $slate-50;
-    color: $primary;
+    background: rgba(255,255,255,.08);
+    color: $white;
   }
 
   &.active {
-    background: rgba(30,58,95,.08);
-    color: $primary;
+    background: rgba(0,181,226,.15);
+    color: $white;
 
-    svg { color: $primary; }
+    svg { color: $cyan; }
 
     &::before {
       content: '';
@@ -223,14 +244,14 @@ $footer-h:    72px;
       transform: translateY(-50%);
       width: 3px;
       height: 60%;
-      background: $primary;
+      background: $cyan;
       border-radius: 0 3px 3px 0;
     }
   }
 
   svg {
     flex-shrink: 0;
-    color: $slate-400;
+    color: rgba(255,255,255,.45);
     transition: color 0.15s;
   }
 }
@@ -239,13 +260,14 @@ $footer-h:    72px;
   font-size: 0.9375rem;
   font-weight: 500;
   white-space: nowrap;
+  color: inherit;
 }
 
 .sidebar-footer {
   display: flex;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-top: 1px solid $slate-100;
+  border-top: 1px solid rgba(255,255,255,.1);
   gap: 0.5rem;
 }
 
@@ -260,7 +282,7 @@ $footer-h:    72px;
 
 .sidebar-ver {
   font-size: 0.75rem;
-  color: $slate-400;
+  color: rgba(255,255,255,.4);
   font-weight: 500;
 }
 
@@ -277,9 +299,9 @@ $footer-h:    72px;
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
-  background: $primary-dk;
+  background: linear-gradient(135deg, $primary 0%, $primary-dk 100%);
   color: $white;
-  border-top: 3px solid $gold;
+  border-top: 3px solid $cyan;
 }
 
 .footer-content {
@@ -292,10 +314,22 @@ $footer-h:    72px;
 
 .footer-left, .footer-center, .footer-right { flex: 1; }
 
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-logo {
+  height: 60px;
+  width: auto;
+  flex-shrink: 0;
+}
+
 .footer-text { font-size: 0.8125rem; margin-bottom: 0.125rem; font-weight: 600; }
 .footer-address { font-size: 0.75rem; color: rgba(255,255,255,.6); }
 .footer-center { text-align: center; }
-.footer-department { font-size: 0.8125rem; color: $gold; font-weight: 500; }
+.footer-department { font-size: 0.8125rem; color: $cyan; font-weight: 500; }
 .footer-right { text-align: right; }
 .footer-copyright { font-size: 0.75rem; color: rgba(255,255,255,.6); }
 

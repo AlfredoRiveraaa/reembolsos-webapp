@@ -154,7 +154,7 @@
               <td>{{ formatDate(reembolso.fecha) }}</td>
               <td>{{ reembolso.remitente }}</td>
               <td class="truncate-cell">{{ reembolso.asunto }}</td>
-              <td class="uuid-cell">{{ reembolso.uuid.substring(0, 8) }}...</td>
+              <td class="uuid-cell">{{ reembolso.uuid }}</td>
               <td class="amount-cell">${{ formatCurrency(reembolso.total) }}</td>
               <td>
                 <span class="estado-badge" [ngClass]="getEstadoClass(reembolso.estado)">

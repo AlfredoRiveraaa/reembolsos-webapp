@@ -148,7 +148,7 @@
                 <td class="td-date">{{ formatDate(r.fecha) }}</td>
                 <td class="td-name">{{ r.remitente }}</td>
                 <td class="td-subject">{{ r.asunto }}</td>
-                <td class="td-uuid">{{ truncateUUID(r.uuid) }}</td>
+                <td class="td-uuid">{{ r.uuid }}</td>
                 <td class="td-amount">${{ formatCurrency(r.total) }}</td>
                 <td class="td-status">
                   <span class="badge" [ngClass]="getEstadoClass(r.estado)">{{ r.estado }}</span>

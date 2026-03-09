@@ -1,0 +1,80 @@
+<div class="login-page">
+  <div class="login-shell">
+    <section class="brand-panel">
+      <div class="brand-overlay">
+        <p class="brand-kicker">Benemérita Universidad Autónoma de Puebla</p>
+        <h1>Sistema de Gestión de Reembolsos</h1>
+        <p class="brand-copy">Acceso para personal de Recursos Humanos.</p>
+      </div>
+    </section>
+
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="card-head">
+        <img src="images/Logo-BUAP.png" alt="Logo BUAP" class="login-logo" />
+        <h2 id="login-title">Iniciar sesión</h2>
+        <p>Ingresa con tus credenciales institucionales.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        <label class="field-group">
+          <span>Usuario</span>
+          <input type="text" formControlName="username" placeholder="rh.usuario" autocomplete="username" />
+          @if (hasError('username', 'required')) {
+            <small class="field-error">El usuario es obligatorio.</small>
+          }
+        </label>
+
+        <label class="field-group">
+          <span>Contraseña</span>
+          <div class="password-input-wrap">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="********"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-password-btn"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              @if (showPassword) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                  <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (hasError('password', 'required')) {
+            <small class="field-error">La contraseña es obligatoria.</small>
+          }
+          @if (hasError('password', 'minlength')) {
+            <small class="field-error">La contraseña debe tener al menos 6 caracteres.</small>
+          }
+        </label>
+
+        @if (authError) {
+          <p class="auth-error" role="alert">{{ authError }}</p>
+        }
+
+        <button type="submit" class="btn-login" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Validando...' : 'Entrar al sistema' }}
+        </button>
+      </form>
+
+      <div class="demo-box">
+        <p class="demo-title">Acceso demo</p>
+        <p>Usuario: <code>rh.usuario</code></p>
+        <p>Contraseña: <code>BUAP2026#</code></p>
+      </div>
+    </section>
+  </div>
+</div>

@@ -278,6 +278,8 @@ table {
   font-family: ui-monospace, monospace;
   font-size: 0.8125rem;
   color: $gray-600;
+  white-space: nowrap;
+  min-width: 280px;
 }
 
 .amount-cell {

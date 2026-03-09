@@ -166,7 +166,7 @@ $amber-bg: #fef9c3;
 // ── Split Panel ────────────────────────────────────────────────────
 .split-panel {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: clamp(950px, 46vw, 680px) minmax(0, 1fr);
   gap: 0;
   height: calc(100vh - 128px); // full viewport minus topbar+header
   overflow: hidden;
@@ -181,10 +181,10 @@ $amber-bg: #fef9c3;
 // ── Data Panel (Left) ──────────────────────────────────────────────
 .data-panel {
   overflow-y: auto;
-  padding: 1.5rem 1.75rem;
+  padding: 1rem 1.125rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.875rem;
   background: $slate-50;
   border-right: 1px solid $slate-200;
 
@@ -198,23 +198,23 @@ $amber-bg: #fef9c3;
 .info-card {
   background: $white;
   border: 1px solid $slate-200;
-  border-radius: 12px;
-  padding: 1.25rem 1.375rem;
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
 }
 
 .card-label {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   color: $slate-400;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  margin-bottom: 1rem;
+  margin-bottom: 0.625rem;
 }
 
 .meta-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
 
   @media (max-width: 640px) { grid-template-columns: 1fr; }
 }
@@ -222,13 +222,13 @@ $amber-bg: #fef9c3;
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.1875rem;
 
   &.full-width { grid-column: 1 / -1; }
 }
 
 .meta-key {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 500;
   color: $slate-400;
   text-transform: uppercase;
@@ -236,12 +236,12 @@ $amber-bg: #fef9c3;
 }
 
 .meta-val {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: $slate-800;
 
   &.meta-name {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     color: $slate-900;
   }
@@ -253,9 +253,9 @@ $amber-bg: #fef9c3;
   }
 
   &.meta-desc {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: $slate-600;
-    line-height: 1.6;
+    line-height: 1.45;
     font-weight: 400;
   }
 }
@@ -264,13 +264,13 @@ $amber-bg: #fef9c3;
 .concepts-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 
   thead tr { border-bottom: 1px solid $slate-200; }
 
   th {
-    padding: 0.5rem 0;
-    font-size: 0.75rem;
+    padding: 0.375rem 0;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: $slate-400;
     text-transform: uppercase;
@@ -282,7 +282,7 @@ $amber-bg: #fef9c3;
   }
 
   tbody td {
-    padding: 0.625rem 0;
+    padding: 0.5rem 0;
     color: $slate-700;
     border-bottom: 1px solid $slate-100;
 
@@ -292,31 +292,31 @@ $amber-bg: #fef9c3;
   }
 
   tfoot td {
-    padding: 0.75rem 0 0;
+    padding: 0.5rem 0 0;
     border-top: 2px solid $slate-200;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
 
     &.ct-right       { text-align: right; }
     &.ct-total-label { color: $slate-500; font-weight: 500; }
-    &.ct-total       { font-size: 1.0625rem; font-weight: 700; color: $slate-900; }
+    &.ct-total       { font-size: 0.9375rem; font-weight: 700; color: $slate-900; }
   }
 }
 
 // ── Fiscal ─────────────────────────────────────────────────────────
 .fiscal-row {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .fiscal-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.1875rem;
 }
 
 .fiscal-total {
-  font-size: 1.25rem !important;
+  font-size: 1.0625rem !important;
   font-weight: 700 !important;
   color: $slate-900 !important;
 }
@@ -325,18 +325,18 @@ $amber-bg: #fef9c3;
 .doc-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .doc-btn {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
   background: $slate-50;
   border: 1px solid $slate-200;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
 
@@ -353,13 +353,18 @@ $amber-bg: #fef9c3;
 }
 
 .doc-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 
   &.doc-xml { background: #ecfdf5; color: #059669; }
   &.doc-pdf { background: #fff7ed; color: #ea580c; }
@@ -373,14 +378,14 @@ $amber-bg: #fef9c3;
 
 .doc-name {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: $slate-900;
 }
 
 .doc-sub {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: $slate-400;
 }
 
@@ -413,7 +418,7 @@ $amber-bg: #fef9c3;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.875rem 1.25rem;
+  padding: 0.625rem 0.875rem;
   background: $white;
   border-bottom: 1px solid $slate-100;
   gap: 0.5rem;
@@ -471,7 +476,7 @@ $amber-bg: #fef9c3;
   align-items: center;
   justify-content: center;
   height: 100%;
-  min-height: 280px;
+  min-height: 220px;
   gap: 0.75rem;
   padding: 2rem;
   text-align: center;
@@ -504,10 +509,10 @@ $amber-bg: #fef9c3;
 .pdf-mock-viewer {
   background: $slate-100;
   min-height: 100%;
-  padding: 1rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.625rem;
 }
 
 .pdf-mock-bar {
@@ -541,11 +546,11 @@ $amber-bg: #fef9c3;
 .pdf-mock-content {
   background: $white;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.125rem;
   box-shadow: 0 2px 8px rgba(0,0,0,.08);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.875rem;
 }
 
 .pdf-mock-header-line {
@@ -688,7 +693,7 @@ $amber-bg: #fef9c3;
 
 // ── Action Card ────────────────────────────────────────────────────
 .action-card {
-  padding: 1.25rem 1.375rem;
+  padding: 0.875rem 1rem;
   background: $white;
   border-top: 1px solid $slate-200;
 }
@@ -697,12 +702,12 @@ $amber-bg: #fef9c3;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.5rem 0.6875rem;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.8125rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
   color: #1e40af;
 
   svg { color: #3b82f6; flex-shrink: 0; }
@@ -712,7 +717,7 @@ $amber-bg: #fef9c3;
 .action-btns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.625rem;
+  gap: 0.5rem;
 }
 
 .act-btn {
@@ -720,11 +725,11 @@ $amber-bg: #fef9c3;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.6875rem 0.5rem;
+  padding: 0.5rem 0.5rem;
   border: none;
   border-radius: 9px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;

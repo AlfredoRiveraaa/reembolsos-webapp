@@ -80,10 +80,6 @@ export class DashboardComponent implements OnInit {
     return new Date(dateString).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  truncateUUID(uuid: string): string {
-    return uuid.substring(0, 18) + '…';
-  }
-
   exportData(): void {
     console.log('Exportando datos…');
   }

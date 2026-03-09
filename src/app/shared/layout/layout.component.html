@@ -11,7 +11,7 @@
         </svg>
       </button>
       <div class="logo-section">
-        <img src="assets/buap-logo.png" alt="BUAP" class="buap-logo" onerror="this.style.display='none'">
+        <img src="images/logo%20blanco.jpg" alt="BUAP" class="buap-logo">
         <div class="header-titles">
           <h1>Benemérita Universidad Autónoma de Puebla</h1>
           <span class="department">Dirección de Recursos Humanos</span>
@@ -30,7 +30,10 @@
             <circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <span class="user-name">RH Usuario</span>
+        <span class="user-name">{{ userDisplayName }}</span>
+        <button type="button" class="logout-btn" (click)="logout()" aria-label="Cerrar sesion">
+          Salir
+        </button>
       </div>
     </div>
   </header>
@@ -38,7 +41,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <nav class="sidebar-nav">
-      <p class="nav-section-label">Módulos</p>
+      
       <ul class="nav-list">
         <li class="nav-item">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
@@ -79,8 +82,11 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-left">
-        <p class="footer-text">Benemérita Universidad Autónoma de Puebla</p>
-        <p class="footer-address">4 Sur 104, Centro Histórico, 72000 Puebla, Pue.</p>
+        <img src="images/logo%20blanco.jpg" alt="BUAP" class="footer-logo">
+        <div>
+          <p class="footer-text">Benemérita Universidad Autónoma de Puebla</p>
+          <p class="footer-address">4 Sur 104, Centro Histórico, 72000 Puebla, Pue.</p>
+        </div>
       </div>
       <div class="footer-center">
         <p class="footer-department">Dirección de Recursos Humanos · Sistema de Gestión de Reembolsos</p>
