@@ -16,17 +16,14 @@ export class DashboardComponent implements OnInit {
   reimbursements: Reimbursement[] = [];
   filteredReimbursements: Reimbursement[] = [];
 
-  filters: ReimbursementFilters = {
-    fecha: '',
-    uuid: '',
-    estado: ''
-  };
+  filters: ReimbursementFilters = { fecha: '', uuid: '', estado: '' };
 
-  // Stats
   totalSolicitudesHoy = 0;
   solicitudesPendientes = 0;
   solicitudesRechazadas = 0;
   totalAcumulado = 0;
+
+  today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   estados: ReimbursementStatus[] = ['Aprobado', 'Pendiente', 'En revisión', 'Rechazado'];
 
@@ -60,19 +57,19 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  clearFilters(): void {
+    this.filters = { fecha: '', uuid: '', estado: '' };
+    this.applyFilters();
+  }
+
   getEstadoClass(estado: string): string {
-    switch (estado) {
-      case 'Aprobado':
-        return 'estado-aprobado';
-      case 'Pendiente':
-        return 'estado-pendiente';
-      case 'En revisión':
-        return 'estado-revision';
-      case 'Rechazado':
-        return 'estado-rechazado';
-      default:
-        return 'estado-default';
-    }
+    const map: Record<string, string> = {
+      'Aprobado': 'estado-aprobado',
+      'Pendiente': 'estado-pendiente',
+      'En revisión': 'estado-revision',
+      'Rechazado': 'estado-rechazado',
+    };
+    return map[estado] ?? 'estado-default';
   }
 
   formatCurrency(value: number): string {
@@ -80,15 +77,14 @@ export class DashboardComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('es-MX');
+    return new Date(dateString).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   truncateUUID(uuid: string): string {
-    return uuid.substring(0, 18) + '...';
+    return uuid.substring(0, 18) + '…';
   }
 
   exportData(): void {
-    // Implementar exportación de datos
-    console.log('Exportando datos...');
+    console.log('Exportando datos…');
   }
 }

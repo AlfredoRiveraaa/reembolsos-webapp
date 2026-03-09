@@ -1,275 +1,356 @@
 @if (isLoading) {
-  <div class="loading-container">
-    <p>Cargando...</p>
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <p>Cargando solicitud…</p>
   </div>
 } @else if (notFound) {
-  <div class="not-found-container">
-    <p class="not-found-text">Reembolso no encontrado</p>
-    <a routerLink="/" class="back-link">Volver al dashboard</a>
+  <div class="not-found-screen">
+    <div class="nf-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <h2>Solicitud no encontrada</h2>
+    <p>No existe un reembolso con ese identificador.</p>
+    <a routerLink="/" class="btn-back-home">← Volver al Dashboard</a>
   </div>
 } @else if (detalle) {
-  <div class="detail-container">
-    <!-- Header -->
-    <div class="detail-header">
-      <a routerLink="/" class="back-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"/>
-          <polyline points="12 19 5 12 12 5"/>
-        </svg>
-        Volver al dashboard
-      </a>
-      <div class="header-content">
-        <div class="header-text">
-          <h1>{{ detalle.asunto }}</h1>
-          <p class="subtitle">Detalle de la solicitud de reembolso</p>
+
+  <!-- Top Bar -->
+  <div class="detail-topbar">
+    <a routerLink="/" class="topbar-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Dashboard
+    </a>
+    <div class="topbar-center">
+      <span class="topbar-id">#{{ detalle.id }}</span>
+      <h1 class="topbar-title">{{ detalle.asunto }}</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="badge badge-lg" [ngClass]="getEstadoClass(estadoActual)">{{ estadoActual }}</span>
+    </div>
+  </div>
+
+  <!-- Split Panel -->
+  <div class="split-panel">
+
+    <!-- ── LEFT: Data Panel ── -->
+    <div class="data-panel">
+
+      <!-- Solicitante -->
+      <div class="info-card">
+        <div class="card-label">Información de la Solicitud</div>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-key">Remitente</span>
+            <span class="meta-val meta-name">{{ detalle.remitente }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-key">Fecha de solicitud</span>
+            <span class="meta-val">{{ formatDate(detalle.fecha) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-key">Fecha de timbrado</span>
+            <span class="meta-val">{{ formatDateTime(detalle.fechaTimbrado) }}</span>
+          </div>
+          <div class="meta-item full-width">
+            <span class="meta-key">UUID</span>
+            <span class="meta-val mono">{{ detalle.uuid }}</span>
+          </div>
+          <div class="meta-item full-width">
+            <span class="meta-key">Descripción</span>
+            <span class="meta-val meta-desc">{{ detalle.descripcion }}</span>
+          </div>
         </div>
-        <span class="estado-badge" [ngClass]="getEstadoClass(estadoActual)">
-          {{ estadoActual }}
-        </span>
       </div>
+
+      <!-- Conceptos -->
+      <div class="info-card">
+        <div class="card-label">Desglose de Conceptos</div>
+        <table class="concepts-table">
+          <thead>
+            <tr>
+              <th class="ct-left">Concepto</th>
+              <th class="ct-center">Cant.</th>
+              <th class="ct-right">P. Unit.</th>
+              <th class="ct-right">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of detalle.conceptos; track $index) {
+              <tr>
+                <td>{{ c.descripcion }}</td>
+                <td class="ct-center">{{ c.cantidad }}</td>
+                <td class="ct-right">${{ formatCurrency(c.precioUnitario) }}</td>
+                <td class="ct-right ct-bold">${{ formatCurrency(calcularImporte(c.cantidad, c.precioUnitario)) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="ct-right ct-total-label">Total</td>
+              <td class="ct-right ct-total">${{ formatCurrency(detalle.total) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Datos Fiscales -->
+      <div class="info-card">
+        <div class="card-label">Información Fiscal</div>
+        <div class="fiscal-row">
+          <div class="fiscal-item">
+            <span class="meta-key">RFC Emisor</span>
+            <span class="meta-val mono">{{ detalle.rfcEmisor }}</span>
+          </div>
+          <div class="fiscal-item">
+            <span class="meta-key">RFC Receptor</span>
+            <span class="meta-val mono">{{ detalle.rfcReceptor }}</span>
+          </div>
+          <div class="fiscal-item">
+            <span class="meta-key">Monto Total</span>
+            <span class="meta-val fiscal-total">${{ formatCurrency(detalle.total) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentos -->
+      <div class="info-card">
+        <div class="card-label">Documentos Adjuntos</div>
+        <div class="doc-list">
+          <button class="doc-btn" (click)="descargarXML()">
+            <div class="doc-icon doc-xml">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+              </svg>
+            </div>
+            <div class="doc-text">
+              <span class="doc-name">Factura XML</span>
+              <span class="doc-sub">Comprobante fiscal digital</span>
+            </div>
+            <svg class="doc-dl" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button class="doc-btn" (click)="previewPdf(1)" [class.doc-active]="activePdf === 1">
+            <div class="doc-icon doc-pdf">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14,2 14,8 20,8"/>
+              </svg>
+            </div>
+            <div class="doc-text">
+              <span class="doc-name">PDF Representación 1</span>
+              <span class="doc-sub">Ver en visor</span>
+            </div>
+            <svg class="doc-eye" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+          <button class="doc-btn" (click)="previewPdf(2)" [class.doc-active]="activePdf === 2">
+            <div class="doc-icon doc-pdf">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14,2 14,8 20,8"/>
+              </svg>
+            </div>
+            <div class="doc-text">
+              <span class="doc-name">PDF Comprobante 2</span>
+              <span class="doc-sub">Ver en visor</span>
+            </div>
+            <svg class="doc-eye" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
     </div>
 
-    <div class="detail-grid">
-      <!-- Columna principal -->
-      <div class="main-column">
-        <!-- Información general -->
-        <div class="card">
-          <h2 class="card-title">Información General</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-icon blue">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              </div>
-              <div class="info-content">
-                <p class="info-label">Fecha de solicitud</p>
-                <p class="info-value">{{ formatDate(detalle.fecha) }}</p>
-              </div>
-            </div>
+    <!-- ── RIGHT: Visor + Acciones ── -->
+    <div class="viewer-panel">
 
-            <div class="info-item">
-              <div class="info-icon purple">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- PDF Viewer -->
+      <div class="pdf-viewer-card">
+        <div class="viewer-header">
+          <div class="viewer-header-left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            <span>Visor de Documento</span>
+            @if (activePdf) {
+              <span class="viewer-file-badge">PDF {{ activePdf }}</span>
+            }
+          </div>
+          @if (activePdf) {
+            <button class="viewer-dl-btn" (click)="descargarPDF(activePdf!)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Descargar
+            </button>
+          }
+        </div>
+        <div class="viewer-body">
+          @if (!activePdf) {
+            <div class="viewer-placeholder">
+              <div class="placeholder-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                   <polyline points="14,2 14,8 20,8"/>
+                  <line x1="9" y1="13" x2="15" y2="13"/>
+                  <line x1="9" y1="17" x2="11" y2="17"/>
                 </svg>
               </div>
-              <div class="info-content">
-                <p class="info-label">Solicitante</p>
-                <p class="info-value">{{ detalle.remitente }}</p>
-              </div>
+              <p class="placeholder-title">Sin documento activo</p>
+              <p class="placeholder-sub">Selecciona un PDF en el panel izquierdo para visualizarlo aquí.</p>
             </div>
-
-            <div class="info-item">
-              <div class="info-icon green">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="4" y1="9" x2="20" y2="9"/>
-                  <line x1="4" y1="15" x2="20" y2="15"/>
-                  <line x1="10" y1="3" x2="8" y2="21"/>
-                  <line x1="16" y1="3" x2="14" y2="21"/>
-                </svg>
+          } @else {
+            <div class="pdf-mock-viewer">
+              <div class="pdf-mock-bar">
+                <span class="pdf-mock-dot"></span>
+                <span class="pdf-mock-dot"></span>
+                <span class="pdf-mock-dot"></span>
+                <span class="pdf-mock-url">SharePoint / Expediente_{{ detalle.id }}_PDF{{ activePdf }}.pdf</span>
               </div>
-              <div class="info-content">
-                <p class="info-label">UUID</p>
-                <p class="info-value uuid">{{ detalle.uuid }}</p>
+              <div class="pdf-mock-content">
+                <div class="pdf-mock-header-line">
+                  <div class="pdf-mock-logo-box"></div>
+                  <div class="pdf-mock-title-lines">
+                    <div class="pdf-line w-60"></div>
+                    <div class="pdf-line w-40"></div>
+                  </div>
+                </div>
+                <div class="pdf-divider"></div>
+                <div class="pdf-mock-row">
+                  <div class="pdf-col">
+                    <div class="pdf-line w-30 label"></div>
+                    <div class="pdf-line w-70"></div>
+                  </div>
+                  <div class="pdf-col">
+                    <div class="pdf-line w-30 label"></div>
+                    <div class="pdf-line w-50"></div>
+                  </div>
+                </div>
+                <div class="pdf-mock-row">
+                  <div class="pdf-col full">
+                    <div class="pdf-line w-20 label"></div>
+                    <div class="pdf-line w-90"></div>
+                    <div class="pdf-line w-75"></div>
+                  </div>
+                </div>
+                <div class="pdf-table-mock">
+                  <div class="ptm-header">
+                    <div class="ptm-cell w-50">Descripción</div>
+                    <div class="ptm-cell w-15 center">Cant</div>
+                    <div class="ptm-cell w-17 right">P. Unit</div>
+                    <div class="ptm-cell w-18 right">Total</div>
+                  </div>
+                  @for (c of detalle.conceptos; track $index) {
+                    <div class="ptm-row">
+                      <div class="ptm-cell w-50">{{ c.descripcion }}</div>
+                      <div class="ptm-cell w-15 center">{{ c.cantidad }}</div>
+                      <div class="ptm-cell w-17 right">${{ formatCurrency(c.precioUnitario) }}</div>
+                      <div class="ptm-cell w-18 right">${{ formatCurrency(calcularImporte(c.cantidad, c.precioUnitario)) }}</div>
+                    </div>
+                  }
+                  <div class="ptm-footer">
+                    <div class="ptm-cell w-82 right bold">Total</div>
+                    <div class="ptm-cell w-18 right bold">${{ formatCurrency(detalle.total) }}</div>
+                  </div>
+                </div>
+                <div class="pdf-mock-qr-row">
+                  <div class="pdf-qr-box"></div>
+                  <div class="pdf-qr-lines">
+                    <div class="pdf-line w-80"></div>
+                    <div class="pdf-line w-90"></div>
+                    <div class="pdf-line w-60"></div>
+                  </div>
+                </div>
+                <p class="pdf-mock-stamp">Este documento es una representación visual — el PDF real se carga desde SharePoint</p>
               </div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-icon orange">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="1" x2="12" y2="23"/>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-              </div>
-              <div class="info-content">
-                <p class="info-label">Monto total</p>
-                <p class="info-value total">${{ formatCurrency(detalle.total) }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="description-section">
-            <p class="info-label">Descripción</p>
-            <p class="description-text">{{ detalle.descripcion }}</p>
-          </div>
-        </div>
-
-        <!-- Conceptos -->
-        <div class="card">
-          <h2 class="card-title">Conceptos</h2>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th class="text-left">Descripción</th>
-                  <th class="text-center">Cantidad</th>
-                  <th class="text-right">Precio Unitario</th>
-                  <th class="text-right">Importe</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (concepto of detalle.conceptos; track $index) {
-                  <tr>
-                    <td>{{ concepto.descripcion }}</td>
-                    <td class="text-center">{{ concepto.cantidad }}</td>
-                    <td class="text-right">${{ formatCurrency(concepto.precioUnitario) }}</td>
-                    <td class="text-right font-medium">${{ formatCurrency(calcularImporte(concepto.cantidad, concepto.precioUnitario)) }}</td>
-                  </tr>
-                }
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3" class="text-right font-semibold">Total:</td>
-                  <td class="text-right total-value">${{ formatCurrency(detalle.total) }}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sidebar derecha -->
-      <div class="sidebar-column">
-        <!-- Documentos -->
-        <div class="card">
-          <h2 class="card-title">Documentos</h2>
-          <div class="documents-list">
-            <button class="document-btn" (click)="descargarXML()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <div class="document-info">
-                <p class="document-title">Descargar XML</p>
-                <p class="document-subtitle">Factura electrónica</p>
-              </div>
-            </button>
-
-            <button class="document-btn" (click)="descargarPDF(1)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <div class="document-info">
-                <p class="document-title">Descargar PDF 1</p>
-                <p class="document-subtitle">Representación impresa</p>
-              </div>
-            </button>
-
-            <button class="document-btn" (click)="descargarPDF(2)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <div class="document-info">
-                <p class="document-title">Descargar PDF 2</p>
-                <p class="document-subtitle">Comprobante adicional</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Información fiscal -->
-        <div class="card">
-          <h2 class="card-title">Información Fiscal</h2>
-          <div class="fiscal-info">
-            <div class="fiscal-item">
-              <p class="info-label">RFC Emisor</p>
-              <p class="info-value mono">{{ detalle.rfcEmisor }}</p>
-            </div>
-
-            <div class="fiscal-item">
-              <p class="info-label">RFC Receptor</p>
-              <p class="info-value mono">{{ detalle.rfcReceptor }}</p>
-            </div>
-
-            <div class="fiscal-item">
-              <p class="info-label">Fecha de Timbrado</p>
-              <p class="info-value">{{ formatDateTime(detalle.fechaTimbrado) }}</p>
-            </div>
-
-            <div class="fiscal-item">
-              <p class="info-label">Monto Total</p>
-              <p class="info-value total">${{ formatCurrency(detalle.total) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Acciones -->
-        <div class="card">
-          <h2 class="card-title">Cambiar Estado</h2>
-          <div class="action-buttons">
-            <button
-              class="action-btn aprobar"
-              [class.disabled]="estadoActual === 'Aprobado'"
-              [disabled]="estadoActual === 'Aprobado'"
-              (click)="cambiarEstado('Aprobado')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22,4 12,14.01 9,11.01"/>
-              </svg>
-              Aprobar
-            </button>
-
-            <button
-              class="action-btn revision"
-              [class.disabled]="estadoActual === 'En revisión'"
-              [disabled]="estadoActual === 'En revisión'"
-              (click)="cambiarEstado('En revisión')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12,6 12,12 16,14"/>
-              </svg>
-              En revisión
-            </button>
-
-            <button
-              class="action-btn rechazar"
-              [class.disabled]="estadoActual === 'Rechazado'"
-              [disabled]="estadoActual === 'Rechazado'"
-              (click)="cambiarEstado('Rechazado')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
-              Rechazar
-            </button>
-
-            <button
-              class="action-btn pendiente"
-              [class.disabled]="estadoActual === 'Pendiente'"
-              [disabled]="estadoActual === 'Pendiente'"
-              (click)="cambiarEstado('Pendiente')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22,4 12,14.01 9,11.01"/>
-              </svg>
-              Pendiente
-            </button>
-          </div>
-
-          @if (estadoActual !== estadoOriginal) {
-            <div class="status-change-notice">
-              <p>
-                <strong>Estado actualizado:</strong> El reembolso ahora está marcado como "{{ estadoActual }}"
-              </p>
             </div>
           }
         </div>
       </div>
+
+      <!-- Action Card -->
+      <div class="action-card">
+        <div class="card-label">Decisión de Validación</div>
+
+        @if (estadoActual !== estadoOriginal) {
+          <div class="change-notice">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+            Estado actualizado a <strong>"{{ estadoActual }}"</strong>
+          </div>
+        }
+
+        <div class="action-btns">
+          <button
+            class="act-btn act-aprobar"
+            [class.act-active]="estadoActual === 'Aprobado'"
+            [disabled]="estadoActual === 'Aprobado'"
+            (click)="cambiarEstado('Aprobado')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+            Aprobar
+          </button>
+
+          <button
+            class="act-btn act-revision"
+            [class.act-active]="estadoActual === 'En revisión'"
+            [disabled]="estadoActual === 'En revisión'"
+            (click)="cambiarEstado('En revisión')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+            </svg>
+            En revisión
+          </button>
+
+          <button
+            class="act-btn act-rechazar"
+            [class.act-active]="estadoActual === 'Rechazado'"
+            [disabled]="estadoActual === 'Rechazado'"
+            (click)="cambiarEstado('Rechazado')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Rechazar
+          </button>
+
+          <button
+            class="act-btn act-pendiente"
+            [class.act-active]="estadoActual === 'Pendiente'"
+            [disabled]="estadoActual === 'Pendiente'"
+            (click)="cambiarEstado('Pendiente')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Pendiente
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 }

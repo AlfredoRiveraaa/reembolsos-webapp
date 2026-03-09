@@ -1,170 +1,189 @@
-<div class="dashboard-container">
-  <!-- Header -->
-  <div class="dashboard-header">
-    <h1>Dashboard de Reembolsos</h1>
-    <p class="subtitle">Resumen y gestión de solicitudes de reembolso</p>
-    <div class="separator"></div>
-    <h2 class="section-title">Acciones de hoy</h2>
-  </div>
+<div class="dashboard-wrap">
 
-  <!-- Cards de resumen -->
-  <div class="stats-grid">
-    <!-- Total solicitudes -->
-    <div class="stat-card">
-      <div class="stat-icon blue">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-          <polyline points="14,2 14,8 20,8"/>
-        </svg>
-      </div>
-      <p class="stat-label">Total solicitudes de hoy</p>
-      <p class="stat-value">{{ totalSolicitudesHoy }}</p>
-    </div>
-
-    <!-- Solicitudes pendientes -->
-    <div class="stat-card">
-      <div class="stat-icon green">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-      </div>
-      <p class="stat-label">Solicitudes pendientes</p>
-      <p class="stat-value">{{ solicitudesPendientes }}</p>
-    </div>
-
-    <!-- Solicitudes rechazadas -->
-    <div class="stat-card">
-      <div class="stat-icon orange">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      </div>
-      <p class="stat-label">Solicitudes rechazadas</p>
-      <p class="stat-value">{{ solicitudesRechazadas }}</p>
-    </div>
-
-    <!-- Total acumulado -->
-    <div class="stat-card">
-      <div class="stat-icon purple">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="1" x2="12" y2="23"/>
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
-      </div>
-      <p class="stat-label">Total monto acumulado</p>
-      <p class="stat-value">${{ formatCurrency(totalAcumulado) }}</p>
-    </div>
-  </div>
-
-  <!-- Tabla de reembolsos -->
-  <div class="table-container">
-    <div class="table-header">
-      <div class="table-title-row">
-        <h2>Solicitudes de reembolso</h2>
-        <button class="btn-export" (click)="exportData()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7,10 12,15 17,10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+  <!-- Page Title Bar -->
+  <div class="page-titlebar">
+    <div class="page-titlebar-inner">
+      <div class="page-title-group">
+        <div class="page-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
           </svg>
-          Exportar
-        </button>
-      </div>
-
-      <!-- Filtros -->
-      <div class="filters-grid">
-        <div class="filter-group">
-          <label>Filtro por fecha</label>
-          <input
-            type="date"
-            [(ngModel)]="filters.fecha"
-            (ngModelChange)="applyFilters()"
-            class="filter-input"
-          />
         </div>
-
-        <div class="filter-group">
-          <label>Filtro por UUID</label>
-          <input
-            type="text"
-            placeholder="Buscar UUID..."
-            [(ngModel)]="filters.uuid"
-            (ngModelChange)="applyFilters()"
-            class="filter-input"
-          />
-        </div>
-
-        <div class="filter-group">
-          <label>Filtro por estado</label>
-          <select
-            [(ngModel)]="filters.estado"
-            (ngModelChange)="applyFilters()"
-            class="filter-input"
-          >
-            <option value="">Todos los estados</option>
-            @for (estado of estados; track estado) {
-              <option [value]="estado">{{ estado }}</option>
-            }
-          </select>
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-sub">Gestión de solicitudes de reembolso — hoy {{ today }}</p>
         </div>
       </div>
-    </div>
-
-    <!-- Tabla -->
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Remitente</th>
-            <th>Asunto</th>
-            <th>UUID</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (reembolso of filteredReimbursements; track reembolso.id) {
-            <tr>
-              <td>{{ formatDate(reembolso.fecha) }}</td>
-              <td>{{ reembolso.remitente }}</td>
-              <td class="truncate-cell">{{ reembolso.asunto }}</td>
-              <td class="uuid-cell">{{ truncateUUID(reembolso.uuid) }}</td>
-              <td>${{ formatCurrency(reembolso.total) }}</td>
-              <td>
-                <span class="estado-badge" [ngClass]="getEstadoClass(reembolso.estado)">
-                  {{ reembolso.estado }}
-                </span>
-              </td>
-              <td>
-                <a [routerLink]="['/reembolso', reembolso.id]" class="btn-ver-detalle">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  Ver detalle
-                </a>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Empty state -->
-    @if (filteredReimbursements.length === 0) {
-      <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      <button class="btn-export" (click)="exportData()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7,10 12,15 17,10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        <p>No se encontraron solicitudes con los filtros aplicados</p>
+        Exportar
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-top">
+          <span class="kpi-label">Solicitudes hoy</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ totalSolicitudesHoy }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
       </div>
-    }
+
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-top">
+          <span class="kpi-label">Pendientes / Revisión</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ solicitudesPendientes }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(solicitudesPendientes / totalSolicitudesHoy * 100) + '%'"></div></div>
+      </div>
+
+      <div class="kpi-card kpi-red">
+        <div class="kpi-top">
+          <span class="kpi-label">Rechazadas</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ solicitudesRechazadas }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(solicitudesRechazadas / totalSolicitudesHoy * 100) + '%'"></div></div>
+      </div>
+
+      <div class="kpi-card kpi-green">
+        <div class="kpi-top">
+          <span class="kpi-label">Monto acumulado</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value kpi-currency">${{ formatCurrency(totalAcumulado) }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Table Panel -->
+    <div class="table-panel">
+      <div class="table-panel-header">
+        <h2 class="panel-title">Solicitudes de reembolso</h2>
+        <!-- Filters inline -->
+        <div class="filter-row">
+          <div class="filter-field">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <input type="date" [(ngModel)]="filters.fecha" (ngModelChange)="applyFilters()" class="filter-input" placeholder="Fecha"/>
+          </div>
+          <div class="filter-field">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Buscar UUID..." [(ngModel)]="filters.uuid" (ngModelChange)="applyFilters()" class="filter-input"/>
+          </div>
+          <div class="filter-field">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            <select [(ngModel)]="filters.estado" (ngModelChange)="applyFilters()" class="filter-input filter-select">
+              <option value="">Todos los estados</option>
+              @for (estado of estados; track estado) {
+                <option [value]="estado">{{ estado }}</option>
+              }
+            </select>
+          </div>
+          @if (filters.fecha || filters.uuid || filters.estado) {
+            <button class="btn-clear-filters" (click)="clearFilters()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Limpiar
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Remitente</th>
+              <th>Asunto</th>
+              <th>UUID</th>
+              <th class="col-right">Total</th>
+              <th class="col-center">Estado</th>
+              <th class="col-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of filteredReimbursements; track r.id) {
+              <tr class="table-row">
+                <td class="td-date">{{ formatDate(r.fecha) }}</td>
+                <td class="td-name">{{ r.remitente }}</td>
+                <td class="td-subject">{{ r.asunto }}</td>
+                <td class="td-uuid">{{ truncateUUID(r.uuid) }}</td>
+                <td class="td-amount">${{ formatCurrency(r.total) }}</td>
+                <td class="td-status">
+                  <span class="badge" [ngClass]="getEstadoClass(r.estado)">{{ r.estado }}</span>
+                </td>
+                <td class="td-action">
+                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Revisar
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (filteredReimbursements.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+          </div>
+          <p class="empty-title">Sin resultados</p>
+          <p class="empty-sub">No hay solicitudes que coincidan con los filtros aplicados.</p>
+        </div>
+      } @else {
+        <div class="table-footer">
+          <span class="result-count">{{ filteredReimbursements.length }} resultado{{ filteredReimbursements.length !== 1 ? 's' : '' }}</span>
+        </div>
+      }
+    </div>
+
   </div>
 </div>
