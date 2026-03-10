@@ -27,8 +27,8 @@
       Dashboard
     </a>
     <div class="topbar-center">
-      <span class="topbar-id">#{{ detalle.id }}</span>
-      <h1 class="topbar-title">{{ detalle.asunto }}</h1>
+      <span class="topbar-id">{{ detalle.folioDRH }}</span>
+      <h1 class="topbar-title">{{ detalle.nombreTrabajador }}</h1>
     </div>
     <div class="topbar-right">
       <span class="badge badge-lg" [ngClass]="getEstadoClass(estadoActual)">{{ estadoActual }}</span>
@@ -46,20 +46,32 @@
         <div class="card-label">Información de la Solicitud</div>
         <div class="meta-grid">
           <div class="meta-item">
-            <span class="meta-key">Remitente</span>
-            <span class="meta-val meta-name">{{ detalle.remitente }}</span>
+            <span class="meta-key">Folio DRH</span>
+            <span class="meta-val meta-name">{{ detalle.folioDRH }}</span>
           </div>
           <div class="meta-item">
-            <span class="meta-key">Fecha de solicitud</span>
-            <span class="meta-val">{{ formatDate(detalle.fecha) }}</span>
+            <span class="meta-key">ID Trabajador</span>
+            <span class="meta-val mono">{{ detalle.idTrabajador }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-key">Nombre Trabajador</span>
+            <span class="meta-val meta-name">{{ detalle.nombreTrabajador }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-key">Fecha Recepción</span>
+            <span class="meta-val">{{ formatDate(detalle.fechaRecepcion) }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-key">Fecha de timbrado</span>
             <span class="meta-val">{{ formatDateTime(detalle.fechaTimbrado) }}</span>
           </div>
+          <div class="meta-item">
+            <span class="meta-key">Fecha Respuesta</span>
+            <span class="meta-val">{{ detalle.fechaRespuesta ? formatDate(detalle.fechaRespuesta) : '—' }}</span>
+          </div>
           <div class="meta-item full-width">
-            <span class="meta-key">UUID</span>
-            <span class="meta-val mono">{{ detalle.uuid }}</span>
+            <span class="meta-key">Comentario</span>
+            <span class="meta-val meta-desc">{{ detalle.comentario || '—' }}</span>
           </div>
           <div class="meta-item full-width">
             <span class="meta-key">Descripción</span>
@@ -93,7 +105,7 @@
           <tfoot>
             <tr>
               <td colspan="3" class="ct-right ct-total-label">Total</td>
-              <td class="ct-right ct-total">${{ formatCurrency(detalle.total) }}</td>
+              <td class="ct-right ct-total">${{ formatCurrency(detalle.monto) }}</td>
             </tr>
           </tfoot>
         </table>
@@ -113,7 +125,7 @@
           </div>
           <div class="fiscal-item">
             <span class="meta-key">Monto Total</span>
-            <span class="meta-val fiscal-total">${{ formatCurrency(detalle.total) }}</span>
+            <span class="meta-val fiscal-total">${{ formatCurrency(detalle.monto) }}</span>
           </div>
         </div>
       </div>
@@ -267,7 +279,7 @@
                   }
                   <div class="ptm-footer">
                     <div class="ptm-cell w-82 right bold">Total</div>
-                    <div class="ptm-cell w-18 right bold">${{ formatCurrency(detalle.total) }}</div>
+                    <div class="ptm-cell w-18 right bold">${{ formatCurrency(detalle.monto) }}</div>
                   </div>
                 </div>
                 <div class="pdf-mock-qr-row">
@@ -353,4 +365,75 @@
 
     </div>
   </div>
+
+  <!-- ── Redactar Respuesta ── -->
+  <div class="reply-section">
+    <div class="reply-card" [class.reply-card--open]="replyOpen">
+      <button class="reply-header" type="button" (click)="replyOpen = !replyOpen">
+        <div class="reply-header-left">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span class="reply-title">Redactar Respuesta</span>
+          <span class="reply-folio">{{ detalle.folioDRH }}</span>
+        </div>
+        <svg class="reply-chevron" [class.reply-chevron--open]="replyOpen" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      @if (replyOpen) {
+      <div class="reply-body">
+        <div class="reply-field-row">
+          <div class="reply-field">
+            <label class="reply-label">Para</label>
+            <input type="text" class="reply-input" [value]="replyTo" readonly />
+          </div>
+          <div class="reply-field">
+            <label class="reply-label">CC</label>
+            <input type="text" class="reply-input" [(ngModel)]="replyCC" placeholder="correo@ejemplo.com" />
+          </div>
+        </div>
+
+        <div class="reply-field">
+          <label class="reply-label">Asunto</label>
+          <input type="text" class="reply-input" [(ngModel)]="replySubject" />
+        </div>
+
+        <div class="reply-field">
+          <label class="reply-label">Mensaje</label>
+          <textarea class="reply-textarea" rows="6" [(ngModel)]="replyBody" placeholder="Escriba aquí el cuerpo del mensaje..."></textarea>
+        </div>
+
+        <!-- Firma RH -->
+        <div class="reply-signature">
+          <div class="signature-divider"></div>
+          <p class="signature-line"><strong>Dirección de Recursos Humanos</strong></p>
+          <p class="signature-line">Departamento de Reembolsos</p>
+          <p class="signature-line sig-email">reembolsos.rh&#64;universidad.edu.mx</p>
+          <p class="signature-line sig-phone">Tel. (55) 1234-5678 ext. 200</p>
+          <p class="signature-note">Este correo es de carácter informativo y confidencial.</p>
+        </div>
+      </div>
+
+      <div class="reply-footer">
+        <button class="reply-btn-send" (click)="enviarRespuesta()" [disabled]="!replyBody.trim()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          Enviar Respuesta
+        </button>
+        <button class="reply-btn-discard" (click)="descartarRespuesta()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Descartar
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+
 }

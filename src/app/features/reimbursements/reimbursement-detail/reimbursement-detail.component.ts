@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import { ReimbursementDetail, ReimbursementStatus } from '../../../core/models/reimbursement.model';
@@ -7,7 +8,7 @@ import { ReimbursementDetail, ReimbursementStatus } from '../../../core/models/r
 @Component({
   selector: 'app-reimbursement-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './reimbursement-detail.component.html',
   styleUrl: './reimbursement-detail.component.scss'
 })
@@ -20,6 +21,14 @@ export class ReimbursementDetailComponent implements OnInit {
 
   /** Which PDF is open in the viewer (null = none) */
   activePdf: number | null = null;
+
+  // Reply form
+  replyOpen = false;
+  replyTo = '';
+  replyCC = '';
+  replySubject = '';
+  replyBody = '';
+  replySent = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,6 +51,7 @@ export class ReimbursementDetailComponent implements OnInit {
         this.detalle = data;
         this.estadoActual = data.estado;
         this.estadoOriginal = data.estado;
+        this.initReplyForm(data);
       } else {
         this.notFound = true;
       }
@@ -97,5 +107,30 @@ export class ReimbursementDetailComponent implements OnInit {
 
   descargarPDF(numero: number): void {
     console.log(`Descargando PDF ${numero}…`);
+  }
+
+  private initReplyForm(data: ReimbursementDetail): void {
+    this.replyTo = `${data.nombreTrabajador} <${data.idTrabajador.toLowerCase()}@universidad.edu.mx>`;
+    this.replySubject = `Re: Solicitud de reembolso ${data.folioDRH} — ${data.nombreTrabajador}`;
+    this.replyBody = '';
+    this.replyCC = '';
+    this.replySent = false;
+  }
+
+  enviarRespuesta(): void {
+    if (!this.replyBody.trim()) return;
+    console.log('Enviando respuesta:', {
+      para: this.replyTo,
+      cc: this.replyCC,
+      asunto: this.replySubject,
+      cuerpo: this.replyBody,
+    });
+    this.replySent = true;
+  }
+
+  descartarRespuesta(): void {
+    if (this.detalle) {
+      this.initReplyForm(this.detalle);
+    }
   }
 }

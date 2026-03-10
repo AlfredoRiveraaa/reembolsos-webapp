@@ -751,3 +751,250 @@ $amber-bg: #fef9c3;
   &.act-rechazar { background: #dc2626; &:hover:not(:disabled):not(.act-active) { background: #b91c1c; } }
   &.act-pendiente{ background: #d97706; &:hover:not(:disabled):not(.act-active) { background: #b45309; } }
 }
+
+// ── Reply Section ──────────────────────────────────────────────────
+.reply-section {
+  padding: 1.25rem 1.75rem 2rem;
+  background: $slate-50;
+  border-top: 1px solid $slate-200;
+}
+
+.reply-card {
+  background: $white;
+  border: 1px solid $slate-200;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: $white;
+  border: none;
+  border-bottom: none;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: $slate-50; }
+
+  .reply-card--open & {
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid $slate-100;
+  }
+}
+
+.reply-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $navy;
+
+  svg { flex-shrink: 0; }
+}
+
+.reply-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: $slate-900;
+}
+
+.reply-chevron {
+  color: $slate-400;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+.reply-folio {
+  padding: 0.1875rem 0.5rem;
+  background: $slate-100;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $slate-500;
+  font-family: ui-monospace, monospace;
+}
+
+.reply-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.reply-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.reply-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reply-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: $slate-400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reply-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid $slate-200;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.875rem;
+  color: $slate-800;
+  background: $slate-50;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: $navy;
+    background: $white;
+    box-shadow: 0 0 0 3px rgba(30,58,95,.08);
+  }
+
+  &[readonly] {
+    background: $slate-100;
+    color: $slate-600;
+    cursor: default;
+  }
+}
+
+.reply-textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid $slate-200;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.875rem;
+  color: $slate-800;
+  background: $slate-50;
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.5;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: $navy;
+    background: $white;
+    box-shadow: 0 0 0 3px rgba(30,58,95,.08);
+  }
+
+  &::placeholder { color: $slate-400; }
+}
+
+// ── Signature ──────────────────────────────────────────────────────
+.reply-signature {
+  padding: 0.875rem 1rem;
+  background: $slate-50;
+  border: 1px solid $slate-200;
+  border-radius: 8px;
+}
+
+.signature-divider {
+  width: 80px;
+  height: 2px;
+  background: $navy;
+  border-radius: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.signature-line {
+  font-size: 0.8125rem;
+  color: $slate-600;
+  margin: 0;
+  line-height: 1.55;
+
+  strong {
+    font-weight: 700;
+    color: $slate-900;
+  }
+
+  &.sig-email {
+    color: $navy;
+    font-weight: 500;
+  }
+
+  &.sig-phone {
+    font-size: 0.75rem;
+    color: $slate-500;
+  }
+}
+
+.signature-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.6875rem;
+  color: $slate-400;
+  font-style: italic;
+}
+
+// ── Reply Footer ───────────────────────────────────────────────────
+.reply-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.25rem;
+  background: $slate-50;
+  border-top: 1px solid $slate-100;
+}
+
+.reply-btn-send {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  background: $navy;
+  color: $white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+
+  &:hover:not(:disabled) { background: $navy-dk; }
+  &:active:not(:disabled) { transform: scale(0.98); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+.reply-btn-discard {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1rem;
+  background: $white;
+  color: $slate-500;
+  border: 1px solid $slate-200;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: $slate-100;
+    color: $slate-700;
+    border-color: $slate-300;
+  }
+}

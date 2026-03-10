@@ -16,7 +16,7 @@ export class DashboardComponent implements OnInit {
   reimbursements: Reimbursement[] = [];
   filteredReimbursements: Reimbursement[] = [];
 
-  filters: ReimbursementFilters = { fecha: '', uuid: '', estado: '' };
+  filters: ReimbursementFilters = { folioDRH: '', nombreTrabajador: '', estado: '' };
 
   totalSolicitudesHoy = 0;
   solicitudesPendientes = 0;
@@ -50,15 +50,15 @@ export class DashboardComponent implements OnInit {
 
   applyFilters(): void {
     this.filteredReimbursements = this.reimbursements.filter(r => {
-      if (this.filters.fecha && !r.fecha.includes(this.filters.fecha)) return false;
-      if (this.filters.uuid && !r.uuid.toLowerCase().includes(this.filters.uuid.toLowerCase())) return false;
+      if (this.filters.folioDRH && !r.folioDRH.toLowerCase().includes(this.filters.folioDRH.toLowerCase())) return false;
+      if (this.filters.nombreTrabajador && !r.nombreTrabajador.toLowerCase().includes(this.filters.nombreTrabajador.toLowerCase())) return false;
       if (this.filters.estado && r.estado !== this.filters.estado) return false;
       return true;
     });
   }
 
   clearFilters(): void {
-    this.filters = { fecha: '', uuid: '', estado: '' };
+    this.filters = { folioDRH: '', nombreTrabajador: '', estado: '' };
     this.applyFilters();
   }
 

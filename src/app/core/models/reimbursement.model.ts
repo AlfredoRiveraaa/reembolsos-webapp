@@ -1,10 +1,12 @@
 export interface Reimbursement {
   id: string;
-  fecha: string;
-  remitente: string;
-  asunto: string;
-  uuid: string;
-  total: number;
+  folioDRH: string;
+  fechaRecepcion: string;
+  idTrabajador: string;
+  nombreTrabajador: string;
+  comentario: string;
+  monto: number;
+  fechaRespuesta: string;
   estado: ReimbursementStatus;
 }
 
@@ -25,7 +27,7 @@ export interface Concepto {
 export type ReimbursementStatus = 'Aprobado' | 'Pendiente' | 'En revisión' | 'Rechazado';
 
 export interface ReimbursementFilters {
-  fecha: string;
-  uuid: string;
+  folioDRH: string;
+  nombreTrabajador: string;
   estado: string;
 }

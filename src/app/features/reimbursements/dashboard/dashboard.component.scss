@@ -358,18 +358,24 @@ $green-kpi: #10b981;
   }
 }
 
+.td-folio {
+  font-family: 'SF Mono', ui-monospace, Consolas, monospace;
+  font-size: 0.8125rem !important;
+  font-weight: 600;
+  color: $navy !important;
+}
 .td-date { color: $slate-500; font-size: 0.8125rem !important; }
+.td-id {
+  font-family: 'SF Mono', ui-monospace, Consolas, monospace;
+  font-size: 0.8125rem !important;
+  color: $slate-400 !important;
+}
 .td-name { font-weight: 600; color: $slate-900 !important; }
-.td-subject {
+.td-comment {
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: $slate-600 !important;
-}
-.td-uuid {
-  font-family: 'SF Mono', ui-monospace, Consolas, monospace;
-  font-size: 0.75rem !important;
-  color: $slate-400 !important;
 }
 .td-amount {
   text-align: right;

@@ -55,7 +55,7 @@ export class HistorialComponent implements OnInit {
     this.totalPendientes = this.reimbursements.filter(r => r.estado === 'Pendiente' || r.estado === 'En revisión').length;
     this.montoTotalAprobado = this.reimbursements
       .filter(r => r.estado === 'Aprobado')
-      .reduce((sum, r) => sum + r.total, 0);
+      .reduce((sum, r) => sum + r.monto, 0);
   }
 
   applyFilters(): void {
@@ -63,19 +63,19 @@ export class HistorialComponent implements OnInit {
 
     // Filtro por rango de fechas
     if (this.fechaInicio) {
-      filtered = filtered.filter(r => r.fecha >= this.fechaInicio);
+      filtered = filtered.filter(r => r.fechaRecepcion >= this.fechaInicio);
     }
     if (this.fechaFin) {
-      filtered = filtered.filter(r => r.fecha <= this.fechaFin);
+      filtered = filtered.filter(r => r.fechaRecepcion <= this.fechaFin);
     }
 
     // Filtro por término de búsqueda
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
-        r.remitente.toLowerCase().includes(term) ||
-        r.asunto.toLowerCase().includes(term) ||
-        r.uuid.toLowerCase().includes(term)
+        r.folioDRH.toLowerCase().includes(term) ||
+        r.nombreTrabajador.toLowerCase().includes(term) ||
+        r.idTrabajador.toLowerCase().includes(term)
       );
     }
 
@@ -85,7 +85,7 @@ export class HistorialComponent implements OnInit {
     }
 
     // Ordenar por fecha descendente (más reciente primero)
-    filtered.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    filtered.sort((a, b) => new Date(b.fechaRecepcion).getTime() - new Date(a.fechaRecepcion).getTime());
 
     this.filteredReimbursements = filtered;
     this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
