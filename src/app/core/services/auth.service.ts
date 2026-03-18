@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { AuthUser, LoginCredentials } from '../models/auth.model';
+import { UserManagementService } from './user-management.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,32 +10,22 @@ import { AuthUser, LoginCredentials } from '../models/auth.model';
 export class AuthService {
   private static readonly STORAGE_KEY = 'reembolsos.auth.user';
 
-  private readonly mockCredentials = {
-    username: 'rh.usuario',
-    password: 'BUAP2026#'
-  };
-
-  private readonly mockUser: AuthUser = {
-    username: 'rh.usuario',
-    displayName: 'RH Usuario',
-    role: 'Analista de Reembolsos'
-  };
-
-  private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(this.restoreSession());
+  private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(this.restoreAndValidateSession());
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  login(credentials: LoginCredentials): Observable<AuthUser> {
-    const username = credentials.username.trim().toLowerCase();
-    const password = credentials.password.trim();
+  constructor(private readonly userManagementService: UserManagementService) {}
 
-    if (username !== this.mockCredentials.username || password !== this.mockCredentials.password) {
-      return throwError(() => new Error('Usuario o contrasena incorrectos.'));
+  login(credentials: LoginCredentials): Observable<AuthUser> {
+    const authenticationResult = this.userManagementService.authenticate(credentials);
+
+    if (!authenticationResult.ok || !authenticationResult.user) {
+      return throwError(() => new Error(authenticationResult.message));
     }
 
-    this.persistSession(this.mockUser);
-    this.currentUserSubject.next(this.mockUser);
+    this.persistSession(authenticationResult.user);
+    this.currentUserSubject.next(authenticationResult.user);
 
-    return of(this.mockUser).pipe(delay(250));
+    return of(authenticationResult.user).pipe(delay(250));
   }
 
   logout(): void {
@@ -54,14 +45,28 @@ export class AuthService {
     localStorage.setItem(AuthService.STORAGE_KEY, JSON.stringify(user));
   }
 
-  private restoreSession(): AuthUser | null {
+  private restoreAndValidateSession(): AuthUser | null {
     const storedUser = localStorage.getItem(AuthService.STORAGE_KEY);
     if (!storedUser) {
       return null;
     }
 
     try {
-      return JSON.parse(storedUser) as AuthUser;
+      const parsedUser = JSON.parse(storedUser) as AuthUser;
+      
+      // Validar que el usuario exista en el sistema y esté activo
+      const systemUsers = this.userManagementService.getUsersSnapshot();
+      const exists = systemUsers.some(
+        u => u.username === parsedUser.username && u.isActive
+      );
+
+      if (!exists) {
+        // Sesión inválida o usuario inactivo
+        localStorage.removeItem(AuthService.STORAGE_KEY);
+        return null;
+      }
+
+      return parsedUser;
     } catch {
       localStorage.removeItem(AuthService.STORAGE_KEY);
       return null;

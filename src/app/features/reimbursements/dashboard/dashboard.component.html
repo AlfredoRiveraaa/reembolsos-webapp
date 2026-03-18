@@ -143,7 +143,7 @@
           </thead>
           <tbody>
             @for (r of filteredReimbursements; track r.id) {
-              <tr class="table-row">
+              <tr class="clickable-row" (click)="navigateToDetail(r.id)">
                 <td class="td-folio">{{ r.folioDRH }}</td>
                 <td class="td-date">{{ formatDate(r.fechaRecepcion) }}</td>
                 <td class="td-id">{{ r.idTrabajador }}</td>

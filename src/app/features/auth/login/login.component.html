@@ -8,19 +8,22 @@
       </div>
     </section>
 
-    <section class="login-card" aria-labelledby="login-title">
+    @if (activeView === 'login') {
+      <section class="login-card" aria-labelledby="login-title">
       <div class="card-head">
-        <img src="images/Logo-BUAP.png" alt="Logo BUAP" class="login-logo" />
+        <img src="/images/Logo-BUAP.png" alt="Logo BUAP" class="login-logo" />
         <h2 id="login-title">Iniciar sesión</h2>
-        <p>Ingresa con tus credenciales institucionales.</p>
+        <p>Ingresa con tu cuenta</p>
       </div>
-
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
         <label class="field-group">
-          <span>Usuario</span>
-          <input type="text" formControlName="username" placeholder="rh.usuario" autocomplete="username" />
+          <span>ID de trabajador o matricula</span>
+          <input type="text" formControlName="username" placeholder="TRB1001 o 202312345" autocomplete="username" />
           @if (hasError('username', 'required')) {
             <small class="field-error">El usuario es obligatorio.</small>
+          }
+          @if (hasError('username', 'pattern')) {
+            <small class="field-error">Solo se permiten letras, numeros y guion medio.</small>
           }
         </label>
 
@@ -56,8 +59,8 @@
           @if (hasError('password', 'required')) {
             <small class="field-error">La contraseña es obligatoria.</small>
           }
-          @if (hasError('password', 'minlength')) {
-            <small class="field-error">La contraseña debe tener al menos 6 caracteres.</small>
+          @if (hasError('password', 'pattern')) {
+            <small class="field-error">La contraseña debe tener minimo 8 caracteres alfanumericos.</small>
           }
         </label>
 
@@ -66,15 +69,208 @@
         }
 
         <button type="submit" class="btn-login" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Validando...' : 'Entrar al sistema' }}
+          {{ isSubmitting ? 'Validando...' : 'Acceder' }}
         </button>
-      </form>
 
-      <div class="demo-box">
-        <p class="demo-title">Acceso demo</p>
-        <p>Usuario: <code>rh.usuario</code></p>
-        <p>Contraseña: <code>BUAP2026#</code></p>
-      </div>
+        <p class="register-link">
+          ¿No tienes cuenta?
+          <button type="button" class="link-btn" (click)="setActiveView('register')">Regístrate aquí</button>
+        </p>
+      </form>
     </section>
+    } @else {
+      <section class="register-card" aria-labelledby="register-title">
+      <div class="card-head">
+        <img src="/images/Logo-BUAP.png" alt="Logo BUAP" class="login-logo register-logo" />
+        <h2 id="register-title">Registrar usuario</h2>
+        <p>Crear una nueva cuenta</p>
+      </div>
+      <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate>
+        <label class="field-group">
+          <span>Matrícula o ID de trabajador</span>
+          <input type="text" formControlName="username" placeholder="p.ej. TRAB1001 o 202312345" autocomplete="username" />
+          @if (hasRegisterError('username', 'required')) {
+            <small class="field-error">La matrícula o ID es obligatorio.</small>
+          }
+          @if (hasRegisterError('username', 'pattern')) {
+            <small class="field-error">Solo se permiten letras, números y guion medio.</small>
+          }
+        </label>
+
+        <label class="field-group">
+          <span>Nombre completo</span>
+          <input type="text" formControlName="fullName" placeholder="Nombre Apellido" autocomplete="name" />
+          @if (hasRegisterError('fullName', 'required')) {
+            <small class="field-error">El nombre completo es obligatorio.</small>
+          }
+          @if (hasRegisterError('fullName', 'minlength')) {
+            <small class="field-error">Ingresa al menos 4 caracteres.</small>
+          }
+        </label>
+
+        <label class="field-group">
+          <span>Tipo de usuario</span>
+          <select formControlName="role">
+            <option value="trabajador">Trabajador</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>Contraseña del nuevo usuario</span>
+          <div class="password-input-wrap">
+            <input
+              [type]="showNewPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="********"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="toggle-password-btn"
+              (click)="toggleNewPasswordVisibility()"
+              [attr.aria-label]="showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              @if (showNewPassword) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                  <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (hasRegisterError('password', 'required')) {
+            <small class="field-error">La contraseña es obligatoria.</small>
+          }
+          @if (hasRegisterError('password', 'pattern')) {
+            <small class="field-error">La contraseña debe tener minimo 8 caracteres alfanumericos.</small>
+          }
+        </label>
+
+        <label class="field-group">
+          <span>Confirmar contraseña</span>
+          <div class="password-input-wrap">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="passwordConfirm"
+              placeholder="********"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="toggle-password-btn"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              @if (showConfirmPassword) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                  <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (hasRegisterError('passwordConfirm', 'required')) {
+            <small class="field-error">Confirma la contraseña.</small>
+          }
+          @if (!passwordsMatch() && registerForm.get('passwordConfirm')?.touched) {
+            <small class="field-error">Las contraseñas no coinciden.</small>
+          }
+        </label>
+
+        @if (registerMessage) {
+          <p class="register-success" role="status">{{ registerMessage }}</p>
+        }
+
+        <button type="submit" class="btn-login" [disabled]="registerSubmitting">
+          {{ registerSubmitting ? 'Validando...' : 'Registrar usuario' }}
+        </button>
+
+        <p class="register-link">
+          ¿Ya tienes cuenta?
+          <button type="button" class="link-btn" (click)="setActiveView('login')">Inicia sesión</button>
+        </p>
+      </form>
+    </section>
+    }
   </div>
+
+  @if (showAdminPasswordModal) {
+    <div class="modal-overlay" (click)="cancelAdminPasswordModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Verificar autorización del administrador</h3>
+          <button type="button" class="modal-close" (click)="cancelAdminPasswordModal()" [disabled]="isAdminPasswordSuccess">×</button>
+        </div>
+        <div class="modal-body">
+          @if (!isAdminPasswordSuccess) {
+            <p>Ingresa la contraseña del administrador para completar el registro.</p>
+            <label class="field-group">
+              <span>Contraseña del administrador</span>
+              <div class="password-input-wrap">
+                <input
+                  [type]="showAdminPassword ? 'text' : 'password'"
+                  [(ngModel)]="adminPasswordInput"
+                  placeholder="********"
+                  autocomplete="off"
+                  (keyup.enter)="submitAdminPassword()"
+                />
+                <button
+                  type="button"
+                  class="toggle-password-btn"
+                  (click)="toggleAdminPasswordVisibility()"
+                  [attr.aria-label]="showAdminPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                >
+                  @if (showAdminPassword) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                      <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+              @if (adminPasswordError) {
+                <small class="field-error">{{ adminPasswordError }}</small>
+              }
+            </label>
+          } @else {
+            <div class="success-container">
+              <div class="success-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <h3>¡Registro Exitoso!</h3>
+              <p>Tu cuenta ha sido creada correctamente.<br>Redirigiendo al inicio de sesión...</p>
+            </div>
+          }
+        </div>
+        @if (!isAdminPasswordSuccess) {
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="cancelAdminPasswordModal()">Cancelar</button>
+            <button type="button" class="btn-login" (click)="submitAdminPassword()" [disabled]="!adminPasswordInput">Verificar</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>

@@ -1,0 +1,470 @@
+<div class="dashboard-wrap">
+
+  <!-- Page Title Bar -->
+  <div class="page-titlebar">
+    <div class="page-titlebar-inner">
+      <div class="page-title-group">
+        <div class="page-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="page-title">Gestión de Usuarios</h1>
+          <p class="page-sub">Administra el acceso al sistema — crea, edita y controla usuarios activos</p>
+        </div>
+      </div>
+      <button class="btn-create" (click)="openCreateModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Crear Usuario
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-top">
+          <span class="kpi-label">Total de Usuarios</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ totalUsers }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
+      </div>
+
+      <div class="kpi-card kpi-green">
+        <div class="kpi-top">
+          <span class="kpi-label">Usuarios Activos</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ activeUsers }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalUsers > 0 ? activeUsers / totalUsers * 100 : 0) + '%'"></div></div>
+      </div>
+
+      <div class="kpi-card kpi-red">
+        <div class="kpi-top">
+          <span class="kpi-label">Usuarios Inactivos</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ inactiveUsers }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalUsers > 0 ? inactiveUsers / totalUsers * 100 : 0) + '%'"></div></div>
+      </div>
+
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-top">
+          <span class="kpi-label">Administradores Activos</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ adminUsers }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Table Panel -->
+    <div class="table-panel">
+      <div class="table-panel-header">
+        <h2 class="panel-title">Listado de Usuarios</h2>
+        <!-- Filters inline -->
+        <div class="filter-row">
+          <div class="filter-field">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Buscar por usuario o nombre..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" class="filter-input"/>
+          </div>
+          <div class="filter-field">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <select [(ngModel)]="roleFilter" (ngModelChange)="applyFilters()" class="filter-input filter-select">
+              <option value="">Todos los roles</option>
+              @for (role of roles; track role) {
+                <option [value]="role">{{ getRoleLabel(role) }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-field">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            <select [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()" class="filter-input filter-select">
+              <option value="all">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+          </div>
+          @if (searchTerm || roleFilter || statusFilter !== 'all') {
+            <button class="btn-clear-filters" (click)="clearFilters()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Limpiar
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Matrícula</th>
+              <th>Nombre Completo</th>
+              <th class="col-center">Rol</th>
+              <th class="col-center">Estado</th>
+              <th>Creado</th>
+              <th>Modificado</th>
+              <th class="col-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers; track user.id) {
+              <tr class="table-row clickable-row" [class.current-user]="isCurrentUser(user.username)" (click)="openEditModal(user)">
+                <td class="td-username">{{ user.username }}</td>
+                <td class="td-name">
+                  {{ user.displayName }}
+                  @if (isCurrentUser(user.username)) {
+                    <span class="badge-self">(Tú)</span>
+                  }
+                </td>
+                <td class="td-role">
+                  <span class="role-badge" [ngClass]="user.role === 'admin' ? 'role-admin' : 'role-trabajador'">
+                    {{ getRoleLabel(user.role) }}
+                  </span>
+                </td>
+                <td class="td-status">
+                  <span class="status-badge" [ngClass]="user.isActive ? 'status-active' : 'status-inactive'">
+                    {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="td-date">{{ formatDate(user.createdAt) }}</td>
+                <td class="td-date">{{ formatDate(user.updatedAt) }}</td>
+                <td class="td-actions">
+                  <button class="btn-action btn-edit" (click)="openEditModal(user)" aria-label="Editar usuario">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                    </svg>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteUser(user)" [disabled]="!canDeleteUser(user)" aria-label="Eliminar usuario">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (filteredUsers.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <p class="empty-title">Sin usuarios</p>
+          <p class="empty-sub">No hay usuarios que coincidan con los filtros aplicados.</p>
+        </div>
+      } @else {
+        <div class="table-footer">
+          <span class="result-count">{{ filteredUsers.length }} usuario{{ filteredUsers.length !== 1 ? 's' : '' }}</span>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-header-content">
+          <div class="modal-icon" [ngClass]="isEditMode ? 'edit-mode' : 'create-mode'">
+            @if (isEditMode) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/>
+              </svg>
+            }
+          </div>
+          <div>
+            <h2 class="modal-title">
+              @if (isEditMode) {
+                Editar Usuario
+              } @else {
+                Crear Nuevo Usuario
+              }
+            </h2>
+            <p class="modal-subtitle">
+              @if (isEditMode) {
+                Actualiza la información del usuario
+              } @else {
+                Completa los datos para crear un nuevo usuario
+              }
+            </p>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeModal()" aria-label="Cerrar modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        @if (message) {
+          <div class="modal-alert" [ngClass]="messageType === 'success' ? 'alert-success' : 'alert-error'">
+            <div class="alert-icon">
+              @if (messageType === 'success') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+              }
+            </div>
+            {{ message }}
+          </div>
+        }
+
+        <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+          <!-- Información Básica Section -->
+          <div class="form-section">
+            <h3 class="section-title">Información Básica</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="username">
+                  <span class="label-text">Matrícula o ID de trabajador</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="form-input-wrap">
+                  <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <input
+                    id="username"
+                    type="text"
+                    formControlName="username"
+                    placeholder="p.ej. TRAB1001 o 202312345"
+                    class="form-input"
+                    [class.input-error]="hasError('username', 'required')"
+                  />
+                </div>
+                @if (hasError('username', 'required')) {
+                  <span class="form-error">La matrícula o ID es requerido.</span>
+                }
+                @if (hasError('username', 'pattern')) {
+                  <span class="form-error">Solo letras, números y guiones permitidos.</span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="displayName">
+                  <span class="label-text">Nombre Completo</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="form-input-wrap">
+                  <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <input
+                    id="displayName"
+                    type="text"
+                    formControlName="displayName"
+                    placeholder="p.ej. Juan Pérez"
+                    class="form-input"
+                    [class.input-error]="hasError('displayName', 'required')"
+                  />
+                </div>
+                @if (hasError('displayName', 'required')) {
+                  <span class="form-error">El nombre es requerido.</span>
+                }
+                @if (hasError('displayName', 'minlength')) {
+                  <span class="form-error">El nombre debe tener al menos 2 caracteres.</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">
+                <span class="label-text">Contraseña</span>
+                @if (!isEditMode) {
+                  <span class="label-required">*</span>
+                } @else {
+                  <span class="label-optional">(opcional para cambiar)</span>
+                }
+              </label>
+              <div class="form-input-wrap">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <input
+                  id="password"
+                  [type]="isEditMode && showPasswordEditing ? 'text' : 'password'"
+                  formControlName="password"
+                  [placeholder]="isEditMode ? 'Contraseña actual' : 'Mínimo 4 caracteres'"
+                  class="form-input"
+                  [class.input-error]="hasError('password', 'required')"
+                />
+                @if (isEditMode) {
+                  <button type="button" class="btn-toggle-password" (click)="togglePasswordVisibility()" aria-label="Mostrar/ocultar contraseña">
+                    @if (showPasswordEditing) {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    }
+                  </button>
+                }
+              </div>
+              @if (hasError('password', 'required')) {
+                <span class="form-error">La contraseña es requerida.</span>
+              }
+              @if (hasError('password', 'minlength')) {
+                <span class="form-error">La contraseña debe tener al menos 4 caracteres.</span>
+              }
+            </div>
+
+            @if (!isEditMode) {
+              <div class="form-group">
+                <label for="passwordConfirm">
+                  <span class="label-text">Confirmar Contraseña</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="form-input-wrap">
+                  <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <input
+                    id="passwordConfirm"
+                    [type]="showPasswordConfirm ? 'text' : 'password'"
+                    formControlName="passwordConfirm"
+                    placeholder="Repetir contraseña"
+                    class="form-input"
+                    [class.input-error]="hasError('passwordConfirm', 'required') || (!passwordsMatch() && userForm.get('passwordConfirm')?.touched)"
+                  />
+                  <button type="button" class="btn-toggle-password" (click)="toggleConfirmPasswordVisibility()" aria-label="Mostrar/ocultar contraseña">
+                    @if (showPasswordConfirm) {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+                @if (hasError('passwordConfirm', 'required')) {
+                  <span class="form-error">Debe confirmar la contraseña.</span>
+                }
+                @if (!passwordsMatch() && userForm.get('passwordConfirm')?.touched) {
+                  <span class="form-error">Las contraseñas no coinciden.</span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Configuración Section -->
+          <div class="form-section">
+            <h3 class="section-title">Configuración</h3>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label for="role">
+                  <span class="label-text">Rol</span>
+                  <span class="label-required">*</span>
+                </label>
+                <div class="form-input-wrap">
+                  <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 11h.01"/><path d="M8 11h.01"/><path d="M12 11h.01"/><path d="M8 15h.01"/><path d="M16 15h.01"/><path d="M8 19h.01"/>
+                  </svg>
+                  <select id="role" formControlName="role" class="form-input">
+                    @for (role of roles; track role) {
+                      <option [value]="role">{{ getRoleLabel(role) }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <div class="checkbox-wrap">
+                    <input type="checkbox" formControlName="isActive" class="form-checkbox" />
+                    <span class="checkbox-custom"></span>
+                  </div>
+                  <span>Activo</span>
+                </label>
+                <p class="field-hint">
+                  @if (userForm.get('isActive')?.value) {
+                    <span class="status-badge status-active">Habilitado</span>
+                  } @else {
+                    <span class="status-badge status-inactive">Deshabilitado</span>
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Footer -->
+          <div class="modal-footer">
+            @if (isEditMode) {
+              @let userToDelete = findUserById(selectedUserId);
+              @if (userToDelete) {
+                <button type="button" class="btn-delete-modal" (click)="deleteUser(userToDelete)" [disabled]="!canDeleteUserInModal()" aria-label="Eliminar usuario">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                  </svg>
+                  Eliminar Usuario
+                </button>
+              }
+            }
+            <div class="modal-footer-actions">
+              <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn-submit" [disabled]="userForm.invalid || (!isEditMode && !passwordsMatch())">
+                @if (isEditMode) {
+                  Actualizar Usuario
+                } @else {
+                  Crear Usuario
+                }
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}

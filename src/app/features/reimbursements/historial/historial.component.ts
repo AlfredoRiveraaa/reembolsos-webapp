@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import { Reimbursement } from '../../../core/models/reimbursement.model';
 
@@ -35,7 +35,10 @@ export class HistorialComponent implements OnInit {
 
   estados = ['Aprobado', 'Pendiente', 'En revisión', 'Rechazado'];
 
-  constructor(private reimbursementService: ReimbursementService) {}
+  constructor(
+    private reimbursementService: ReimbursementService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadHistorial();
@@ -141,5 +144,9 @@ export class HistorialComponent implements OnInit {
 
   exportHistorial(): void {
     console.log('Exportando historial...');
+  }
+
+  navigateToDetail(id: string): void {
+    this.router.navigate(['/reembolso', id]);
   }
 }

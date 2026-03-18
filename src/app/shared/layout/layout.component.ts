@@ -27,6 +27,10 @@ export class LayoutComponent {
     return this.authService.getCurrentUser()?.displayName ?? 'Usuario';
   }
 
+  get isAdmin(): boolean {
+    return this.authService.getCurrentUser()?.role === 'admin';
+  }
+
   logout(): void {
     this.authService.logout();
     void this.router.navigate(['/login']);

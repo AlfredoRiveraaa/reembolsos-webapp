@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import { Reimbursement, ReimbursementFilters, ReimbursementStatus } from '../../../core/models/reimbursement.model';
 
@@ -27,7 +27,10 @@ export class DashboardComponent implements OnInit {
 
   estados: ReimbursementStatus[] = ['Aprobado', 'Pendiente', 'En revisión', 'Rechazado'];
 
-  constructor(private reimbursementService: ReimbursementService) {}
+  constructor(
+    private reimbursementService: ReimbursementService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadReimbursements();
@@ -82,5 +85,9 @@ export class DashboardComponent implements OnInit {
 
   exportData(): void {
     console.log('Exportando datos…');
+  }
+
+  navigateToDetail(id: string): void {
+    this.router.navigate(['/reembolso', id]);
   }
 }
