@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthUser, LoginCredentials, UserRole } from '../models/auth.model';
+import { APP_RUNTIME_CONFIG } from '../config/app-runtime.config';
+import { MOCK_USERS } from '../mocks/users.mock';
 import {
   CreateSystemUserRequest,
   SystemUser,
@@ -13,42 +15,17 @@ import {
 })
 export class UserManagementService {
   private static readonly STORAGE_KEY = 'reembolsos.auth.users';
-
-  private readonly seedUsers: SystemUser[] = [
-    {
-      id: 'USR-1',
-      username: 'ADMIN001',
-      displayName: 'RH Usuario',
-      password: 'BUAP2026',
-      role: 'admin',
-      isActive: true,
-      createdAt: '2026-01-01T08:00:00.000Z',
-      updatedAt: '2026-01-01T08:00:00.000Z'
-    },
-    {
-      id: 'USR-2',
-      username: 'TRAB1001',
-      displayName: 'Ana Martinez',
-      password: 'Trab1234',
-      role: 'trabajador',
-      isActive: true,
-      createdAt: '2026-01-05T08:00:00.000Z',
-      updatedAt: '2026-01-05T08:00:00.000Z'
-    },
-    {
-      id: 'USR-3',
-      username: 'TRAB1002',
-      displayName: 'Luis Sandoval',
-      password: 'Seguri123',
-      role: 'trabajador',
-      isActive: false,
-      createdAt: '2026-01-10T08:00:00.000Z',
-      updatedAt: '2026-01-10T08:00:00.000Z'
-    }
-  ];
+  private readonly seedUsers: SystemUser[] = MOCK_USERS.map(user => ({ ...user }));
 
   private readonly usersSubject = new BehaviorSubject<SystemUser[]>(this.restoreUsers());
   readonly users$ = this.usersSubject.asObservable();
+
+  constructor() {
+    if (APP_RUNTIME_CONFIG.dataProviderMode === 'api') {
+      // TODO: replace localStorage persistence with API integration.
+      throw new Error('API mode is not implemented yet in UserManagementService.');
+    }
+  }
 
   authenticate(credentials: LoginCredentials): UserOperationResult & { user?: AuthUser } {
     const username = this.normalizeUsername(credentials.username);
@@ -179,19 +156,19 @@ export class UserManagementService {
   private restoreUsers(): SystemUser[] {
     const storedUsers = localStorage.getItem(UserManagementService.STORAGE_KEY);
     if (!storedUsers) {
-      return this.seedUsers;
+      return this.seedUsers.map(user => ({ ...user }));
     }
 
     try {
       const parsedUsers = JSON.parse(storedUsers) as SystemUser[];
       if (!Array.isArray(parsedUsers) || parsedUsers.length === 0) {
-        return this.seedUsers;
+        return this.seedUsers.map(user => ({ ...user }));
       }
 
-      return parsedUsers;
+      return parsedUsers.map(user => ({ ...user }));
     } catch {
       localStorage.removeItem(UserManagementService.STORAGE_KEY);
-      return this.seedUsers;
+      return this.seedUsers.map(user => ({ ...user }));
     }
   }
 

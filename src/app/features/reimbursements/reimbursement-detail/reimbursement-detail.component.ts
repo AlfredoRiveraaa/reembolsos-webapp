@@ -102,10 +102,12 @@ export class ReimbursementDetailComponent implements OnInit {
   }
 
   descargarXML(): void {
+    // TODO: replace with document download endpoint when backend is available.
     console.log('Descargando XML…');
   }
 
   descargarPDF(numero: number): void {
+    // TODO: replace with document download endpoint when backend is available.
     console.log(`Descargando PDF ${numero}…`);
   }
 

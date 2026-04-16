@@ -194,16 +194,6 @@ export class LoginComponent {
     }, 1500);
   }
 
-  private generateUsername(fullName: string): string {
-    // Generar username a partir del nombre completo
-    // Formato: INICIALES + número aleatorio
-    // Ejemplo: Diego González Camaril -> DGCA001
-    const words = fullName.trim().split(/\s+/);
-    const initials = words.map(word => word.charAt(0).toUpperCase()).join('');
-    const randomNum = Math.floor(Math.random() * 900) + 100;
-    return `${initials}${randomNum}`;
-  }
-
   cancelAdminPasswordModal(): void {
     if (!this.isAdminPasswordSuccess) {
       this.showAdminPasswordModal = false;
@@ -211,9 +201,5 @@ export class LoginComponent {
       this.adminPasswordError = '';
       this.pendingRegisterData = null;
     }
-  }
-
-  private getRoleLabel(role: UserRole): string {
-    return role === 'admin' ? 'Administrador' : 'Trabajador';
   }
 }
