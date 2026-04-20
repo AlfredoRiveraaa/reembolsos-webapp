@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserManagementService } from '../../../core/services/user-management.service';
 import { SystemUser, CreateSystemUserRequest, UpdateSystemUserRequest } from '../../../core/models/user-management.model';
@@ -13,7 +14,11 @@ import { UserRole } from '../../../core/models/auth.model';
   templateUrl: './users-management.component.html',
   styleUrl: './users-management.component.scss'
 })
-export class UsersManagementComponent implements OnInit {
+export class UsersManagementComponent implements OnInit, OnDestroy {
+  private static readonly ALPHANUMERIC_PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+  private readonly destroy$ = new Subject<void>();
+
   users: SystemUser[] = [];
   filteredUsers: SystemUser[] = [];
 
@@ -54,7 +59,7 @@ export class UsersManagementComponent implements OnInit {
     this.userForm = this.fb.nonNullable.group({
       username: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9-]+$/)]],
       displayName: ['', [Validators.required, Validators.minLength(2)]],
-      password: ['', [Validators.minLength(4)]],
+      password: ['', [Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)]],
       passwordConfirm: [''],
       role: this.fb.nonNullable.control<UserRole>('trabajador'),
       isActive: [true]
@@ -64,9 +69,16 @@ export class UsersManagementComponent implements OnInit {
   ngOnInit(): void {
     this.currentUserUsername = this.authService.getCurrentUser()?.username ?? '';
     this.loadUsers();
-    this.userManagementService.users$.subscribe(() => {
-      this.loadUsers();
-    });
+    this.userManagementService.users$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadUsers();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadUsers(): void {
@@ -127,7 +139,10 @@ export class UsersManagementComponent implements OnInit {
       role: 'trabajador',
       isActive: true
     });
-    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(4)]);
+    this.userForm.get('password')?.setValidators([
+      Validators.required,
+      Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)
+    ]);
     this.userForm.get('password')?.updateValueAndValidity();
     this.userForm.get('passwordConfirm')?.setValidators([Validators.required]);
     this.userForm.get('passwordConfirm')?.updateValueAndValidity();
@@ -143,12 +158,14 @@ export class UsersManagementComponent implements OnInit {
     this.userForm.reset({
       username: user.username,
       displayName: user.displayName,
-      password: user.password,
+      password: '',
       passwordConfirm: '',
       role: user.role,
       isActive: user.isActive
     });
-    this.userForm.get('password')?.setValidators([Validators.minLength(4)]);
+    this.userForm.get('password')?.setValidators([
+      Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)
+    ]);
     this.userForm.get('password')?.updateValueAndValidity();
     this.userForm.get('passwordConfirm')?.setValidators([]);
     this.userForm.get('passwordConfirm')?.updateValueAndValidity();
@@ -188,7 +205,7 @@ export class UsersManagementComponent implements OnInit {
       };
 
       if (formValue.password?.trim()) {
-        updatePayload.password = formValue.password;
+        updatePayload.password = formValue.password.trim();
       }
 
       const result = this.userManagementService.updateUser(
@@ -209,7 +226,7 @@ export class UsersManagementComponent implements OnInit {
       const createPayload: CreateSystemUserRequest = {
         username: formValue.username,
         displayName: formValue.displayName,
-        password: formValue.password,
+        password: formValue.password.trim(),
         role: formValue.role,
         isActive: formValue.isActive
       };
@@ -250,7 +267,7 @@ export class UsersManagementComponent implements OnInit {
   }
 
   canDeleteUser(user: SystemUser): boolean {
-    return this.userManagementService.getUsersSnapshot().some(u => u.id !== user.id && u.username !== this.currentUserUsername);
+    return user.username !== this.currentUserUsername;
   }
 
   findUserById(userId: string | null): SystemUser | undefined {

@@ -89,6 +89,11 @@ $footer-h:    72px;
     background: rgba(255,255,255,.12);
     color: $white;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255,255,255,.8);
+    outline-offset: 2px;
+  }
 }
 
 .logo-section {
@@ -177,6 +182,11 @@ $footer-h:    72px;
     background: rgba(255, 255, 255, 0.14);
     border-color: rgba(255, 255, 255, 0.45);
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255,255,255,.8);
+    outline-offset: 2px;
+  }
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────
@@ -230,6 +240,11 @@ $footer-h:    72px;
     color: $white;
   }
 
+  &:focus-visible {
+    outline: 2px solid rgba(0,181,226,.85);
+    outline-offset: 2px;
+  }
+
   &.active {
     background: rgba(0,181,226,.15);
     color: $white;
@@ -254,6 +269,10 @@ $footer-h:    72px;
     color: rgba(255,255,255,.45);
     transition: color 0.15s;
   }
+}
+
+.sidebar-backdrop {
+  display: none;
 }
 
 .nav-text {
@@ -356,6 +375,20 @@ $footer-h:    72px;
   }
 
   .app-layout:not(.sidebar-collapsed) .sidebar { left: 0; }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: $header-h;
+    left: 0;
+    right: 0;
+    bottom: $footer-h;
+    z-index: 98;
+    border: none;
+    background: rgba(15, 23, 42, 0.45);
+    padding: 0;
+    margin: 0;
+  }
 
   .header-titles h1 { display: none; }
   .header-titles .department { font-size: 0.75rem; }

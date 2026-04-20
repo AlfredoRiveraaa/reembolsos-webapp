@@ -195,7 +195,7 @@
         }
 
         <button type="submit" class="btn-login" [disabled]="registerSubmitting">
-          {{ registerSubmitting ? 'Validando...' : 'Registrar usuario' }}
+          {{ registerSubmitting ? 'Procesando...' : 'Registrar usuario' }}
         </button>
 
         <p class="register-link">
@@ -212,7 +212,7 @@
       <div class="modal-dialog" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Verificar autorización del administrador</h3>
-          <button type="button" class="modal-close" (click)="cancelAdminPasswordModal()" [disabled]="isAdminPasswordSuccess">×</button>
+          <button type="button" class="modal-close" (click)="cancelAdminPasswordModal()" [disabled]="isAdminPasswordSuccess || registerSubmitting" aria-label="Cerrar modal">×</button>
         </div>
         <div class="modal-body">
           @if (!isAdminPasswordSuccess) {
@@ -225,12 +225,14 @@
                   [(ngModel)]="adminPasswordInput"
                   placeholder="********"
                   autocomplete="off"
+                  [disabled]="registerSubmitting"
                   (keyup.enter)="submitAdminPassword()"
                 />
                 <button
                   type="button"
                   class="toggle-password-btn"
                   (click)="toggleAdminPasswordVisibility()"
+                  [disabled]="registerSubmitting"
                   [attr.aria-label]="showAdminPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
                 >
                   @if (showAdminPassword) {
@@ -250,6 +252,9 @@
               @if (adminPasswordError) {
                 <small class="field-error">{{ adminPasswordError }}</small>
               }
+              @if (registerSubmitting) {
+                <small class="field-help">Verificando autorización y creando usuario...</small>
+              }
             </label>
           } @else {
             <div class="success-container">
@@ -266,8 +271,10 @@
         </div>
         @if (!isAdminPasswordSuccess) {
           <div class="modal-footer">
-            <button type="button" class="btn-cancel" (click)="cancelAdminPasswordModal()">Cancelar</button>
-            <button type="button" class="btn-login" (click)="submitAdminPassword()" [disabled]="!adminPasswordInput">Verificar</button>
+            <button type="button" class="btn-cancel" (click)="cancelAdminPasswordModal()" [disabled]="registerSubmitting">Cancelar</button>
+            <button type="button" class="btn-login" (click)="submitAdminPassword()" [disabled]="!adminPasswordInput || registerSubmitting">
+              {{ registerSubmitting ? 'Verificando...' : 'Verificar' }}
+            </button>
           </div>
         }
       </div>

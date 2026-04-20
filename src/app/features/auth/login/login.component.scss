@@ -251,11 +251,21 @@ form {
     outline: 2px solid rgba(0, 59, 92, 0.35);
     outline-offset: 1px;
   }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 .field-error {
   font-size: 0.74rem;
   color: $red;
+}
+
+.field-help {
+  font-size: 0.74rem;
+  color: $slate-500;
 }
 
 .auth-error {
@@ -380,6 +390,11 @@ code {
   &:hover {
     background: $slate-100;
     color: $slate-700;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 }
 

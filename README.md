@@ -57,3 +57,13 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Mock credentials (frontend mode)
+
+When using localStorage/mock mode, the app seeds these initial users:
+
+- Admin: `ADMIN001` / `Admin2026`
+- Worker (active): `TRAB1001` / `Trab1234`
+- Worker (inactive): `TRAB1002` / `Seguri123`
+
+If you had previous users stored in localStorage, these defaults are not re-seeded automatically.
