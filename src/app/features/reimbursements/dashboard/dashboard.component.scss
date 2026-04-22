@@ -105,6 +105,11 @@ $green-kpi: #10b981;
 
   &:hover { background: $navy-dk; }
   &:active { transform: scale(0.98); }
+
+  &:focus-visible {
+    outline: 2px solid rgba(30,58,95,.8);
+    outline-offset: 2px;
+  }
 }
 
 // ── Body ───────────────────────────────────────────────────────────
@@ -310,6 +315,11 @@ $green-kpi: #10b981;
     background: $slate-200;
     color: $slate-700;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(30,58,95,.75);
+    outline-offset: 2px;
+  }
 }
 
 // ── Data Table ─────────────────────────────────────────────────────
@@ -365,6 +375,13 @@ $green-kpi: #10b981;
 
     &:last-child { border-bottom: none; }
     &:hover {
+      background: $slate-100;
+      box-shadow: inset 0 0 0 1px $slate-200;
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba(30,58,95,.8);
+      outline-offset: -2px;
       background: $slate-100;
       box-shadow: inset 0 0 0 1px $slate-200;
     }
@@ -442,6 +459,11 @@ $green-kpi: #10b981;
 
   &:hover  { background: $navy-dk; }
   &:active { transform: scale(0.97); }
+
+  &:focus-visible {
+    outline: 2px solid rgba(30,58,95,.8);
+    outline-offset: 2px;
+  }
 }
 
 // ── Table Footer ───────────────────────────────────────────────────

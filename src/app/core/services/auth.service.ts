@@ -10,10 +10,13 @@ import { UserManagementService } from './user-management.service';
 export class AuthService {
   private static readonly STORAGE_KEY = 'reembolsos.auth.user';
 
-  private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(this.restoreAndValidateSession());
-  readonly currentUser$ = this.currentUserSubject.asObservable();
+  private readonly currentUserSubject: BehaviorSubject<AuthUser | null>;
+  readonly currentUser$;
 
-  constructor(private readonly userManagementService: UserManagementService) {}
+  constructor(private readonly userManagementService: UserManagementService) {
+    this.currentUserSubject = new BehaviorSubject<AuthUser | null>(this.restoreAndValidateSession());
+    this.currentUser$ = this.currentUserSubject.asObservable();
+  }
 
   login(credentials: LoginCredentials): Observable<AuthUser> {
     const authenticationResult = this.userManagementService.authenticate(credentials);
@@ -53,7 +56,7 @@ export class AuthService {
 
     try {
       const parsedUser = JSON.parse(storedUser) as AuthUser;
-      
+
       // Validar que el usuario exista en el sistema y esté activo
       const systemUsers = this.userManagementService.getUsersSnapshot();
       const exists = systemUsers.some(

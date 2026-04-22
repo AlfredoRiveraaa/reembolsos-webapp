@@ -103,6 +103,11 @@ $amber-kpi: #f59e0b;
 
   &:hover { background: $navy-dk; }
   &:active { transform: scale(0.98); }
+
+  &:focus-visible {
+    outline: 2px solid rgba(30,58,95,.8);
+    outline-offset: 2px;
+  }
 }
 
 // ── Body ───────────────────────────────────────────────────────────
@@ -301,6 +306,11 @@ $amber-kpi: #f59e0b;
     background: $slate-200;
     color: $slate-700;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(30,58,95,.75);
+    outline-offset: 2px;
+  }
 }
 
 // ── Data Table ─────────────────────────────────────────────────────
@@ -350,6 +360,13 @@ $amber-kpi: #f59e0b;
       user-select: none;
 
       &:hover {
+        background: $slate-100;
+        box-shadow: inset 0 0 0 1px $slate-200;
+      }
+
+      &:focus-visible {
+        outline: 2px solid rgba(30,58,95,.8);
+        outline-offset: -2px;
         background: $slate-100;
         box-shadow: inset 0 0 0 1px $slate-200;
       }
@@ -457,7 +474,12 @@ $amber-kpi: #f59e0b;
     cursor: not-allowed;
   }
 
-  svg { 
+  &:focus-visible {
+    outline: 2px solid rgba(30,58,95,.75);
+    outline-offset: 2px;
+  }
+
+  svg {
     transition: color 0.2s ease-out;
   }
 }

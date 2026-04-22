@@ -54,7 +54,7 @@
           </div>
         </div>
         <p class="kpi-value">{{ solicitudesPendientes }}</p>
-        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(solicitudesPendientes / totalSolicitudesHoy * 100) + '%'"></div></div>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalSolicitudesHoy > 0 ? solicitudesPendientes / totalSolicitudesHoy * 100 : 0) + '%'"></div></div>
       </div>
 
       <div class="kpi-card kpi-red">
@@ -68,7 +68,7 @@
           </div>
         </div>
         <p class="kpi-value">{{ solicitudesRechazadas }}</p>
-        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(solicitudesRechazadas / totalSolicitudesHoy * 100) + '%'"></div></div>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalSolicitudesHoy > 0 ? solicitudesRechazadas / totalSolicitudesHoy * 100 : 0) + '%'"></div></div>
       </div>
 
       <div class="kpi-card kpi-green">
@@ -143,7 +143,14 @@
           </thead>
           <tbody>
             @for (r of filteredReimbursements; track r.id) {
-              <tr class="clickable-row" (click)="navigateToDetail(r.id)">
+              <tr
+                class="clickable-row"
+                tabindex="0"
+                role="button"
+                (click)="navigateToDetail(r.id)"
+                (keydown.enter)="navigateToDetail(r.id)"
+                (keydown.space)="navigateToDetail(r.id); $event.preventDefault()"
+              >
                 <td class="td-folio">{{ r.folioDRH }}</td>
                 <td class="td-date">{{ formatDate(r.fechaRecepcion) }}</td>
                 <td class="td-id">{{ r.idTrabajador }}</td>
@@ -155,7 +162,7 @@
                   <span class="badge" [ngClass]="getEstadoClass(r.estado)">{{ r.estado }}</span>
                 </td>
                 <td class="td-action">
-                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail">
+                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.folioDRH">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>

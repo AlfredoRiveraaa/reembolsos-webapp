@@ -99,6 +99,8 @@ export class LoginComponent {
       return;
     }
 
+    this.registerSubmitting = false;
+    this.isAdminPasswordSuccess = false;
     this.pendingRegisterData = this.registerForm.getRawValue() as RegisterUserRequest;
     this.showAdminPasswordModal = true;
     this.adminPasswordInput = '';
@@ -129,25 +131,37 @@ export class LoginComponent {
   }
 
   submitAdminPassword(): void {
+    if (this.registerSubmitting) {
+      return;
+    }
+
     this.adminPasswordError = '';
 
-    if (!this.adminPasswordInput) {
+    const payload = this.pendingRegisterData;
+    if (!payload) {
+      this.adminPasswordError = 'No se encontraron datos de registro. Intenta nuevamente.';
+      return;
+    }
+
+    const adminPassword = this.adminPasswordInput.trim();
+
+    if (!adminPassword) {
       this.adminPasswordError = 'La contraseña del administrador es requerida.';
       return;
     }
 
     // Validar que la contraseña del admin sea correcta
     // Por ahora, aceptamos cualquier contraseña válida (8+ alfanuméricos)
-    if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(this.adminPasswordInput)) {
+    if (!LoginComponent.ALPHANUMERIC_PASSWORD_REGEX.test(adminPassword)) {
       this.adminPasswordError = 'La contraseña debe tener mínimo 8 caracteres alfanuméricos.';
       return;
     }
 
-    // Crear el usuario
-    const payload = this.pendingRegisterData!;
+    this.registerSubmitting = true;
 
+    // Crear el usuario
     const createResult = this.userManagementService.createUser({
-      username: (payload as any).username,
+      username: payload.username,
       displayName: payload.fullName,
       password: payload.password,
       role: payload.role,
@@ -156,6 +170,7 @@ export class LoginComponent {
 
     if (!createResult.ok) {
       this.adminPasswordError = createResult.message || 'Error al crear el usuario.';
+      this.registerSubmitting = false;
       return;
     }
 
@@ -166,13 +181,15 @@ export class LoginComponent {
     // Auto-login y navegación
     window.setTimeout(() => {
       this.authService.login({
-        username: (payload as any).username,
+        username: payload.username,
         password: payload.password
       }).subscribe({
         next: () => {
           this.showAdminPasswordModal = false;
           this.isAdminPasswordSuccess = false;
           this.adminPasswordInput = '';
+          this.adminPasswordError = '';
+          this.registerSubmitting = false;
           this.registerMessage = '';
           this.registerForm.reset({
             username: '',
@@ -188,6 +205,7 @@ export class LoginComponent {
         error: () => {
           this.adminPasswordError = 'Error al iniciar sesión. Por favor intenta nuevamente.';
           this.isAdminPasswordSuccess = false;
+          this.registerSubmitting = false;
           this.showAdminPasswordModal = true;
         }
       });
@@ -195,7 +213,7 @@ export class LoginComponent {
   }
 
   cancelAdminPasswordModal(): void {
-    if (!this.isAdminPasswordSuccess) {
+    if (!this.isAdminPasswordSuccess && !this.registerSubmitting) {
       this.showAdminPasswordModal = false;
       this.adminPasswordInput = '';
       this.adminPasswordError = '';
