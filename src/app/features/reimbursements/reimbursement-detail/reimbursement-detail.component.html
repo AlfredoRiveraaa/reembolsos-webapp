@@ -144,54 +144,33 @@
       <div class="info-card">
         <div class="card-label">Documentos Adjuntos</div>
         <div class="doc-list">
-          <button class="doc-btn" (click)="descargarXML()">
-            <div class="doc-icon doc-xml">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-              </svg>
-            </div>
-            <div class="doc-text">
-              <span class="doc-name">Factura XML</span>
-              <span class="doc-sub">Comprobante fiscal digital</span>
-            </div>
-            <svg class="doc-dl" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7,10 12,15 17,10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-          </button>
-          <button class="doc-btn" (click)="previewPdf(1)" [class.doc-active]="activePdf === 1">
-            <div class="doc-icon doc-pdf">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14,2 14,8 20,8"/>
-              </svg>
-            </div>
-            <div class="doc-text">
-              <span class="doc-name">PDF Representación 1</span>
-              <span class="doc-sub">Ver en visor</span>
-            </div>
-            <svg class="doc-eye" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
-          <button class="doc-btn" (click)="previewPdf(2)" [class.doc-active]="activePdf === 2">
-            <div class="doc-icon doc-pdf">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14,2 14,8 20,8"/>
-              </svg>
-            </div>
-            <div class="doc-text">
-              <span class="doc-name">PDF Comprobante 2</span>
-              <span class="doc-sub">Ver en visor</span>
-            </div>
-            <svg class="doc-eye" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
+          @for (document of documents; track document.id) {
+            <button class="doc-btn" (click)="toggleDocument(document.id)" [class.doc-active]="activeDocumentId === document.id">
+              <div class="doc-icon" [class.doc-xml]="document.type === 'txt'" [class.doc-pdf]="document.type === 'pdf'">
+                @if (document.type === 'txt') {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                  </svg>
+                }
+              </div>
+              <div class="doc-text">
+                <span class="doc-name">{{ document.name }}</span>
+                <span class="doc-sub">{{ document.subtitle }}</span>
+              </div>
+              <span class="doc-action-icon" aria-hidden="true">
+                <svg class="doc-dl" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7,10 12,15 17,10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </span>
+            </button>
+          }
         </div>
       </div>
 
@@ -209,12 +188,12 @@
               <polyline points="14,2 14,8 20,8"/>
             </svg>
             <span>Visor de Documento</span>
-            @if (activePdf) {
-              <span class="viewer-file-badge">PDF {{ activePdf }}</span>
+            @if (activeDocument) {
+              <span class="viewer-file-badge">{{ activeDocument.name }}</span>
             }
           </div>
-          @if (activePdf) {
-            <button class="viewer-dl-btn" (click)="descargarPDF(activePdf!)">
+          @if (activeDocument) {
+            <button class="viewer-dl-btn" (click)="descargarDocumentoActivo()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7,10 12,15 17,10"/>
@@ -225,7 +204,7 @@
           }
         </div>
         <div class="viewer-body">
-          @if (!activePdf) {
+          @if (!activeDocument) {
             <div class="viewer-placeholder">
               <div class="placeholder-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -236,72 +215,16 @@
                 </svg>
               </div>
               <p class="placeholder-title">Sin documento activo</p>
-              <p class="placeholder-sub">Selecciona un PDF en el panel izquierdo para visualizarlo aquí.</p>
+              <p class="placeholder-sub">Selecciona un archivo de prueba en el panel izquierdo para visualizarlo aquí.</p>
             </div>
           } @else {
-            <div class="pdf-mock-viewer">
-              <div class="pdf-mock-bar">
-                <span class="pdf-mock-dot"></span>
-                <span class="pdf-mock-dot"></span>
-                <span class="pdf-mock-dot"></span>
-                <span class="pdf-mock-url">SharePoint / Expediente_{{ detalle.id }}_PDF{{ activePdf }}.pdf</span>
-              </div>
-              <div class="pdf-mock-content">
-                <div class="pdf-mock-header-line">
-                  <div class="pdf-mock-logo-box"></div>
-                  <div class="pdf-mock-title-lines">
-                    <div class="pdf-line w-60"></div>
-                    <div class="pdf-line w-40"></div>
-                  </div>
-                </div>
-                <div class="pdf-divider"></div>
-                <div class="pdf-mock-row">
-                  <div class="pdf-col">
-                    <div class="pdf-line w-30 label"></div>
-                    <div class="pdf-line w-70"></div>
-                  </div>
-                  <div class="pdf-col">
-                    <div class="pdf-line w-30 label"></div>
-                    <div class="pdf-line w-50"></div>
-                  </div>
-                </div>
-                <div class="pdf-mock-row">
-                  <div class="pdf-col full">
-                    <div class="pdf-line w-20 label"></div>
-                    <div class="pdf-line w-90"></div>
-                    <div class="pdf-line w-75"></div>
-                  </div>
-                </div>
-                <div class="pdf-table-mock">
-                  <div class="ptm-header">
-                    <div class="ptm-cell w-50">Descripción</div>
-                    <div class="ptm-cell w-15 center">Cant</div>
-                    <div class="ptm-cell w-17 right">P. Unit</div>
-                    <div class="ptm-cell w-18 right">Total</div>
-                  </div>
-                  @for (c of detalle.conceptos; track $index) {
-                    <div class="ptm-row">
-                      <div class="ptm-cell w-50">{{ c.descripcion }}</div>
-                      <div class="ptm-cell w-15 center">{{ c.cantidad }}</div>
-                      <div class="ptm-cell w-17 right">${{ formatCurrency(c.precioUnitario) }}</div>
-                      <div class="ptm-cell w-18 right">${{ formatCurrency(calcularImporte(c.cantidad, c.precioUnitario)) }}</div>
-                    </div>
-                  }
-                  <div class="ptm-footer">
-                    <div class="ptm-cell w-82 right bold">Total</div>
-                    <div class="ptm-cell w-18 right bold">${{ formatCurrency(detalle.monto) }}</div>
-                  </div>
-                </div>
-                <div class="pdf-mock-qr-row">
-                  <div class="pdf-qr-box"></div>
-                  <div class="pdf-qr-lines">
-                    <div class="pdf-line w-80"></div>
-                    <div class="pdf-line w-90"></div>
-                    <div class="pdf-line w-60"></div>
-                  </div>
-                </div>
-                <p class="pdf-mock-stamp">Este documento es una representación visual — el PDF real se carga desde SharePoint</p>
-              </div>
+            <div class="file-viewer-wrapper">
+              <div class="file-viewer-meta">{{ activeDocument.url }}</div>
+              <iframe
+                class="file-viewer-frame"
+                [title]="activeDocument.name"
+                [src]="activeDocument.safeUrl"
+              ></iframe>
             </div>
           }
         </div>
@@ -395,6 +318,21 @@
 
       @if (replyOpen) {
       <div class="reply-body">
+        <div class="reply-field">
+          <label class="reply-label">Plantilla automática</label>
+          <select class="reply-input" [(ngModel)]="selectedTemplateId" (ngModelChange)="applyReplyTemplate($event)">
+            <option value="">Sin plantilla (mensaje manual)</option>
+            @for (template of replyTemplates; track template.id) {
+              <option [value]="template.id">{{ template.label }}</option>
+            }
+          </select>
+          @if (selectedTemplateId) {
+            <p class="reply-template-help">
+              {{ selectedTemplateDescription }}
+            </p>
+          }
+        </div>
+
         <div class="reply-field-row">
           <div class="reply-field">
             <label class="reply-label">Para</label>

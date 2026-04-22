@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
+import * as XLSX from 'xlsx';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import { Reimbursement, ReimbursementFilters, ReimbursementStatus } from '../../../core/models/reimbursement.model';
 
@@ -84,7 +85,35 @@ export class DashboardComponent implements OnInit {
   }
 
   exportData(): void {
-    console.log('Exportando datos…');
+    const rows = this.filteredReimbursements.length > 0 ? this.filteredReimbursements : this.reimbursements;
+    const exportRows = rows.map(reimbursement => ({
+      'Folio DRH': reimbursement.folioDRH,
+      'Fecha Recepcion': reimbursement.fechaRecepcion,
+      'ID Trabajador': reimbursement.idTrabajador,
+      'Nombre Trabajador': reimbursement.nombreTrabajador,
+      Comentario: reimbursement.comentario || '',
+      Monto: reimbursement.monto,
+      'Fecha Respuesta': reimbursement.fechaRespuesta || '',
+      Estado: reimbursement.estado
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    worksheet['!cols'] = [
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 30 },
+      { wch: 38 },
+      { wch: 12 },
+      { wch: 16 },
+      { wch: 14 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reembolsos');
+
+    const today = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `reembolsos_${today}.xlsx`);
   }
 
   navigateToDetail(id: string): void {
