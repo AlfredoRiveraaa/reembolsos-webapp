@@ -96,26 +96,26 @@
             <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" placeholder="Buscar folio DRH..." [(ngModel)]="filters.folioDRH" (ngModelChange)="applyFilters()" class="filter-input"/>
+            <input type="text" placeholder="Buscar folio DRH..." [(ngModel)]="filters.uuid" (ngModelChange)="applyFilters()" class="filter-input"/>
           </div>
           <div class="filter-field">
             <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" placeholder="Nombre trabajador..." [(ngModel)]="filters.nombreTrabajador" (ngModelChange)="applyFilters()" class="filter-input"/>
+            <input type="text" placeholder="Nombre trabajador..." [(ngModel)]="filters.nombre_solicitante" (ngModelChange)="applyFilters()" class="filter-input"/>
           </div>
           <div class="filter-field">
             <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
             </svg>
-            <select [(ngModel)]="filters.estado" (ngModelChange)="applyFilters()" class="filter-input filter-select">
+            <select [(ngModel)]="filters.estatus" (ngModelChange)="applyFilters()" class="filter-input filter-select">
               <option value="">Todos los estados</option>
               @for (estado of estados; track estado) {
                 <option [value]="estado">{{ estado }}</option>
               }
             </select>
           </div>
-          @if (filters.folioDRH || filters.nombreTrabajador || filters.estado) {
+          @if (filters.uuid || filters.nombre_solicitante || filters.estatus) {
             <button class="btn-clear-filters" (click)="clearFilters()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -132,11 +132,11 @@
             <tr>
               <th>Folio DRH</th>
               <th>Fecha Recepción</th>
-              <th>ID Trabajador</th>
+              <th>Correo Solicitante</th>
               <th>Nombre Trabajador</th>
-              <th>Comentario</th>
+              <th>Observaciones</th>
               <th class="col-right">Monto</th>
-              <th>Fecha Respuesta</th>
+              <th>Resolución</th>
               <th class="col-center">Estado</th>
               <th class="col-center">Acción</th>
             </tr>
@@ -151,18 +151,18 @@
                 (keydown.enter)="navigateToDetail(r.id)"
                 (keydown.space)="navigateToDetail(r.id); $event.preventDefault()"
               >
-                <td class="td-folio">{{ r.folioDRH }}</td>
-                <td class="td-date">{{ formatDate(r.fechaRecepcion) }}</td>
-                <td class="td-id">{{ r.idTrabajador }}</td>
-                <td class="td-name">{{ r.nombreTrabajador }}</td>
-                <td class="td-comment">{{ r.comentario || '—' }}</td>
+                <td class="td-folio">{{ r.uuid }}</td>
+                <td class="td-date">{{ formatDate(r.fecha_recepcion) }}</td>
+                <td class="td-id">{{ r.correo_solicitante }}</td>
+                <td class="td-name">{{ r.nombre_solicitante }}</td>
+                <td class="td-comment">{{ r.mensaje || '—' }}</td>
                 <td class="td-amount">${{ formatCurrency(r.monto) }}</td>
-                <td class="td-date">{{ r.fechaRespuesta ? formatDate(r.fechaRespuesta) : '—' }}</td>
+                <td class="td-date">{{ r.fecha_resolucion ? formatDate(r.fecha_resolucion) : '—' }}</td>
                 <td class="td-status">
-                  <span class="badge" [ngClass]="getEstadoClass(r.estado)">{{ r.estado }}</span>
+                  <span class="badge" [ngClass]="getEstadoClass(r.estatus)">{{ r.estatus }}</span>
                 </td>
                 <td class="td-action">
-                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.folioDRH">
+                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.uuid">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>

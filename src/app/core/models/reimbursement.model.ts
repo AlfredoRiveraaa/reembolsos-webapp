@@ -1,33 +1,32 @@
 export interface Reimbursement {
-  id: string;
-  folioDRH: string;
-  fechaRecepcion: string;
-  idTrabajador: string;
-  nombreTrabajador: string;
-  comentario: string;
+  id: number;
+  uuid: string;
   monto: number;
-  fechaRespuesta: string;
-  estado: ReimbursementStatus;
+  correo_solicitante: string;
+  nombre_solicitante: string;
+  nombre_proveedor: string;
+  estatus: ReimbursementStatus;
+  fecha_recepcion: string;
+
+  forma_pago?: string;
+  rfc_emisor?: string;
+  fecha_factura?: string;
+  mensaje?: string;
+  link_expediente?: string;
+
+  revisado_por?: number;
+  fecha_resolucion?: string;
 }
 
-export interface ReimbursementDetail extends Reimbursement {
-  rfcEmisor: string;
-  rfcReceptor: string;
-  fechaTimbrado: string;
-  descripcion: string;
-  conceptos: Concepto[];
-}
-
-export interface Concepto {
-  descripcion: string;
-  cantidad: number;
-  precioUnitario: number;
-}
-
-export type ReimbursementStatus = 'Aprobado' | 'Pendiente' | 'En revisión' | 'Rechazado';
+export type ReimbursementStatus = 'PENDIENTE' | 'EN REVISIÓN' | 'APROBADO' | 'RECHAZADO';
 
 export interface ReimbursementFilters {
-  folioDRH: string;
-  nombreTrabajador: string;
-  estado: string;
+  uuid: string;
+  nombre_solicitante: string;
+  estatus: string;
 }
+
+/**
+ * Nota: Se eliminaron ReimbursementDetail y Concepto ya que
+ * el backend actual no maneja desglose de conceptos por fila
+ */

@@ -43,12 +43,12 @@ export class LoginComponent {
     private readonly router: Router
   ) {
     this.loginForm = this.fb.nonNullable.group({
-      username: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9-]+$/)]],
+      username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.pattern(LoginComponent.ALPHANUMERIC_PASSWORD_REGEX)]]
     });
 
     this.registerForm = this.fb.nonNullable.group({
-      username: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9-]+$/)]],
+      username: ['', [Validators.required, Validators.email]],
       fullName: ['', [Validators.required, Validators.minLength(4)]],
       role: this.fb.nonNullable.control<UserRole>('trabajador', { validators: [Validators.required] }),
       password: ['', [Validators.required, Validators.pattern(LoginComponent.ALPHANUMERIC_PASSWORD_REGEX)]],

@@ -31,9 +31,9 @@
 
     <div class="topbar-center">
       <div class="topbar-content">
-        <span class="topbar-id">{{ detalle.folioDRH }}</span>
-        <h1 class="topbar-title">{{ detalle.nombreTrabajador }}</h1>
-        <span class="topbar-worker">ID: {{ detalle.idTrabajador }}</span>
+        <span class="topbar-id">{{ detalle.uuid }}</span>
+        <h1 class="topbar-title">{{ detalle.nombre_solicitante }}</h1>
+        <span class="topbar-worker">Correo: {{ detalle.correo_solicitante }}</span>
       </div>
     </div>
 
@@ -57,68 +57,33 @@
         <div class="meta-grid">
           <div class="meta-item">
             <span class="meta-key">Folio DRH</span>
-            <span class="meta-val meta-name">{{ detalle.folioDRH }}</span>
+            <span class="meta-val meta-name">{{ detalle.uuid }}</span>
           </div>
           <div class="meta-item">
-            <span class="meta-key">ID Trabajador</span>
-            <span class="meta-val mono">{{ detalle.idTrabajador }}</span>
+            <span class="meta-key">Correo Electrónico</span>
+            <span class="meta-val mono">{{ detalle.correo_solicitante }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-key">Nombre Trabajador</span>
-            <span class="meta-val meta-name">{{ detalle.nombreTrabajador }}</span>
+            <span class="meta-val meta-name">{{ detalle.nombre_solicitante }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-key">Fecha Recepción</span>
-            <span class="meta-val">{{ formatDate(detalle.fechaRecepcion) }}</span>
+            <span class="meta-val">{{ formatDate(detalle.fecha_recepcion) }}</span>
           </div>
           <div class="meta-item">
-            <span class="meta-key">Fecha de timbrado</span>
-            <span class="meta-val">{{ formatDateTime(detalle.fechaTimbrado) }}</span>
+            <span class="meta-key">Fecha de Factura</span>
+            <span class="meta-val">{{ detalle.fecha_factura ? formatDate(detalle.fecha_factura) : '—' }}</span>
           </div>
           <div class="meta-item">
-            <span class="meta-key">Fecha Respuesta</span>
-            <span class="meta-val">{{ detalle.fechaRespuesta ? formatDate(detalle.fechaRespuesta) : '—' }}</span>
+            <span class="meta-key">Fecha Resolución</span>
+            <span class="meta-val">{{ detalle.fecha_resolucion ? formatDate(detalle.fecha_resolucion) : '—' }}</span>
           </div>
           <div class="meta-item full-width">
-            <span class="meta-key">Comentario</span>
-            <span class="meta-val meta-desc">{{ detalle.comentario || '—' }}</span>
-          </div>
-          <div class="meta-item full-width">
-            <span class="meta-key">Descripción</span>
-            <span class="meta-val meta-desc">{{ detalle.descripcion }}</span>
+            <span class="meta-key">Observaciones de RH</span>
+            <span class="meta-val meta-desc">{{ detalle.mensaje || '—' }}</span>
           </div>
         </div>
-      </div>
-
-      <!-- Conceptos -->
-      <div class="info-card">
-        <div class="card-label">Desglose de Conceptos</div>
-        <table class="concepts-table">
-          <thead>
-            <tr>
-              <th class="ct-left">Concepto</th>
-              <th class="ct-center">Cant.</th>
-              <th class="ct-right">P. Unit.</th>
-              <th class="ct-right">Importe</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of detalle.conceptos; track $index) {
-              <tr>
-                <td>{{ c.descripcion }}</td>
-                <td class="ct-center">{{ c.cantidad }}</td>
-                <td class="ct-right">${{ formatCurrency(c.precioUnitario) }}</td>
-                <td class="ct-right ct-bold">${{ formatCurrency(calcularImporte(c.cantidad, c.precioUnitario)) }}</td>
-              </tr>
-            }
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" class="ct-right ct-total-label">Total</td>
-              <td class="ct-right ct-total">${{ formatCurrency(detalle.monto) }}</td>
-            </tr>
-          </tfoot>
-        </table>
       </div>
 
       <!-- Datos Fiscales -->
@@ -127,11 +92,11 @@
         <div class="fiscal-row">
           <div class="fiscal-item">
             <span class="meta-key">RFC Emisor</span>
-            <span class="meta-val mono">{{ detalle.rfcEmisor }}</span>
+            <span class="meta-val mono">{{ detalle.rfc_emisor || 'N/A' }}</span>
           </div>
           <div class="fiscal-item">
-            <span class="meta-key">RFC Receptor</span>
-            <span class="meta-val mono">{{ detalle.rfcReceptor }}</span>
+            <span class="meta-key">Proveedor</span>
+            <span class="meta-val meta-name">{{ detalle.nombre_proveedor }}</span>
           </div>
           <div class="fiscal-item">
             <span class="meta-key">Monto Total</span>
@@ -247,9 +212,9 @@
         <div class="action-btns">
           <button
             class="act-btn act-aprobar"
-            [class.act-active]="estadoActual === 'Aprobado'"
-            [disabled]="estadoActual === 'Aprobado'"
-            (click)="cambiarEstado('Aprobado')"
+            [class.act-active]="estadoActual === 'APROBADO'"
+            [disabled]="estadoActual === 'APROBADO'"
+            (click)="cambiarEstado('APROBADO')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
@@ -259,9 +224,9 @@
 
           <button
             class="act-btn act-revision"
-            [class.act-active]="estadoActual === 'En revisión'"
-            [disabled]="estadoActual === 'En revisión'"
-            (click)="cambiarEstado('En revisión')"
+            [class.act-active]="estadoActual === 'EN REVISIÓN'"
+            [disabled]="estadoActual === 'EN REVISIÓN'"
+            (click)="cambiarEstado('EN REVISIÓN')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
@@ -271,9 +236,9 @@
 
           <button
             class="act-btn act-rechazar"
-            [class.act-active]="estadoActual === 'Rechazado'"
-            [disabled]="estadoActual === 'Rechazado'"
-            (click)="cambiarEstado('Rechazado')"
+            [class.act-active]="estadoActual === 'RECHAZADO'"
+            [disabled]="estadoActual === 'RECHAZADO'"
+            (click)="cambiarEstado('RECHAZADO')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
@@ -284,9 +249,9 @@
 
           <button
             class="act-btn act-pendiente"
-            [class.act-active]="estadoActual === 'Pendiente'"
-            [disabled]="estadoActual === 'Pendiente'"
-            (click)="cambiarEstado('Pendiente')"
+            [class.act-active]="estadoActual === 'PENDIENTE'"
+            [disabled]="estadoActual === 'PENDIENTE'"
+            (click)="cambiarEstado('PENDIENTE')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -309,7 +274,7 @@
             <polyline points="22,6 12,13 2,6"/>
           </svg>
           <span class="reply-title">Redactar Respuesta</span>
-          <span class="reply-folio">{{ detalle.folioDRH }}</span>
+          <span class="reply-folio">{{ detalle.uuid }}</span>
         </div>
         <svg class="reply-chevron" [class.reply-chevron--open]="replyOpen" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"/>

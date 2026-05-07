@@ -1,70 +1,53 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { APP_RUNTIME_CONFIG } from '../config/app-runtime.config';
-import { Reimbursement, ReimbursementDetail, ReimbursementStatus } from '../models/reimbursement.model';
-import { MOCK_REIMBURSEMENT_DETAILS, MOCK_REIMBURSEMENTS } from '../mocks/reimbursements.mock';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Reimbursement, ReimbursementStatus } from '../models/reimbursement.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReimbursementService {
-  private readonly mockReimbursements: Reimbursement[] = MOCK_REIMBURSEMENTS.map(reimbursement => ({ ...reimbursement }));
-  private readonly mockReimbursementDetails: Record<string, ReimbursementDetail> = Object.fromEntries(
-    Object.entries(MOCK_REIMBURSEMENT_DETAILS).map(([id, detail]) => [id, {
-      ...detail,
-      conceptos: detail.conceptos.map(concept => ({ ...concept }))
-    }])
-  );
-
-  constructor() {
-    if (APP_RUNTIME_CONFIG.dataProviderMode === 'api') {
-      // TODO: replace mock implementation with HttpClient API calls.
-      throw new Error('API mode is not implemented yet in ReimbursementService.');
-    }
-  }
+  private http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:8000/api/reembolsos';
 
   getReimbursements(): Observable<Reimbursement[]> {
-    return of(this.mockReimbursements.map(reimbursement => ({ ...reimbursement })));
+    return this.http.get<Reimbursement[]>(this.apiUrl);
   }
 
-  getReimbursementById(id: string): Observable<ReimbursementDetail | undefined> {
-    const detail = this.mockReimbursementDetails[id];
-    if (!detail) {
-      return of(undefined);
+  // Cambiamos el ID a number para que coincida con el backend
+  getReimbursementById(id: number): Observable<Reimbursement> {
+    return this.http.get<Reimbursement>(`${this.apiUrl}/${id}`);
+  }
+
+  iniciarRevision(id: number): Observable<Reimbursement> {
+    return this.http.patch<Reimbursement>(`${this.apiUrl}/${id}/iniciar-revision`, {});
+  }
+
+  updateReimbursementStatus(id: number, status: ReimbursementStatus, comentarios?: string): Observable<Reimbursement> {
+    // Usamos HttpParams para asegurar que los parámetros se envíen correctamente en la URL
+    let params = new HttpParams().set('nuevo_estatus', status);
+
+    if (comentarios) {
+      params = params.set('comentarios_rh', comentarios);
     }
 
-    return of({
-      ...detail,
-      conceptos: detail.conceptos.map(concept => ({ ...concept }))
+    // Enviamos null como cuerpo porque los datos van por parámetros de URL en el backend
+    return this.http.put<Reimbursement>(`${this.apiUrl}/${id}/estatus`, null, { params });
+  }
+
+  // Descarga el documento como Blob para poder autenticar la petición
+  getDocumentBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/archivo`, {
+      responseType: 'blob'
     });
   }
 
-  updateReimbursementStatus(id: string, status: ReimbursementStatus): Observable<boolean> {
-    const detail = this.mockReimbursementDetails[id];
-    if (detail) {
-      detail.estado = status;
-      const reimbursement = this.mockReimbursements.find(r => r.id === id);
-      if (reimbursement) {
-        reimbursement.estado = status;
-      }
-      return of(true);
-    }
-    return of(false);
-  }
-
-  getTotalSolicitudesHoy(): number {
-    return this.mockReimbursements.length;
-  }
-
-  getSolicitudesPendientes(): number {
-    return this.mockReimbursements.filter(r => r.estado === 'Pendiente' || r.estado === 'En revisión').length;
-  }
-
-  getSolicitudesRechazadas(): number {
-    return this.mockReimbursements.filter(r => r.estado === 'Rechazado').length;
-  }
-
-  getTotalAcumulado(): number {
-    return this.mockReimbursements.reduce((sum, r) => sum + r.monto, 0);
+  getStats(reimbursements: Reimbursement[]) {
+    return {
+      total: reimbursements.length,
+      pendientes: reimbursements.filter(r => r.estatus === 'PENDIENTE' || r.estatus === 'EN REVISIÓN').length,
+      rechazados: reimbursements.filter(r => r.estatus === 'RECHAZADO').length,
+      acumulado: reimbursements.reduce((sum, r) => sum + Number(r.monto), 0)
+    };
   }
 }

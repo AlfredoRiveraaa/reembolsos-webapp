@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
-import { Reimbursement } from '../../../core/models/reimbursement.model';
+import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
 
 @Component({
   selector: 'app-historial',
@@ -13,6 +13,9 @@ import { Reimbursement } from '../../../core/models/reimbursement.model';
   styleUrl: './historial.component.scss'
 })
 export class HistorialComponent implements OnInit {
+  private reimbursementService = inject(ReimbursementService);
+  private router = inject(Router);
+
   reimbursements: Reimbursement[] = [];
   filteredReimbursements: Reimbursement[] = [];
 
@@ -33,12 +36,7 @@ export class HistorialComponent implements OnInit {
   totalPendientes = 0;
   montoTotalAprobado = 0;
 
-  estados = ['Aprobado', 'Pendiente', 'En revisión', 'Rechazado'];
-
-  constructor(
-    private reimbursementService: ReimbursementService,
-    private router: Router
-  ) {}
+  estados: ReimbursementStatus[] = ['APROBADO', 'PENDIENTE', 'EN REVISIÓN', 'RECHAZADO'];
 
   ngOnInit(): void {
     this.loadHistorial();
@@ -53,12 +51,13 @@ export class HistorialComponent implements OnInit {
   }
 
   private calculateStats(): void {
-    this.totalAprobados = this.reimbursements.filter(r => r.estado === 'Aprobado').length;
-    this.totalRechazados = this.reimbursements.filter(r => r.estado === 'Rechazado').length;
-    this.totalPendientes = this.reimbursements.filter(r => r.estado === 'Pendiente' || r.estado === 'En revisión').length;
+    // Sincronización con las propiedades del modelo Reimbursement[cite: 9]
+    this.totalAprobados = this.reimbursements.filter(r => r.estatus === 'APROBADO').length;
+    this.totalRechazados = this.reimbursements.filter(r => r.estatus === 'RECHAZADO').length;
+    this.totalPendientes = this.reimbursements.filter(r => r.estatus === 'PENDIENTE' || r.estatus === 'EN REVISIÓN').length;
     this.montoTotalAprobado = this.reimbursements
-      .filter(r => r.estado === 'Aprobado')
-      .reduce((sum, r) => sum + r.monto, 0);
+      .filter(r => r.estatus === 'APROBADO')
+      .reduce((sum, r) => sum + Number(r.monto), 0);
   }
 
   applyFilters(): void {
@@ -66,29 +65,28 @@ export class HistorialComponent implements OnInit {
 
     // Filtro por rango de fechas
     if (this.fechaInicio) {
-      filtered = filtered.filter(r => r.fechaRecepcion >= this.fechaInicio);
+      filtered = filtered.filter(r => r.fecha_recepcion >= this.fechaInicio);
     }
     if (this.fechaFin) {
-      filtered = filtered.filter(r => r.fechaRecepcion <= this.fechaFin);
+      filtered = filtered.filter(r => r.fecha_recepcion <= this.fechaFin);
     }
 
     // Filtro por término de búsqueda
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
-        r.folioDRH.toLowerCase().includes(term) ||
-        r.nombreTrabajador.toLowerCase().includes(term) ||
-        r.idTrabajador.toLowerCase().includes(term)
+        r.uuid.toLowerCase().includes(term) ||
+        r.nombre_solicitante.toLowerCase().includes(term) ||
+        r.correo_solicitante.toLowerCase().includes(term)
       );
     }
 
     // Filtro por estado
     if (this.estadoFilter) {
-      filtered = filtered.filter(r => r.estado === this.estadoFilter);
+      filtered = filtered.filter(r => r.estatus === this.estadoFilter);
     }
 
-    // Ordenar por fecha descendente (más reciente primero)
-    filtered.sort((a, b) => new Date(b.fechaRecepcion).getTime() - new Date(a.fechaRecepcion).getTime());
+    filtered.sort((a, b) => new Date(b.fecha_recepcion).getTime() - new Date(a.fecha_recepcion).getTime());
 
     this.filteredReimbursements = filtered;
     this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
@@ -117,13 +115,13 @@ export class HistorialComponent implements OnInit {
 
   getEstadoClass(estado: string): string {
     switch (estado) {
-      case 'Aprobado':
+      case 'APROBADO':
         return 'estado-aprobado';
-      case 'Pendiente':
+      case 'PENDIENTE':
         return 'estado-pendiente';
-      case 'En revisión':
+      case 'EN REVISIÓN':
         return 'estado-revision';
-      case 'Rechazado':
+      case 'RECHAZADO':
         return 'estado-rechazado';
       default:
         return 'estado-default';
@@ -135,6 +133,7 @@ export class HistorialComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
+    if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'short',
@@ -146,7 +145,7 @@ export class HistorialComponent implements OnInit {
     console.log('Exportando historial...');
   }
 
-  navigateToDetail(id: string): void {
+  navigateToDetail(id: number): void {
     this.router.navigate(['/reembolso', id]);
   }
 }

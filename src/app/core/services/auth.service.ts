@@ -1,43 +1,71 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { AuthUser, LoginCredentials } from '../models/auth.model';
-import { UserManagementService } from './user-management.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private static readonly STORAGE_KEY = 'reembolsos.auth.user';
+  private readonly apiUrl = 'http://localhost:8000/api';
+
+  private http = inject(HttpClient);
 
   private readonly currentUserSubject: BehaviorSubject<AuthUser | null>;
   readonly currentUser$;
 
-  constructor(private readonly userManagementService: UserManagementService) {
-    this.currentUserSubject = new BehaviorSubject<AuthUser | null>(this.restoreAndValidateSession());
+  constructor() {
+    // 1. Inicializamos en null para prevenir errores
+    this.currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
     this.currentUser$ = this.currentUserSubject.asObservable();
+
+    // 2. Restauramos después de inicializar
+    const session = this.restoreAndValidateSession();
+    if (session) {
+      this.currentUserSubject.next(session);
+    }
   }
 
   login(credentials: LoginCredentials): Observable<AuthUser> {
-    const authenticationResult = this.userManagementService.authenticate(credentials);
+    const body = new HttpParams()
+      .set('username', credentials.username)
+      .set('password', credentials.password);
 
-    if (!authenticationResult.ok || !authenticationResult.user) {
-      return throwError(() => new Error(authenticationResult.message));
-    }
+    return this.http.post<{access_token: string, token_type: string}>(
+      `${this.apiUrl}/login`,
+      body.toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    ).pipe(
+      map(response => {
+        localStorage.setItem('access_token', response.access_token);
 
-    this.persistSession(authenticationResult.user);
-    this.currentUserSubject.next(authenticationResult.user);
+        const authUser: AuthUser = {
+          username: credentials.username,
+          displayName: 'Administrador RH',
+          role: 'admin'
+        };
 
-    return of(authenticationResult.user).pipe(delay(250));
+        this.persistSession(authUser);
+        this.currentUserSubject.next(authUser);
+
+        return authUser;
+      }),
+      catchError(error => {
+        const errorMsg = error.error?.detail || 'Error al iniciar sesión';
+        return throwError(() => new Error(errorMsg));
+      })
+    );
   }
 
   logout(): void {
-    localStorage.removeItem(AuthService.STORAGE_KEY);
+    this.clearStorage();
     this.currentUserSubject.next(null);
   }
 
   isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+    return localStorage.getItem('access_token') !== null;
   }
 
   getCurrentUser(): AuthUser | null {
@@ -50,29 +78,23 @@ export class AuthService {
 
   private restoreAndValidateSession(): AuthUser | null {
     const storedUser = localStorage.getItem(AuthService.STORAGE_KEY);
-    if (!storedUser) {
+    const token = localStorage.getItem('access_token');
+
+    if (!storedUser || !token) {
+      this.clearStorage();
       return null;
     }
 
     try {
-      const parsedUser = JSON.parse(storedUser) as AuthUser;
-
-      // Validar que el usuario exista en el sistema y esté activo
-      const systemUsers = this.userManagementService.getUsersSnapshot();
-      const exists = systemUsers.some(
-        u => u.username === parsedUser.username && u.isActive
-      );
-
-      if (!exists) {
-        // Sesión inválida o usuario inactivo
-        localStorage.removeItem(AuthService.STORAGE_KEY);
-        return null;
-      }
-
-      return parsedUser;
+      return JSON.parse(storedUser) as AuthUser;
     } catch {
-      localStorage.removeItem(AuthService.STORAGE_KEY);
+      this.clearStorage();
       return null;
     }
+  }
+
+  private clearStorage(): void {
+    localStorage.removeItem(AuthService.STORAGE_KEY);
+    localStorage.removeItem('access_token');
   }
 }

@@ -17,13 +17,13 @@
       </div>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
         <label class="field-group">
-          <span>ID de trabajador o matricula</span>
-          <input type="text" formControlName="username" placeholder="TRB1001 o 202312345" autocomplete="username" />
+          <span>Correo electrónico</span>
+          <input type="email" formControlName="username" placeholder="nombre@ejemplo.com" autocomplete="email" />
           @if (hasError('username', 'required')) {
-            <small class="field-error">El usuario es obligatorio.</small>
+            <small class="field-error">El correo electrónico es obligatorio.</small>
           }
-          @if (hasError('username', 'pattern')) {
-            <small class="field-error">Solo se permiten letras, numeros y guion medio.</small>
+          @if (hasError('username', 'email')) {
+            <small class="field-error">Ingresa un correo electrónico válido.</small>
           }
         </label>
 
@@ -87,13 +87,13 @@
       </div>
       <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate>
         <label class="field-group">
-          <span>Matrícula o ID de trabajador</span>
-          <input type="text" formControlName="username" placeholder="p.ej. TRAB1001 o 202312345" autocomplete="username" />
+          <span>Correo electrónico</span>
+          <input type="email" formControlName="username" placeholder="nombre@ejemplo.com" autocomplete="email" />
           @if (hasRegisterError('username', 'required')) {
-            <small class="field-error">La matrícula o ID es obligatorio.</small>
+            <small class="field-error">El correo electrónico es obligatorio.</small>
           }
-          @if (hasRegisterError('username', 'pattern')) {
-            <small class="field-error">Solo se permiten letras, números y guion medio.</small>
+          @if (hasRegisterError('username', 'email')) {
+            <small class="field-error">Ingresa un correo electrónico válido.</small>
           }
         </label>
 

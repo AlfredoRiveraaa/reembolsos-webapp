@@ -5,6 +5,7 @@
     <div class="page-titlebar-inner">
       <div class="page-title-group">
         <div class="page-icon">
+          <!-- Corregido el icono para que sea un historial (reloj) -->
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
           </svg>
@@ -113,7 +114,7 @@
             <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" placeholder="Folio, nombre o ID trabajador..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" class="filter-input"/>
+            <input type="text" placeholder="Folio o nombre trabajador..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" class="filter-input"/>
           </div>
           <div class="filter-field">
             <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -143,11 +144,11 @@
             <tr>
               <th>Folio DRH</th>
               <th>Fecha Recepción</th>
-              <th>ID Trabajador</th>
+              <th>Correo Solicitante</th>
               <th>Nombre Trabajador</th>
-              <th>Comentario</th>
+              <th>Observaciones</th>
               <th class="col-right">Monto</th>
-              <th>Fecha Respuesta</th>
+              <th>Resolución</th>
               <th class="col-center">Estado</th>
               <th class="col-center">Acción</th>
             </tr>
@@ -162,23 +163,23 @@
                 (keydown.enter)="navigateToDetail(r.id)"
                 (keydown.space)="navigateToDetail(r.id); $event.preventDefault()"
               >
-                <td class="td-folio">{{ r.folioDRH }}</td>
-                <td class="td-date">{{ formatDate(r.fechaRecepcion) }}</td>
-                <td class="td-id">{{ r.idTrabajador }}</td>
-                <td class="td-name">{{ r.nombreTrabajador }}</td>
-                <td class="td-comment">{{ r.comentario || '—' }}</td>
+                <td class="td-folio">{{ r.uuid }}</td>
+                <td class="td-date">{{ formatDate(r.fecha_recepcion) }}</td>
+                <td class="td-id">{{ r.correo_solicitante }}</td>
+                <td class="td-name">{{ r.nombre_solicitante }}</td>
+                <td class="td-comment">{{ r.mensaje || '—' }}</td>
                 <td class="td-amount">${{ formatCurrency(r.monto) }}</td>
-                <td class="td-date">{{ r.fechaRespuesta ? formatDate(r.fechaRespuesta) : '—' }}</td>
+                <td class="td-date">{{ r.fecha_resolucion ? formatDate(r.fecha_resolucion) : '—' }}</td>
                 <td class="td-status">
-                  <span class="badge" [ngClass]="getEstadoClass(r.estado)">{{ r.estado }}</span>
+                  <span class="badge" [ngClass]="getEstadoClass(r.estatus)">{{ r.estatus }}</span>
                 </td>
                 <td class="td-action">
-                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.folioDRH">
+                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.uuid">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>
                     </svg>
-                    Revisar
+                    Ver Detalle
                   </a>
                 </td>
               </tr>

@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
-import { ReimbursementDetail, ReimbursementStatus } from '../../../core/models/reimbursement.model';
+import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
 
 type ViewerDocumentType = 'pdf' | 'txt';
 
@@ -31,9 +31,9 @@ interface ReplyTemplate {
   styleUrl: './reimbursement-detail.component.scss'
 })
 export class ReimbursementDetailComponent implements OnInit {
-  detalle: ReimbursementDetail | undefined;
-  estadoActual: ReimbursementStatus = 'Pendiente';
-  estadoOriginal: ReimbursementStatus = 'Pendiente';
+  detalle: Reimbursement | undefined;
+  estadoActual: ReimbursementStatus = 'PENDIENTE';
+  estadoOriginal: ReimbursementStatus = 'PENDIENTE';
   isLoading = true;
   notFound = false;
 
@@ -84,24 +84,24 @@ export class ReimbursementDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.initializeMockDocuments();
-
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadReimbursement(id);
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      const idNumber = Number(idParam);
+      this.loadReimbursement(idNumber);
     } else {
       this.notFound = true;
       this.isLoading = false;
     }
   }
 
-  private loadReimbursement(id: string): void {
+  private loadReimbursement(id: number): void {
     this.reimbursementService.getReimbursementById(id).subscribe(data => {
       if (data) {
         this.detalle = data;
-        this.estadoActual = data.estado;
-        this.estadoOriginal = data.estado;
+        this.estadoActual = data.estatus;
+        this.estadoOriginal = data.estatus;
         this.initReplyForm(data);
+        this.cargarDocumentoSeguro(data.id);
       } else {
         this.notFound = true;
       }
@@ -139,10 +139,10 @@ export class ReimbursementDetailComponent implements OnInit {
 
   getEstadoClass(estado: string): string {
     const map: Record<string, string> = {
-      'Aprobado':   'estado-aprobado',
-      'Pendiente':  'estado-pendiente',
-      'En revisión':'estado-revision',
-      'Rechazado':  'estado-rechazado',
+      'APROBADO':   'estado-aprobado',
+      'PENDIENTE':  'estado-pendiente',
+      'EN REVISIÓN':'estado-revision',
+      'RECHAZADO':  'estado-rechazado',
     };
     return map[estado] ?? 'estado-default';
   }
@@ -215,8 +215,8 @@ export class ReimbursementDetailComponent implements OnInit {
     this.replySent = false;
   }
 
-  private initReplyForm(data: ReimbursementDetail): void {
-    this.replyTo = `${data.nombreTrabajador} <${data.idTrabajador.toLowerCase()}@universidad.edu.mx>`;
+  private initReplyForm(data: Reimbursement): void {
+    this.replyTo = `${data.nombre_solicitante} <${data.correo_solicitante}>`;
     this.setDefaultReplySubject(data);
     this.replyBody = '';
     this.replyCC = '';
@@ -241,28 +241,28 @@ export class ReimbursementDetailComponent implements OnInit {
     }
   }
 
-  private initializeMockDocuments(): void {
-    const baseDocuments = [
-      {
-        id: 'factura-txt',
-        name: 'Factura TXT (simulación XML)',
-        subtitle: 'Comprobante fiscal de ejemplo',
-        type: 'txt' as const,
-        url: '/mocks/archivosprueba/facturaEjemplo.txt'
-      },
-      {
-        id: 'factura-pdf',
-        name: 'PDF Representación',
-        subtitle: 'Documento de ejemplo para visor',
-        type: 'pdf' as const,
-        url: '/mocks/archivosprueba/ArchivoEjemplo.pdf'
-      }
-    ];
+  private cargarDocumentoSeguro(id: number): void {
+    this.reimbursementService.getDocumentBlob(id).subscribe({
+      next: (blob) => {
+        const objectUrl = URL.createObjectURL(blob);
 
-    this.documents = baseDocuments.map(document => ({
-      ...document,
-      safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(document.url)
-    }));
+        this.documents = [
+          {
+            id: 'factura-pdf',
+            name: 'Factura PDF',
+            subtitle: 'Extraído del correo original',
+            type: 'pdf',
+            url: objectUrl,
+            safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl)
+          }
+        ];
+
+        this.activeDocumentId = 'factura-pdf';
+      },
+      error: (err) => {
+        console.error('No se pudo cargar el PDF o no existe', err);
+      }
+    });
   }
 
   private getFileNameFromUrl(url: string): string {
@@ -271,13 +271,13 @@ export class ReimbursementDetailComponent implements OnInit {
     return segments[segments.length - 1] || 'archivo';
   }
 
-  private setDefaultReplySubject(data: ReimbursementDetail): void {
-    this.replySubject = `Re: Solicitud de reembolso ${data.folioDRH} — ${data.nombreTrabajador}`;
+  private setDefaultReplySubject(data: Reimbursement): void {
+    this.replySubject = `Re: Solicitud de reembolso ${data.uuid} — ${data.nombre_solicitante}`;
   }
 
-  private getTemplateContent(templateId: string, data: ReimbursementDetail): { subject: string; body: string } {
-    const nombre = data.nombreTrabajador;
-    const folio = data.folioDRH;
+  private getTemplateContent(templateId: string, data: Reimbursement): { subject: string; body: string } {
+    const nombre = data.nombre_solicitante;
+    const folio = data.uuid;
 
     const map: Record<string, { subject: string; body: string }> = {
       'acuse-recibido': {
