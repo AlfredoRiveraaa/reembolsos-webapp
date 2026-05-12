@@ -35,11 +35,15 @@ export class ReimbursementService {
     return this.http.put<Reimbursement>(`${this.apiUrl}/${id}/estatus`, null, { params });
   }
 
-  // Descarga el documento como Blob para poder autenticar la petición
-  getDocumentBlob(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${id}/archivo`, {
-      responseType: 'blob'
-    });
+  // Obtiene el array de strings con los nombres de los archivos
+  listarArchivos(id: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/${id}/archivos`);
+  }
+
+  // Descarga el archivo binario (Blob) de un archivo específico
+  getDocumentBlob(id: number, nombreArchivo: string): Observable<Blob> {
+    const urlSegura = `${this.apiUrl}/${id}/archivo/${encodeURIComponent(nombreArchivo)}`;
+    return this.http.get(urlSegura, { responseType: 'blob' });
   }
 
   getStats(reimbursements: Reimbursement[]) {

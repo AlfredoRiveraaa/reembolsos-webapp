@@ -184,12 +184,19 @@
             </div>
           } @else {
             <div class="file-viewer-wrapper">
-              <div class="file-viewer-meta">{{ activeDocument.url }}</div>
-              <iframe
-                class="file-viewer-frame"
-                [title]="activeDocument.name"
-                [src]="activeDocument.safeUrl"
-              ></iframe>
+              <div class="file-viewer-meta">{{ activeDocument.name }}</div>
+
+              @if (activeDocument.type === 'pdf') {
+                <iframe
+                  class="file-viewer-frame"
+                  [title]="activeDocument.name"
+                  [src]="activeDocument.safeUrl"
+                ></iframe>
+              } @else {
+                <div class="xml-viewer-container" style="padding: 20px; overflow: auto; height: 100%; background: #1e1e1e; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+                  <pre style="white-space: pre-wrap; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; color: #d4d4d4; line-height: 1.5;"><code>{{ activeDocument.xmlContent || 'Cargando contenido...' }}</code></pre>
+                </div>
+              }
             </div>
           }
         </div>

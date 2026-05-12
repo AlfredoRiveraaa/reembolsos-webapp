@@ -15,6 +15,7 @@ interface ViewerDocument {
   type: ViewerDocumentType;
   url: string;
   safeUrl: SafeResourceUrl;
+  xmlContent?: string;
 }
 
 interface ReplyTemplate {
@@ -101,7 +102,7 @@ export class ReimbursementDetailComponent implements OnInit {
         this.estadoActual = data.estatus;
         this.estadoOriginal = data.estatus;
         this.initReplyForm(data);
-        this.cargarDocumentoSeguro(data.id);
+        this.cargarArchivosExpediente(data.id);
       } else {
         this.notFound = true;
       }
@@ -111,6 +112,31 @@ export class ReimbursementDetailComponent implements OnInit {
 
   toggleDocument(documentId: string): void {
     this.activeDocumentId = this.activeDocumentId === documentId ? null : documentId;
+
+    if (this.activeDocumentId && this.detalle) {
+      const activeDoc = this.documents.find(d => d.id === documentId);
+
+      if (activeDoc && !activeDoc.url && !activeDoc.xmlContent) {
+        this.reimbursementService.getDocumentBlob(this.detalle.id, documentId).subscribe({
+          next: (blob) => {
+            if (activeDoc.type === 'pdf') {
+              const objectUrl = URL.createObjectURL(blob);
+              activeDoc.url = objectUrl;
+              activeDoc.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl);
+            } else {
+              const reader = new FileReader();
+              reader.onload = () => {
+                activeDoc.xmlContent = reader.result as string;
+              };
+              reader.readAsText(blob);
+            }
+          },
+          error: (err) => {
+            console.error(`Error cargando archivo ${documentId}`, err);
+          }
+        });
+      }
+    }
   }
 
   get activeDocument(): ViewerDocument | undefined {
@@ -167,25 +193,25 @@ export class ReimbursementDetailComponent implements OnInit {
   }
 
   descargarDocumento(viewerDocument: ViewerDocument): void {
-    fetch(viewerDocument.url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`No se pudo descargar el archivo: ${response.status}`);
-        }
-        return response.blob();
-      })
-      .then(blob => {
+    const reimbursementId = this.detalle?.id;
+    if (!reimbursementId) {
+      return;
+    }
+
+    this.reimbursementService.getDocumentBlob(reimbursementId, viewerDocument.id).subscribe({
+      next: (blob) => {
         const objectUrl = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = objectUrl;
-        anchor.download = this.getFileNameFromUrl(viewerDocument.url);
+        anchor.download = viewerDocument.id;
         anchor.click();
         URL.revokeObjectURL(objectUrl);
-      })
-      .catch(() => {
-        // Fallback: if the browser blocks fetch/download, open the file URL.
+      },
+      error: () => {
+        // Fallback: if the request fails, open the file URL.
         window.open(viewerDocument.url, '_blank', 'noopener');
-      });
+      }
+    });
   }
 
   descargarDocumentoActivo(): void {
@@ -241,34 +267,27 @@ export class ReimbursementDetailComponent implements OnInit {
     }
   }
 
-  private cargarDocumentoSeguro(id: number): void {
-    this.reimbursementService.getDocumentBlob(id).subscribe({
-      next: (blob) => {
-        const objectUrl = URL.createObjectURL(blob);
+  private cargarArchivosExpediente(id: number): void {
+    this.reimbursementService.listarArchivos(id).subscribe({
+      next: (archivos: string[]) => {
+        this.documents = archivos.map(archivo => {
+          const isPdf = archivo.toLowerCase().endsWith('.pdf');
+          return {
+            id: archivo,
+            name: archivo,
+            subtitle: isPdf ? 'Documento PDF' : 'Documento XML / Anexo',
+            type: isPdf ? 'pdf' : 'txt',
+            url: '',
+            safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(''),
+            xmlContent: ''
+          };
+        });
 
-        this.documents = [
-          {
-            id: 'factura-pdf',
-            name: 'Factura PDF',
-            subtitle: 'Extraído del correo original',
-            type: 'pdf',
-            url: objectUrl,
-            safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl)
-          }
-        ];
-
-        this.activeDocumentId = 'factura-pdf';
-      },
-      error: (err) => {
-        console.error('No se pudo cargar el PDF o no existe', err);
+        if (this.documents.length > 0) {
+          this.toggleDocument(this.documents[0].id);
+        }
       }
     });
-  }
-
-  private getFileNameFromUrl(url: string): string {
-    const urlWithoutQuery = url.split('?')[0] ?? url;
-    const segments = urlWithoutQuery.split('/');
-    return segments[segments.length - 1] || 'archivo';
   }
 
   private setDefaultReplySubject(data: Reimbursement): void {
