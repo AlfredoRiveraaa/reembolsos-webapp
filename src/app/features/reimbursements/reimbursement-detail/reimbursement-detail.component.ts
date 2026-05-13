@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -18,12 +18,6 @@ interface ViewerDocument {
   xmlContent?: string;
 }
 
-interface ReplyTemplate {
-  id: string;
-  label: string;
-  description: string;
-}
-
 @Component({
   selector: 'app-reimbursement-detail',
   standalone: true,
@@ -41,42 +35,10 @@ export class ReimbursementDetailComponent implements OnInit {
   documents: ViewerDocument[] = [];
   activeDocumentId: string | null = null;
 
-  // Reply form
-  replyOpen = false;
-  replyTo = '';
-  replyCC = '';
-  replySubject = '';
-  replyBody = '';
-  replySent = false;
-  selectedTemplateId = '';
-
-  readonly replyTemplates: ReplyTemplate[] = [
-    {
-      id: 'acuse-recibido',
-      label: 'Acuse de recibido',
-      description: 'Confirma recepción y tiempo estimado de revisión.'
-    },
-    {
-      id: 'solicitud-informacion',
-      label: 'Solicitud de información adicional',
-      description: 'Pide documentos o datos faltantes para continuar.'
-    },
-    {
-      id: 'en-revision',
-      label: 'Actualización: en revisión',
-      description: 'Notifica que la solicitud sigue en validación.'
-    },
-    {
-      id: 'aprobada',
-      label: 'Solicitud aprobada',
-      description: 'Confirma aprobación y próximos pasos.'
-    },
-    {
-      id: 'rechazada',
-      label: 'Solicitud rechazada',
-      description: 'Informa rechazo y motivo general.'
-    }
-  ];
+  // --- VARIABLES PARA EL FLUJO DE DECISION ---
+  pendingAction: ReimbursementStatus | null = null;
+  actionComment: string = '';
+  isSubmittingStatus: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -99,9 +61,22 @@ export class ReimbursementDetailComponent implements OnInit {
     this.reimbursementService.getReimbursementById(id).subscribe(data => {
       if (data) {
         this.detalle = data;
-        this.estadoActual = data.estatus;
         this.estadoOriginal = data.estatus;
-        this.initReplyForm(data);
+
+        // --- TRANSICIÓN AUTOMÁTICA ---
+        if (data.estatus === 'PENDIENTE') {
+          // 1. Lo cambiamos visualmente de inmediato
+          this.estadoActual = 'EN REVISIÓN';
+
+          // 2. Le avisamos al backend de forma silenciosa (sin comentarios extra)
+          this.reimbursementService.updateReimbursementStatus(id, 'EN REVISIÓN').subscribe({
+            error: (err) => console.error('Error al actualizar a En Revisión automáticamente', err)
+          });
+        } else {
+          // Si ya estaba en revisión, aprobado o rechazado, lo dejamos como está
+          this.estadoActual = data.estatus;
+        }
+
         this.cargarArchivosExpediente(data.id);
       } else {
         this.notFound = true;
@@ -110,12 +85,60 @@ export class ReimbursementDetailComponent implements OnInit {
     });
   }
 
+  // --- LOGICA DE INTERACCION ---
+  iniciarCambioEstado(nuevoEstado: ReimbursementStatus): void {
+    // Si ya esta en ese estado, no hacemos nada
+    if (this.estadoActual === nuevoEstado) return;
+
+    // Abrimos la caja de confirmacion
+    this.pendingAction = nuevoEstado;
+    this.actionComment = '';
+  }
+
+  cancelarAccion(): void {
+    this.pendingAction = null;
+    this.actionComment = '';
+  }
+
+  confirmarCambioEstado(): void {
+    if (!this.detalle || !this.pendingAction) return;
+
+    // Validacion: El rechazo obliga a escribir un motivo
+    if (this.pendingAction === 'RECHAZADO' && !this.actionComment.trim()) {
+      alert('Por favor, especifique un motivo para el rechazo.');
+      return;
+    }
+
+    this.isSubmittingStatus = true;
+
+    this.reimbursementService
+      .updateReimbursementStatus(this.detalle.id, this.pendingAction, this.actionComment.trim())
+      .subscribe({
+        next: (updated) => {
+          if (updated) {
+            // Actualizamos la UI
+            this.estadoActual = this.pendingAction!;
+            this.detalle!.mensaje = this.actionComment.trim();
+
+            // Cerramos la caja
+            this.cancelarAccion();
+          }
+          this.isSubmittingStatus = false;
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Hubo un error al actualizar el estado y enviar el correo.');
+          this.isSubmittingStatus = false;
+        }
+      });
+  }
+
+  // --- LOGICA DE DOCUMENTOS
   toggleDocument(documentId: string): void {
     this.activeDocumentId = this.activeDocumentId === documentId ? null : documentId;
 
     if (this.activeDocumentId && this.detalle) {
       const activeDoc = this.documents.find(d => d.id === documentId);
-
       if (activeDoc && !activeDoc.url && !activeDoc.xmlContent) {
         this.reimbursementService.getDocumentBlob(this.detalle.id, documentId).subscribe({
           next: (blob) => {
@@ -131,35 +154,9 @@ export class ReimbursementDetailComponent implements OnInit {
               reader.readAsText(blob);
             }
           },
-          error: (err) => {
-            console.error(`Error cargando archivo ${documentId}`, err);
-          }
+          error: (err) => console.error(`Error cargando archivo ${documentId}`, err)
         });
       }
-    }
-  }
-
-  get activeDocument(): ViewerDocument | undefined {
-    if (!this.activeDocumentId) {
-      return undefined;
-    }
-    return this.documents.find(document => document.id === this.activeDocumentId);
-  }
-
-  get selectedTemplateDescription(): string {
-    if (!this.selectedTemplateId) {
-      return '';
-    }
-
-    return this.replyTemplates.find(template => template.id === this.selectedTemplateId)?.description ?? '';
-  }
-
-  cambiarEstado(nuevoEstado: ReimbursementStatus): void {
-    if (this.detalle && this.estadoActual !== nuevoEstado) {
-      this.reimbursementService.updateReimbursementStatus(this.detalle.id, nuevoEstado)
-        .subscribe(success => {
-          if (success) this.estadoActual = nuevoEstado;
-        });
     }
   }
 
@@ -181,24 +178,17 @@ export class ReimbursementDetailComponent implements OnInit {
     return new Date(dateString).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  formatDateTime(dateString: string): string {
-    return new Date(dateString).toLocaleString('es-MX', {
-      year: 'numeric', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
+  get activeDocument(): ViewerDocument | undefined {
+    return this.activeDocumentId ? this.documents.find(d => d.id === this.activeDocumentId) : undefined;
   }
 
-  calcularImporte(cantidad: number, precio: number): number {
-    return cantidad * precio;
+  descargarDocumentoActivo(): void {
+    if (this.activeDocument) this.descargarDocumento(this.activeDocument);
   }
 
   descargarDocumento(viewerDocument: ViewerDocument): void {
-    const reimbursementId = this.detalle?.id;
-    if (!reimbursementId) {
-      return;
-    }
-
-    this.reimbursementService.getDocumentBlob(reimbursementId, viewerDocument.id).subscribe({
+    if (!this.detalle) return;
+    this.reimbursementService.getDocumentBlob(this.detalle.id, viewerDocument.id).subscribe({
       next: (blob) => {
         const objectUrl = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
@@ -207,64 +197,8 @@ export class ReimbursementDetailComponent implements OnInit {
         anchor.click();
         URL.revokeObjectURL(objectUrl);
       },
-      error: () => {
-        // Fallback: if the request fails, open the file URL.
-        window.open(viewerDocument.url, '_blank', 'noopener');
-      }
+      error: () => window.open(viewerDocument.url, '_blank', 'noopener')
     });
-  }
-
-  descargarDocumentoActivo(): void {
-    const document = this.activeDocument;
-    if (!document) {
-      return;
-    }
-
-    this.descargarDocumento(document);
-  }
-
-  applyReplyTemplate(templateId: string): void {
-    if (!this.detalle) {
-      return;
-    }
-
-    this.selectedTemplateId = templateId;
-    if (!templateId) {
-      this.setDefaultReplySubject(this.detalle);
-      this.replyBody = '';
-      return;
-    }
-
-    const { subject, body } = this.getTemplateContent(templateId, this.detalle);
-    this.replySubject = subject;
-    this.replyBody = body;
-    this.replySent = false;
-  }
-
-  private initReplyForm(data: Reimbursement): void {
-    this.replyTo = `${data.nombre_solicitante} <${data.correo_solicitante}>`;
-    this.setDefaultReplySubject(data);
-    this.replyBody = '';
-    this.replyCC = '';
-    this.replySent = false;
-    this.selectedTemplateId = '';
-  }
-
-  enviarRespuesta(): void {
-    if (!this.replyBody.trim()) return;
-    console.log('Enviando respuesta:', {
-      para: this.replyTo,
-      cc: this.replyCC,
-      asunto: this.replySubject,
-      cuerpo: this.replyBody,
-    });
-    this.replySent = true;
-  }
-
-  descartarRespuesta(): void {
-    if (this.detalle) {
-      this.initReplyForm(this.detalle);
-    }
   }
 
   private cargarArchivosExpediente(id: number): void {
@@ -277,79 +211,11 @@ export class ReimbursementDetailComponent implements OnInit {
             name: archivo,
             subtitle: isPdf ? 'Documento PDF' : 'Documento XML / Anexo',
             type: isPdf ? 'pdf' : 'txt',
-            url: '',
-            safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(''),
-            xmlContent: ''
+            url: '', safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(''), xmlContent: ''
           };
         });
-
-        if (this.documents.length > 0) {
-          this.toggleDocument(this.documents[0].id);
-        }
+        if (this.documents.length > 0) this.toggleDocument(this.documents[0].id);
       }
     });
-  }
-
-  private setDefaultReplySubject(data: Reimbursement): void {
-    this.replySubject = `Re: Solicitud de reembolso ${data.uuid} — ${data.nombre_solicitante}`;
-  }
-
-  private getTemplateContent(templateId: string, data: Reimbursement): { subject: string; body: string } {
-    const nombre = data.nombre_solicitante;
-    const folio = data.uuid;
-
-    const map: Record<string, { subject: string; body: string }> = {
-      'acuse-recibido': {
-        subject: `Acuse de recibido de solicitud ${folio}`,
-        body:
-          `Estimado(a) ${nombre},\n\n` +
-          `Le confirmamos la recepción de su solicitud de reembolso con folio ${folio}.\n` +
-          `Actualmente se encuentra en proceso de validación documental y fiscal.\n\n` +
-          `Tiempo estimado de respuesta: 2 a 5 días hábiles.\n\n` +
-          `Quedamos atentos a cualquier comentario.\n\n` +
-          `Atentamente,\nDirección de Recursos Humanos`
-      },
-      'solicitud-informacion': {
-        subject: `Información adicional requerida para folio ${folio}`,
-        body:
-          `Estimado(a) ${nombre},\n\n` +
-          `Durante la revisión de su solicitud con folio ${folio}, detectamos que necesitamos información adicional para continuar el trámite.\n\n` +
-          `Por favor comparta a este correo los documentos faltantes o la aclaración correspondiente en un plazo de 3 días hábiles.\n\n` +
-          `En caso de dudas, con gusto le apoyamos.\n\n` +
-          `Atentamente,\nDirección de Recursos Humanos`
-      },
-      'en-revision': {
-        subject: `Estatus en revisión de solicitud ${folio}`,
-        body:
-          `Estimado(a) ${nombre},\n\n` +
-          `Su solicitud de reembolso con folio ${folio} continúa en etapa de revisión.\n` +
-          `Le notificaremos por este medio en cuanto se emita una resolución final.\n\n` +
-          `Agradecemos su paciencia.\n\n` +
-          `Atentamente,\nDirección de Recursos Humanos`
-      },
-      aprobada: {
-        subject: `Solicitud aprobada: folio ${folio}`,
-        body:
-          `Estimado(a) ${nombre},\n\n` +
-          `Le informamos que su solicitud de reembolso con folio ${folio} fue aprobada.\n` +
-          `El proceso de pago continuará conforme a los tiempos administrativos establecidos.\n\n` +
-          `Gracias por su colaboración.\n\n` +
-          `Atentamente,\nDirección de Recursos Humanos`
-      },
-      rechazada: {
-        subject: `Solicitud rechazada: folio ${folio}`,
-        body:
-          `Estimado(a) ${nombre},\n\n` +
-          `Le informamos que su solicitud de reembolso con folio ${folio} fue rechazada después de la revisión correspondiente.\n` +
-          `Si requiere una aclaración o desea iniciar una nueva solicitud, por favor responda a este correo.\n\n` +
-          `Quedamos a sus órdenes.\n\n` +
-          `Atentamente,\nDirección de Recursos Humanos`
-      }
-    };
-
-    return map[templateId] ?? {
-      subject: `Re: Solicitud de reembolso ${folio} — ${nombre}`,
-      body: ''
-    };
   }
 }

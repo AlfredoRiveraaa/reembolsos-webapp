@@ -208,27 +208,27 @@ $amber-bg: #fef9c3;
   }
 }
 
-.estado-aprobado  { 
+.estado-aprobado  {
   background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
   color: #166534;
 }
 
-.estado-pendiente { 
+.estado-pendiente {
   background: linear-gradient(135deg, #fef9c3 0%, #feee8c 100%);
   color: #853a0a;
 }
 
-.estado-revision  { 
+.estado-revision  {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   color: #1e40af;
 }
 
-.estado-rechazado { 
+.estado-rechazado {
   background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
   color: #b91c1c;
 }
 
-.estado-default   { 
+.estado-default   {
   background: $slate-200;
   color: $slate-700;
 }
@@ -866,24 +866,110 @@ $amber-bg: #fef9c3;
     height: 15px;
   }
 
-  &.act-aprobar  { 
+  &.act-aprobar  {
     background: #22c55e;
     border-color: #16a34a;
   }
-  
-  &.act-revision { 
+
+  &.act-revision {
     background: #3b82f6;
     border-color: #2563eb;
   }
-  
-  &.act-rechazar { 
+
+  &.act-rechazar {
     background: #ef4444;
     border-color: #dc2626;
   }
-  
-  &.act-pendiente{ 
+
+  &.act-pendiente{
     background: #f59e0b;
     border-color: #d97706;
+  }
+}
+
+.confirmation-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.confirmation-text {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.confirmation-required {
+  color: #e74c3c;
+}
+
+.confirmation-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+.confirmation-cancel-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.confirmation-confirm-btn {
+  padding: 8px 16px;
+  border: none;
+  background: #0d6efd;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.confirmation-spinner {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
