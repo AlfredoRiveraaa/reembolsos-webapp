@@ -123,6 +123,8 @@ export class HistorialComponent implements OnInit {
         return 'estado-revision';
       case 'RECHAZADO':
         return 'estado-rechazado';
+      case 'INFO_SOLICITADA':
+        return 'estado-info';
       default:
         return 'estado-default';
     }

@@ -214,8 +214,8 @@ $amber-bg: #fef9c3;
 }
 
 .estado-pendiente {
-  background: linear-gradient(135deg, #fef9c3 0%, #feee8c 100%);
-  color: #853a0a;
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  color: #b45309;
 }
 
 .estado-revision  {
@@ -226,6 +226,11 @@ $amber-bg: #fef9c3;
 .estado-rechazado {
   background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
   color: #b91c1c;
+}
+
+.estado-info {
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+  color: #854d0e;
 }
 
 .estado-default   {
@@ -518,6 +523,12 @@ $amber-bg: #fef9c3;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
+}
+
+.estado-info {
+  background-color: #fef08a; /* Amarillo clarito */
+  color: #854d0e; /* Texto amarillo oscuro/café */
+  border: 1px solid #fde047;
 }
 
 .viewer-dl-btn {
@@ -881,7 +892,7 @@ $amber-bg: #fef9c3;
     border-color: #dc2626;
   }
 
-  &.act-pendiente{
+  &.act-info{
     background: #f59e0b;
     border-color: #d97706;
   }

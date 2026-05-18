@@ -18,7 +18,7 @@ export interface Reimbursement {
   fecha_resolucion?: string;
 }
 
-export type ReimbursementStatus = 'PENDIENTE' | 'EN REVISIÓN' | 'APROBADO' | 'RECHAZADO';
+export type ReimbursementStatus = 'PENDIENTE' | 'EN REVISIÓN' | 'APROBADO' | 'RECHAZADO' | 'INFO_SOLICITADA';
 
 export interface ReimbursementFilters {
   uuid: string;

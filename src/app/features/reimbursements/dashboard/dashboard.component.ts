@@ -75,6 +75,7 @@ export class DashboardComponent implements OnInit {
       'PENDIENTE': 'estado-pendiente',
       'EN REVISIÓN': 'estado-revision',
       'RECHAZADO': 'estado-rechazado',
+      'INFO_SOLICITADA': 'estado-info'
     };
     return map[estatus] ?? 'estado-default';
   }

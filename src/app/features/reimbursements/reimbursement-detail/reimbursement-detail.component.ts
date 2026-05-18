@@ -29,6 +29,7 @@ export class ReimbursementDetailComponent implements OnInit {
   detalle: Reimbursement | undefined;
   estadoActual: ReimbursementStatus = 'PENDIENTE';
   estadoOriginal: ReimbursementStatus = 'PENDIENTE';
+  estadoActualizadoMensaje: string | null = null;
   isLoading = true;
   notFound = false;
 
@@ -62,6 +63,7 @@ export class ReimbursementDetailComponent implements OnInit {
       if (data) {
         this.detalle = data;
         this.estadoOriginal = data.estatus;
+        this.estadoActualizadoMensaje = null;
 
         // --- TRANSICIÓN AUTOMÁTICA ---
         if (data.estatus === 'PENDIENTE') {
@@ -91,6 +93,7 @@ export class ReimbursementDetailComponent implements OnInit {
     if (this.estadoActual === nuevoEstado) return;
 
     // Abrimos la caja de confirmacion
+    this.estadoActualizadoMensaje = null;
     this.pendingAction = nuevoEstado;
     this.actionComment = '';
   }
@@ -103,9 +106,14 @@ export class ReimbursementDetailComponent implements OnInit {
   confirmarCambioEstado(): void {
     if (!this.detalle || !this.pendingAction) return;
 
-    // Validacion: El rechazo obliga a escribir un motivo
+    // Validaciones: El rechazo y las solicitudes de información requieren un comentario
     if (this.pendingAction === 'RECHAZADO' && !this.actionComment.trim()) {
       alert('Por favor, especifique un motivo para el rechazo.');
+      return;
+    }
+
+    if (this.pendingAction === 'INFO_SOLICITADA' && !this.actionComment.trim()) {
+      alert('Debe especificar qué información está solicitando.');
       return;
     }
 
@@ -119,6 +127,7 @@ export class ReimbursementDetailComponent implements OnInit {
             // Actualizamos la UI
             this.estadoActual = this.pendingAction!;
             this.detalle!.mensaje = this.actionComment.trim();
+            this.estadoActualizadoMensaje = `Estado actualizado a "${this.estadoActual}"`;
 
             // Cerramos la caja
             this.cancelarAccion();
@@ -166,6 +175,7 @@ export class ReimbursementDetailComponent implements OnInit {
       'PENDIENTE':  'estado-pendiente',
       'EN REVISIÓN':'estado-revision',
       'RECHAZADO':  'estado-rechazado',
+      'INFO_SOLICITADA': 'estado-info'
     };
     return map[estado] ?? 'estado-default';
   }

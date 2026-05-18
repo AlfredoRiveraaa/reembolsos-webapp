@@ -436,9 +436,10 @@ $green-kpi: #10b981;
 }
 
 .estado-aprobado  { background: #dcfce7; color: #15803d; }
-.estado-pendiente { background: #fef9c3; color: #a16207; }
+.estado-pendiente { background: #fed7aa; color: #b45309; }
 .estado-revision  { background: #dbeafe; color: #1d4ed8; }
 .estado-rechazado { background: #fee2e2; color: #b91c1c; }
+.estado-info      { background: #fef08a; color: #854d0e; }
 .estado-default   { background: $slate-100; color: $slate-600; }
 
 // ── Action Button ──────────────────────────────────────────────────
