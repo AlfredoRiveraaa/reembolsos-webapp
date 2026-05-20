@@ -156,7 +156,7 @@
                   }
                 </td>
                 <td class="td-role">
-                  <span class="role-badge" [ngClass]="user.role === 'admin' ? 'role-admin' : 'role-trabajador'">
+                  <span class="role-badge" [ngClass]="user.role === 'admin' || user.role === 'admin_rh' ? 'role-admin' : 'role-trabajador'">
                     {{ getRoleLabel(user.role) }}
                   </span>
                 </td>
@@ -291,9 +291,6 @@
                 </div>
                 @if (hasError('username', 'required')) {
                   <span class="form-error">La matrícula o ID es requerido.</span>
-                }
-                @if (hasError('username', 'pattern')) {
-                  <span class="form-error">Solo letras, números y guiones permitidos.</span>
                 }
               </div>
 
@@ -446,6 +443,37 @@
               </div>
             </div>
           </div>
+
+          @if (userForm.get('role')?.value === 'trabajador') {
+            <div class="form-section">
+              <h3 class="section-title">Días de Revisión Asignados</h3>
+              <p class="field-hint" style="margin-bottom: 10px;">Selecciona los días en que este trabajador verá las solicitudes que ingresen.</p>
+
+              <div formGroupName="dias" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="1"> <span class="chip-label">Lunes</span>
+                </label>
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="2"> <span class="chip-label">Martes</span>
+                </label>
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="3"> <span class="chip-label">Miércoles</span>
+                </label>
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="4"> <span class="chip-label">Jueves</span>
+                </label>
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="5"> <span class="chip-label">Viernes</span>
+                </label>
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="6"> <span class="chip-label">Sábado</span>
+                </label>
+                <label class="day-chip">
+                  <input type="checkbox" formControlName="7"> <span class="chip-label">Domingo</span>
+                </label>
+              </div>
+            </div>
+          }
 
           <!-- Form Footer -->
           <div class="modal-footer">

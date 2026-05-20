@@ -4,6 +4,24 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { AuthUser, LoginCredentials } from '../models/auth.model';
 
+interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  username?: string;
+  displayName?: string;
+  role?: AuthUser['role'];
+}
+
+// 1. Agregamos esta interfaz para que TypeScript conozca qué trae el token
+interface JwtPayload {
+  sub?: string;
+  rol?: string;
+  role?: string;
+  displayName?: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -33,7 +51,7 @@ export class AuthService {
       .set('username', credentials.username)
       .set('password', credentials.password);
 
-    return this.http.post<{access_token: string, token_type: string}>(
+    return this.http.post<LoginResponse>(
       `${this.apiUrl}/login`,
       body.toString(),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
@@ -41,10 +59,14 @@ export class AuthService {
       map(response => {
         localStorage.setItem('access_token', response.access_token);
 
+        const tokenPayload = this.decodeJwtPayload(response.access_token);
+
+        const role = (tokenPayload.role ?? tokenPayload.rol ?? response.role ?? 'trabajador') as AuthUser['role'];
+
         const authUser: AuthUser = {
-          username: credentials.username,
-          displayName: 'Administrador RH',
-          role: 'admin'
+          username: response.username ?? tokenPayload.sub ?? credentials.username,
+          displayName: response.displayName ?? tokenPayload.displayName ?? tokenPayload.name ?? 'Usuario',
+          role: role
         };
 
         this.persistSession(authUser);
@@ -86,7 +108,20 @@ export class AuthService {
     }
 
     try {
-      return JSON.parse(storedUser) as AuthUser;
+      const user = JSON.parse(storedUser) as AuthUser;
+
+      // --- NUEVA VALIDACIÓN ROBUSTA ---
+      // Nunca confiamos en el texto viejo, extraemos la verdad absoluta del token actual
+      const tokenPayload = this.decodeJwtPayload(token);
+      const realRole = (tokenPayload.role ?? tokenPayload.rol ?? 'trabajador') as AuthUser['role'];
+
+      // Si el rol viejo guardado en memoria es diferente al real del token, lo corregimos
+      if (user.role !== realRole) {
+        user.role = realRole;
+        this.persistSession(user); // Guardamos la corrección
+      }
+
+      return user;
     } catch {
       this.clearStorage();
       return null;
@@ -96,5 +131,28 @@ export class AuthService {
   private clearStorage(): void {
     localStorage.removeItem(AuthService.STORAGE_KEY);
     localStorage.removeItem('access_token');
+  }
+
+  // 2. Cambiamos el tipo de retorno para que TypeScript sepa qué esperar
+  private decodeJwtPayload(token: string): JwtPayload {
+    const payloadPart = token.split('.')[1];
+
+    if (!payloadPart) {
+      return {};
+    }
+
+    const base64Url = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = decodeURIComponent(
+      atob(base64Url)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+
+    try {
+      return JSON.parse(base64) as JwtPayload;
+    } catch {
+      return {};
+    }
   }
 }

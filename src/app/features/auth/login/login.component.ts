@@ -160,56 +160,56 @@ export class LoginComponent {
     this.registerSubmitting = true;
 
     // Crear el usuario
-    const createResult = this.userManagementService.createUser({
+    this.userManagementService.createUser({
       username: payload.username,
       displayName: payload.fullName,
       password: payload.password,
       role: payload.role,
       isActive: true
+    }).subscribe(createResult => {
+      if (!createResult.ok) {
+        this.adminPasswordError = createResult.message || 'Error al crear el usuario.';
+        this.registerSubmitting = false;
+        return;
+      }
+
+      // Mostrar estado de éxito en el modal
+      this.isAdminPasswordSuccess = true;
+      this.registerMessage = `¡Registro exitoso! Bienvenido ${payload.fullName}. Iniciando sesión...`;
+
+      // Auto-login y navegación
+      window.setTimeout(() => {
+        this.authService.login({
+          username: payload.username,
+          password: payload.password
+        }).subscribe({
+          next: () => {
+            this.showAdminPasswordModal = false;
+            this.isAdminPasswordSuccess = false;
+            this.adminPasswordInput = '';
+            this.adminPasswordError = '';
+            this.registerSubmitting = false;
+            this.registerMessage = '';
+            this.registerForm.reset({
+              username: '',
+              fullName: '',
+              role: 'trabajador',
+              password: '',
+              passwordConfirm: ''
+            });
+            this.pendingRegisterData = null;
+            // Navegar al dashboard
+            void this.router.navigateByUrl('/');
+          },
+          error: () => {
+            this.adminPasswordError = 'Error al iniciar sesión. Por favor intenta nuevamente.';
+            this.isAdminPasswordSuccess = false;
+            this.registerSubmitting = false;
+            this.showAdminPasswordModal = true;
+          }
+        });
+      }, 1500);
     });
-
-    if (!createResult.ok) {
-      this.adminPasswordError = createResult.message || 'Error al crear el usuario.';
-      this.registerSubmitting = false;
-      return;
-    }
-
-    // Mostrar estado de éxito en el modal
-    this.isAdminPasswordSuccess = true;
-    this.registerMessage = `¡Registro exitoso! Bienvenido ${payload.fullName}. Iniciando sesión...`;
-
-    // Auto-login y navegación
-    window.setTimeout(() => {
-      this.authService.login({
-        username: payload.username,
-        password: payload.password
-      }).subscribe({
-        next: () => {
-          this.showAdminPasswordModal = false;
-          this.isAdminPasswordSuccess = false;
-          this.adminPasswordInput = '';
-          this.adminPasswordError = '';
-          this.registerSubmitting = false;
-          this.registerMessage = '';
-          this.registerForm.reset({
-            username: '',
-            fullName: '',
-            role: 'trabajador',
-            password: '',
-            passwordConfirm: ''
-          });
-          this.pendingRegisterData = null;
-          // Navegar al dashboard
-          void this.router.navigateByUrl('/');
-        },
-        error: () => {
-          this.adminPasswordError = 'Error al iniciar sesión. Por favor intenta nuevamente.';
-          this.isAdminPasswordSuccess = false;
-          this.registerSubmitting = false;
-          this.showAdminPasswordModal = true;
-        }
-      });
-    }, 1500);
   }
 
   cancelAdminPasswordModal(): void {

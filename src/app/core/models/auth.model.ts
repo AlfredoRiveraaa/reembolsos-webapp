@@ -3,7 +3,7 @@ export interface LoginCredentials {
   password: string;
 }
 
-export type UserRole = 'admin' | 'trabajador';
+export type UserRole = 'admin' | 'admin_rh' | 'trabajador';
 
 export interface RegisterUserRequest {
   username: string;

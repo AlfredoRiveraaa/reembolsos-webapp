@@ -9,7 +9,7 @@ export interface ApiLoginResponse {
   token: string;
   username: string;
   displayName: string;
-  role: 'admin' | 'trabajador';
+  role: 'admin' | 'admin_rh' | 'trabajador';
 }
 
 export interface ApiRegisterRequest extends RegisterUserRequest {

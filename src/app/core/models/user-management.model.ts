@@ -9,6 +9,7 @@ export interface SystemUser {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  dias_asignados?: string;
 }
 
 export interface CreateSystemUserRequest {
@@ -17,6 +18,7 @@ export interface CreateSystemUserRequest {
   password: string;
   role: UserRole;
   isActive: boolean;
+  dias_asignados?: string;
 }
 
 export interface UpdateSystemUserRequest {
@@ -25,6 +27,7 @@ export interface UpdateSystemUserRequest {
   role: UserRole;
   isActive: boolean;
   password?: string;
+  dias_asignados?: string;
 }
 
 export interface UserOperationResult {

@@ -13,7 +13,7 @@ export const adminGuard: CanActivateFn = (_route, state) => {
     });
   }
 
-  if (currentUser.role === 'admin') {
+  if (currentUser.role === 'admin' || currentUser.role === 'admin_rh') {
     return true;
   }
 

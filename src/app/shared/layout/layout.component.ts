@@ -50,7 +50,8 @@ export class LayoutComponent implements OnInit {
   }
 
   get isAdmin(): boolean {
-    return this.authService.getCurrentUser()?.role === 'admin';
+    const role = this.authService.getCurrentUser()?.role;
+    return role === 'admin' || role === 'admin_rh';
   }
 
   logout(): void {

@@ -57,23 +57,38 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     private readonly fb: FormBuilder
   ) {
     this.userForm = this.fb.nonNullable.group({
-      username: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9-]+$/)]],
+      username: ['', [Validators.required]],
       displayName: ['', [Validators.required, Validators.minLength(2)]],
       password: ['', [Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)]],
       passwordConfirm: [''],
       role: this.fb.nonNullable.control<UserRole>('trabajador'),
-      isActive: [true]
+      isActive: [true],
+      dias: this.fb.nonNullable.group({
+        1: [true], // Lunes
+        2: [true], // Martes
+        3: [true], // Miercoles
+        4: [true], // Jueves
+        5: [true], // Viernes
+        6: [true], // Sabado
+        7: [true] // Domingo
+      })
     });
   }
 
   ngOnInit(): void {
     this.currentUserUsername = this.authService.getCurrentUser()?.username ?? '';
-    this.loadUsers();
     this.userManagementService.users$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadUsers();
+      .subscribe(users => {
+        this.users = users;
+        this.calculateStats();
+        this.applyFilters();
       });
+
+    this.userManagementService
+      .loadUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   ngOnDestroy(): void {
@@ -81,17 +96,11 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadUsers(): void {
-    this.users = this.userManagementService.getUsersSnapshot();
-    this.calculateStats();
-    this.applyFilters();
-  }
-
   private calculateStats(): void {
     this.totalUsers = this.users.length;
     this.activeUsers = this.users.filter(u => u.isActive).length;
     this.inactiveUsers = this.users.filter(u => !u.isActive).length;
-    this.adminUsers = this.users.filter(u => u.role === 'admin' && u.isActive).length;
+    this.adminUsers = this.users.filter(u => (u.role === 'admin' || u.role === 'admin_rh') && u.isActive).length;
   }
 
   applyFilters(): void {
@@ -137,7 +146,16 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       password: '',
       passwordConfirm: '',
       role: 'trabajador',
-      isActive: true
+      isActive: true,
+      dias: {
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+        7: true
+      }
     });
     this.userForm.get('password')?.setValidators([
       Validators.required,
@@ -146,6 +164,15 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.userForm.get('password')?.updateValueAndValidity();
     this.userForm.get('passwordConfirm')?.setValidators([Validators.required]);
     this.userForm.get('passwordConfirm')?.updateValueAndValidity();
+    this.userForm.get('dias')?.setValue({
+      1: true,
+      2: true,
+      3: true,
+      4: true,
+      5: true,
+      6: true,
+      7: true
+    });
     this.showModal = true;
     this.message = '';
   }
@@ -161,7 +188,16 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       password: '',
       passwordConfirm: '',
       role: user.role,
-      isActive: user.isActive
+      isActive: user.isActive,
+      dias: {
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+        7: true
+      }
     });
     this.userForm.get('password')?.setValidators([
       Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)
@@ -169,6 +205,16 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.userForm.get('password')?.updateValueAndValidity();
     this.userForm.get('passwordConfirm')?.setValidators([]);
     this.userForm.get('passwordConfirm')?.updateValueAndValidity();
+    const assignDays = user.dias_asignados ? user.dias_asignados.split(',').map(d => d.trim()) : ['1', '2', '3', '4', '5', '6', '7'];
+    this.userForm.get('dias')?.setValue({
+      1: assignDays.includes('1'),
+      2: assignDays.includes('2'),
+      3: assignDays.includes('3'),
+      4: assignDays.includes('4'),
+      5: assignDays.includes('5'),
+      6: assignDays.includes('6'),
+      7: assignDays.includes('7')
+    });
     this.showModal = true;
     this.message = '';
   }
@@ -195,52 +241,57 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     }
 
     const formValue = this.userForm.getRawValue();
+    const diasObj = formValue.dias as Record<string, boolean>;
+    const selectedDias = Object.keys(diasObj).filter(key => diasObj[key]).join(',');
 
     if (this.isEditMode && this.selectedUserId) {
       const updatePayload: UpdateSystemUserRequest = {
         username: formValue.username,
         displayName: formValue.displayName,
         role: formValue.role,
-        isActive: formValue.isActive
+        isActive: formValue.isActive,
+        dias_asignados: selectedDias
       };
 
       if (formValue.password?.trim()) {
         updatePayload.password = formValue.password.trim();
       }
 
-      const result = this.userManagementService.updateUser(
+      this.userManagementService.updateUser(
         this.selectedUserId,
-        updatePayload,
-        this.currentUserUsername
-      );
-
-      if (result.ok) {
-        this.message = result.message;
-        this.messageType = 'success';
-        window.setTimeout(() => this.closeModal(), 1200);
-      } else {
-        this.message = result.message;
-        this.messageType = 'error';
-      }
+        updatePayload
+      ).pipe(takeUntil(this.destroy$)).subscribe(result => {
+        if (result.ok) {
+          this.message = result.message;
+          this.messageType = 'success';
+          window.setTimeout(() => this.closeModal(), 1200);
+        } else {
+          this.message = result.message;
+          this.messageType = 'error';
+        }
+      });
     } else {
       const createPayload: CreateSystemUserRequest = {
         username: formValue.username,
         displayName: formValue.displayName,
         password: formValue.password.trim(),
         role: formValue.role,
-        isActive: formValue.isActive
+        isActive: formValue.isActive,
+        dias_asignados: selectedDias
       };
 
-      const result = this.userManagementService.createUser(createPayload);
-
-      if (result.ok) {
-        this.message = result.message;
-        this.messageType = 'success';
-        window.setTimeout(() => this.closeModal(), 1200);
-      } else {
-        this.message = result.message;
-        this.messageType = 'error';
-      }
+      this.userManagementService.createUser(createPayload)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(result => {
+          if (result.ok) {
+            this.message = result.message;
+            this.messageType = 'success';
+            window.setTimeout(() => this.closeModal(), 1200);
+          } else {
+            this.message = result.message;
+            this.messageType = 'error';
+          }
+        });
     }
   }
 
@@ -249,21 +300,27 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const result = this.userManagementService.deleteUser(user.id, this.currentUserUsername);
+    this.userManagementService.deleteUser(user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.message = result.message;
+        this.messageType = result.ok ? 'success' : 'error';
 
-    this.message = result.message;
-    this.messageType = result.ok ? 'success' : 'error';
-
-    if (result.ok) {
-      window.setTimeout(() => {
-        this.message = '';
-        this.messageType = '';
-      }, 3000);
-    }
+        if (result.ok) {
+          window.setTimeout(() => {
+            this.message = '';
+            this.messageType = '';
+          }, 3000);
+        }
+      });
   }
 
   getRoleLabel(role: UserRole): string {
-    return role === 'admin' ? 'Administrador' : 'Trabajador';
+    if (role === 'admin' || role === 'admin_rh') {
+      return role === 'admin_rh' ? 'Administrador RH' : 'Administrador';
+    }
+
+    return 'Trabajador';
   }
 
   canDeleteUser(user: SystemUser): boolean {
