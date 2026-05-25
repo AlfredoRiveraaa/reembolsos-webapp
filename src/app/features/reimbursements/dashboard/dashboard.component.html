@@ -81,7 +81,7 @@
             </svg>
           </div>
         </div>
-        <p class="kpi-value kpi-currency">${{ formatCurrency(totalAcumulado) }}</p>
+        <p class="kpi-value kpi-currency">{{ formatCurrency(totalAcumulado) }}</p>
         <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
       </div>
     </div>
@@ -156,7 +156,7 @@
                 <td class="td-id">{{ r.correo_solicitante }}</td>
                 <td class="td-name">{{ r.nombre_solicitante }}</td>
                 <td class="td-comment">{{ r.mensaje || '—' }}</td>
-                <td class="td-amount">${{ formatCurrency(r.monto) }}</td>
+                <td class="td-amount">{{ formatCurrency(r.monto) }}</td>
                 <td class="td-date">{{ r.fecha_resolucion ? formatDate(r.fecha_resolucion) : '—' }}</td>
                 <td class="td-status">
                   <span class="badge" [ngClass]="getEstadoClass(r.estatus)">{{ r.estatus }}</span>
