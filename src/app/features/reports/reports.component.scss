@@ -1,0 +1,84 @@
+@use '../reimbursements/dashboard/dashboard.component' as *;
+
+.reports-wrap {
+  .dashboard-body {
+    gap: 1.25rem;
+  }
+
+  .reports-kpis {
+    margin-bottom: 0;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+  }
+
+  .chart-panel {
+    background: $white;
+    border: 1px solid $slate-200;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  }
+
+  .chart-panel-header {
+    padding: 1.125rem 1.5rem 1rem;
+    border-bottom: 1px solid $slate-100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chart-panel-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    min-height: 340px;
+  }
+
+  .chart-panel-body--centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chart-panel-body canvas {
+    display: block;
+    width: 100% !important;
+    height: 320px !important;
+  }
+
+  .chart-panel canvas {
+    max-height: 320px;
+  }
+
+  .chart-card-wide {
+    min-height: 420px;
+  }
+
+  .chart-card-wide .chart-panel-body canvas {
+    height: 360px !important;
+  }
+
+  .chart-panel-body--centered canvas {
+    max-width: 280px;
+    max-height: 280px;
+  }
+
+  .table-panel {
+    margin-top: 0;
+  }
+
+  .reports-empty {
+    padding-top: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .charts-grid { grid-template-columns: 1fr; }
+
+    .chart-panel-body {
+      min-height: 280px;
+      padding: 1rem;
+    }
+  }
+}

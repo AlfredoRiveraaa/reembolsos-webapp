@@ -12,7 +12,7 @@ export interface DashboardStats {
   providedIn: 'root'
 })
 export class StatisticsService {
-  private readonly apiUrl = 'http://localhost:8000/api/estadisticas/dashboard';
+  private readonly apiUrl = 'http://localhost:8000/api/reembolsos/estadisticas/dashboard';
   private http = inject(HttpClient);
 
   getDashboardStats(): Observable<DashboardStats> {

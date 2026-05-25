@@ -32,6 +32,12 @@ export const routes: Routes = [
         title: 'Historial - Reembolsos BUAP'
       },
       {
+        path: 'reportes',
+        loadComponent: () => import('./features/reports/reports.component').then((m) => m.ReportsComponent),
+        canActivate: [adminGuard],
+        title: 'Reportes - Reembolsos BUAP'
+      },
+      {
         path: 'reembolso/:id',
         component: ReimbursementDetailComponent,
         title: 'Detalle de Reembolso - BUAP'
