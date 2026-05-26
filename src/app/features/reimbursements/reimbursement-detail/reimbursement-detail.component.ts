@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
@@ -43,6 +43,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private reimbursementService: ReimbursementService,
     private sanitizer: DomSanitizer
   ) {}
@@ -131,6 +132,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
             // Cerramos la caja
             this.cancelarAccion();
+            this.router.navigate(['/']);
           }
           this.isSubmittingStatus = false;
         },
@@ -144,8 +146,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
   // --- LOGICA DE DOCUMENTOS
   toggleDocument(documentId: string): void {
-    this.activeDocumentId = this.activeDocumentId === documentId ? null : documentId;
-
+    this.activeDocumentId = documentId;
     if (this.activeDocumentId && this.detalle) {
       const activeDoc = this.documents.find(d => d.id === documentId);
       if (activeDoc && !activeDoc.url && !activeDoc.xmlContent) {
@@ -180,6 +181,10 @@ export class ReimbursementDetailComponent implements OnInit {
     return map[estado] ?? 'estado-default';
   }
 
+  get puedeMostrarAcciones(): boolean {
+    return this.estadoActual !== 'APROBADO' && this.estadoActual !== 'RECHAZADO';
+  }
+
   formatCurrency(value: number): string {
     return value.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -203,7 +208,7 @@ export class ReimbursementDetailComponent implements OnInit {
         const objectUrl = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = objectUrl;
-        anchor.download = viewerDocument.id;
+        anchor.download = viewerDocument.name || viewerDocument.id;
         anchor.click();
         URL.revokeObjectURL(objectUrl);
       },

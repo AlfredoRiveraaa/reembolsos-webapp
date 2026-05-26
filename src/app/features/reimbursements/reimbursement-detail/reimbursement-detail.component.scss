@@ -280,7 +280,7 @@ $amber-bg: #fef9c3;
 .card-label {
   font-size: 0.6875rem;
   font-weight: 700;
-  color: $slate-400;
+  color: $slate-800;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   margin-bottom: 0.625rem;
@@ -305,7 +305,7 @@ $amber-bg: #fef9c3;
 .meta-key {
   font-size: 0.6875rem;
   font-weight: 500;
-  color: $slate-400;
+  color: $slate-500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -475,6 +475,11 @@ $amber-bg: #fef9c3;
 .doc-action-icon {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 // ── Viewer Panel (Right) ───────────────────────────────────────────

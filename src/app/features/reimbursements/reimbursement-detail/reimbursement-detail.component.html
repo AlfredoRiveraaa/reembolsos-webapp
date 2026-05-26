@@ -31,9 +31,11 @@
 
     <div class="topbar-center">
       <div class="topbar-content">
-        <span class="topbar-id">{{ detalle.uuid }}</span>
-        <h1 class="topbar-title">{{ detalle.nombre_solicitante }}</h1>
-        <span class="topbar-worker">Correo: {{ detalle.correo_solicitante }}</span>
+        
+        <h1 class="topbar-title">
+        <span>Nombre de trabajador:</span> {{ detalle.nombre_solicitante }}
+        </h1>
+        
       </div>
     </div>
 
@@ -126,8 +128,8 @@
                 <span class="doc-name">{{ document.name }}</span>
                 <span class="doc-sub">{{ document.subtitle }}</span>
               </div>
-              <span class="doc-action-icon" aria-hidden="true">
-                <svg class="doc-dl" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <span class="doc-action-icon" title="Descargar documento" (click)="$event.stopPropagation(); descargarDocumento(document)">
+                <svg class="doc-dl" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                   <polyline points="7,10 12,15 17,10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
@@ -183,7 +185,7 @@
             </div>
           } @else {
             <div class="file-viewer-wrapper">
-              <div class="file-viewer-meta">{{ activeDocument.name }}</div>
+              
 
               @if (activeDocument.type === 'pdf') {
                 <iframe
@@ -202,6 +204,7 @@
       </div>
 
       <!-- Action Card -->
+      @if (puedeMostrarAcciones) {
       <div class="action-card">
         <div class="card-label">Decisión de Validación</div>
 
@@ -264,6 +267,7 @@
           </div>
         }
       </div>
+      }
 
     </div>
   </div>
