@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
+import * as XLSX from 'xlsx';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
 
@@ -144,7 +145,48 @@ export class HistorialComponent implements OnInit {
   }
 
   exportHistorial(): void {
-    console.log('Exportando historial...');
+    if (this.filteredReimbursements.length === 0) {
+      alert('No hay datos para exportar con los filtros actuales.');
+      return;
+    }
+
+    // Mapeamos los datos para que las columnas del Excel tengan nombres bonitos en español
+    const exportData = this.filteredReimbursements.map(r => ({
+      'Folio DRH': r.uuid,
+      'Fecha Recepción': this.formatDate(r.fecha_recepcion),
+      'Correo Solicitante': r.correo_solicitante,
+      'Nombre Trabajador': r.nombre_solicitante,
+      'Observaciones': r.mensaje || '',
+      'Proveedor / Hospital': r.nombre_proveedor,
+      'Monto ($)': Number(r.monto), // Como número para que Excel pueda sumar
+      'Fecha de Resolución': r.fecha_resolucion ? this.formatDate(r.fecha_resolucion) : '—',
+      'Estado': r.estatus
+    }));
+
+    // Creamos la hoja de cálculo
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Ajustar el ancho de las columnas
+    const columnWidths = [
+      { wch: 15 }, // Folio
+      { wch: 15 }, // Fecha Rec
+      { wch: 30 }, // Nombre
+      { wch: 30 }, // Correo
+      { wch: 35 }, // Proveedor
+      { wch: 12 }, // Monto
+      { wch: 15 }, // Estado
+      { wch: 15 }, // Fecha Res
+      { wch: 40 }, // Observaciones
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Creamos el libro (Workbook) y le añadimos la hoja
+    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Historial_Reembolsos');
+
+    // Generamos el archivo y forzamos la descarga con la fecha actual
+    const fechaArchivo = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(workbook, `Reporte_Reembolsos_${fechaArchivo}.xlsx`);
   }
 
   navigateToDetail(id: number): void {
