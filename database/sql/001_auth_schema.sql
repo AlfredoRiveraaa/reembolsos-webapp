@@ -136,5 +136,5 @@ GO
   DECLARE @admin_role_id TINYINT = (SELECT role_id FROM dbo.roles WHERE role_code = 'admin');
 
   INSERT INTO dbo.users (username, full_name, password_hash, role_id)
-  VALUES ('ADMIN001', N'Administrador Inicial', '<HASH_REAL_AQUI>', @admin_role_id);
+  VALUES ('<USUARIO_ADMIN_REAL>', N'<NOMBRE_ADMIN_REAL>', '<HASH_REAL_AQUI>', @admin_role_id);
 */
