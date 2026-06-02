@@ -128,7 +128,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Matrícula</th>
+              <th>Correo Electrónico</th>
               <th>Nombre Completo</th>
               <th class="col-center">Rol</th>
               <th class="col-center">Estado</th>
@@ -273,7 +273,7 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="username">
-                  <span class="label-text">Matrícula o ID de trabajador</span>
+                  <span class="label-text">Correo Electrónico</span>
                   <span class="label-required">*</span>
                 </label>
                 <div class="form-input-wrap">
@@ -284,13 +284,16 @@
                     id="username"
                     type="text"
                     formControlName="username"
-                    placeholder="p.ej. 202312345"
+                    placeholder="p.ej. juan.perez@universidad.edu.mx"
                     class="form-input"
                     [class.input-error]="hasError('username', 'required')"
                   />
                 </div>
                 @if (hasError('username', 'required')) {
-                  <span class="form-error">La matrícula o ID es requerido.</span>
+                  <span class="form-error">El correo electrónico es requerido.</span>
+                }
+                @if (hasError('username', 'email')) {
+                  <span class="form-error">El correo electrónico no es válido.</span>
                 }
               </div>
 
