@@ -59,9 +59,6 @@
           @if (hasError('password', 'required')) {
             <small class="field-error">La contraseña es obligatoria.</small>
           }
-          @if (hasError('password', 'pattern')) {
-            <small class="field-error">La contraseña debe tener mínimo 8 caracteres alfanuméricos.</small>
-          }
         </label>
 
         @if (authError) {

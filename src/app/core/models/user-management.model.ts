@@ -15,7 +15,7 @@ export interface SystemUser {
 export interface CreateSystemUserRequest {
   username: string;
   displayName: string;
-  password: string;
+  password?: string;
   role: UserRole;
   isActive: boolean;
   dias_asignados?: string;

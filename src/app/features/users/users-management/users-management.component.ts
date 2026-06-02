@@ -38,7 +38,6 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   isEditMode = false;
   selectedUserId: string | null = null;
   showPasswordEditing = false;
-  showPasswordConfirm = false;
 
   // Form
   userForm;
@@ -60,7 +59,6 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       username: ['', [Validators.required]],
       displayName: ['', [Validators.required, Validators.minLength(2)]],
       password: ['', [Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)]],
-      passwordConfirm: [''],
       role: this.fb.nonNullable.control<UserRole>('trabajador'),
       isActive: [true],
       dias: this.fb.nonNullable.group({
@@ -139,12 +137,10 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   openCreateModal(): void {
     this.isEditMode = false;
     this.selectedUserId = null;
-    this.showPasswordConfirm = false;
     this.userForm.reset({
       username: '',
       displayName: '',
       password: '',
-      passwordConfirm: '',
       role: 'trabajador',
       isActive: true,
       dias: {
@@ -157,13 +153,11 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
         7: true
       }
     });
+    // La contraseña ya no es requerida al crear
     this.userForm.get('password')?.setValidators([
-      Validators.required,
       Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)
     ]);
     this.userForm.get('password')?.updateValueAndValidity();
-    this.userForm.get('passwordConfirm')?.setValidators([Validators.required]);
-    this.userForm.get('passwordConfirm')?.updateValueAndValidity();
     this.userForm.get('dias')?.setValue({
       1: true,
       2: true,
@@ -181,12 +175,10 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.isEditMode = true;
     this.selectedUserId = user.id;
     this.showPasswordEditing = false;
-    this.showPasswordConfirm = false;
     this.userForm.reset({
       username: user.username,
       displayName: user.displayName,
       password: '',
-      passwordConfirm: '',
       role: user.role,
       isActive: user.isActive,
       dias: {
@@ -203,8 +195,6 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       Validators.pattern(UsersManagementComponent.ALPHANUMERIC_PASSWORD_REGEX)
     ]);
     this.userForm.get('password')?.updateValueAndValidity();
-    this.userForm.get('passwordConfirm')?.setValidators([]);
-    this.userForm.get('passwordConfirm')?.updateValueAndValidity();
     const assignDays = user.dias_asignados ? user.dias_asignados.split(',').map(d => d.trim()) : ['1', '2', '3', '4', '5', '6', '7'];
     this.userForm.get('dias')?.setValue({
       1: assignDays.includes('1'),
@@ -224,19 +214,11 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.userForm.reset();
     this.message = '';
     this.showPasswordEditing = false;
-    this.showPasswordConfirm = false;
   }
 
   saveUser(): void {
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
-      return;
-    }
-
-    if (!this.isEditMode && !this.passwordsMatch()) {
-      this.message = 'Las contraseñas no coinciden.';
-      this.messageType = 'error';
-      this.userForm.get('passwordConfirm')?.markAsTouched();
       return;
     }
 
@@ -274,11 +256,14 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       const createPayload: CreateSystemUserRequest = {
         username: formValue.username,
         displayName: formValue.displayName,
-        password: formValue.password.trim(),
         role: formValue.role,
         isActive: formValue.isActive,
         dias_asignados: selectedDias
       };
+
+      if (formValue.password?.trim()) {
+        createPayload.password = formValue.password.trim();
+      }
 
       this.userManagementService.createUser(createPayload)
         .pipe(takeUntil(this.destroy$))
@@ -338,7 +323,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     return user ? this.canDeleteUser(user) : false;
   }
 
-  hasError(fieldName: 'username' | 'displayName' | 'password' | 'passwordConfirm' | 'role' | 'isActive', error: string): boolean {
+  hasError(fieldName: 'username' | 'displayName' | 'password' | 'role' | 'isActive', error: string): boolean {
     const control = this.userForm.get(fieldName);
     return control ? control.touched && control.hasError(error) : false;
   }
@@ -359,15 +344,5 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
 
   togglePasswordVisibility(): void {
     this.showPasswordEditing = !this.showPasswordEditing;
-  }
-
-  toggleConfirmPasswordVisibility(): void {
-    this.showPasswordConfirm = !this.showPasswordConfirm;
-  }
-
-  passwordsMatch(): boolean {
-    const password = this.userForm.get('password')?.value ?? '';
-    const passwordConfirm = this.userForm.get('passwordConfirm')?.value ?? '';
-    return !!(password && passwordConfirm && password === passwordConfirm);
   }
 }

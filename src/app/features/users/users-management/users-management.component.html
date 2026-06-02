@@ -324,14 +324,11 @@
               </div>
             </div>
 
+            @if (isEditMode) {
             <div class="form-group">
               <label for="password">
-                <span class="label-text">Contraseña</span>
-                @if (!isEditMode) {
-                  <span class="label-required">*</span>
-                } @else {
-                  <span class="label-optional">(opcional para cambiar)</span>
-                }
+                <span class="label-text">Nueva Contraseña</span>
+                <span class="label-optional">(opcional para forzar cambio)</span>
               </label>
               <div class="form-input-wrap">
                 <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -339,71 +336,28 @@
                 </svg>
                 <input
                   id="password"
-                  [type]="isEditMode && showPasswordEditing ? 'text' : 'password'"
+                  [type]="showPasswordEditing ? 'text' : 'password'"
                   formControlName="password"
-                  [placeholder]="isEditMode ? 'Nueva contraseña (opcional)' : 'Mínimo 8 alfanuméricos'"
+                  placeholder="Nueva contraseña (opcional)"
                   class="form-input"
-                  [class.input-error]="hasError('password', 'required')"
+                  [class.input-error]="hasError('password', 'pattern')"
                 />
-                @if (isEditMode) {
-                  <button type="button" class="btn-toggle-password" (click)="togglePasswordVisibility()" aria-label="Mostrar/ocultar contraseña">
-                    @if (showPasswordEditing) {
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    } @else {
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
-                      </svg>
-                    }
-                  </button>
-                }
+                <button type="button" class="btn-toggle-password" (click)="togglePasswordVisibility()" aria-label="Mostrar/ocultar contraseña">
+                  @if (showPasswordEditing) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  }
+                </button>
               </div>
-              @if (hasError('password', 'required')) {
-                <span class="form-error">La contraseña es requerida.</span>
-              }
               @if (hasError('password', 'pattern')) {
                 <span class="form-error">La contraseña debe tener mínimo 8 caracteres alfanuméricos.</span>
               }
             </div>
-
-            @if (!isEditMode) {
-              <div class="form-group">
-                <label for="passwordConfirm">
-                  <span class="label-text">Confirmar Contraseña</span>
-                  <span class="label-required">*</span>
-                </label>
-                <div class="form-input-wrap">
-                  <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
-                  <input
-                    id="passwordConfirm"
-                    [type]="showPasswordConfirm ? 'text' : 'password'"
-                    formControlName="passwordConfirm"
-                    placeholder="Repetir contraseña"
-                    class="form-input"
-                    [class.input-error]="hasError('passwordConfirm', 'required') || (!passwordsMatch() && userForm.get('passwordConfirm')?.touched)"
-                  />
-                  <button type="button" class="btn-toggle-password" (click)="toggleConfirmPasswordVisibility()" aria-label="Mostrar/ocultar contraseña">
-                    @if (showPasswordConfirm) {
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    } @else {
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
-                      </svg>
-                    }
-                  </button>
-                </div>
-                @if (hasError('passwordConfirm', 'required')) {
-                  <span class="form-error">Debe confirmar la contraseña.</span>
-                }
-                @if (!passwordsMatch() && userForm.get('passwordConfirm')?.touched) {
-                  <span class="form-error">Las contraseñas no coinciden.</span>
-                }
-              </div>
             }
           </div>
 
@@ -493,7 +447,7 @@
             }
             <div class="modal-footer-actions">
               <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-              <button type="submit" class="btn-submit" [disabled]="userForm.invalid || (!isEditMode && !passwordsMatch())">
+              <button type="submit" class="btn-submit" [disabled]="userForm.invalid">
                 @if (isEditMode) {
                   Actualizar Usuario
                 } @else {

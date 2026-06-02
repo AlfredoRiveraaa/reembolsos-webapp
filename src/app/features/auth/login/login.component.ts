@@ -12,8 +12,6 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  private static readonly ALPHANUMERIC_PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
   isSubmitting = false;
   authError = '';
   showPassword = false;
@@ -28,7 +26,7 @@ export class LoginComponent {
   ) {
     this.loginForm = this.fb.nonNullable.group({
       username: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.pattern(LoginComponent.ALPHANUMERIC_PASSWORD_REGEX)]]
+      password: ['', [Validators.required]]
     });
   }
 
