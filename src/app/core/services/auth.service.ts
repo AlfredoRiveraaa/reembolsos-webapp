@@ -81,6 +81,10 @@ export class AuthService {
     );
   }
 
+  recuperarPassword(username: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/recuperar-password`, { username });
+  }
+
   logout(): void {
     this.clearStorage();
     this.currentUserSubject.next(null);

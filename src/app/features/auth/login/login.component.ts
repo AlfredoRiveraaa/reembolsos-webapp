@@ -14,6 +14,9 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginComponent {
   isSubmitting = false;
   authError = '';
+  forgotPasswordForm;
+  showForgotPassword = false;
+  successMessage = '';
   showPassword = false;
 
   readonly loginForm;
@@ -27,6 +30,10 @@ export class LoginComponent {
     this.loginForm = this.fb.nonNullable.group({
       username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
+    });
+
+    this.forgotPasswordForm = this.fb.nonNullable.group({
+      username: ['', [Validators.required, Validators.email]]
     });
   }
 
@@ -61,5 +68,37 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onForgotPassword(): void {}
+  toggleForgotPassword(): void {
+    this.showForgotPassword = !this.showForgotPassword;
+    this.authError = '';
+    this.successMessage = '';
+    this.forgotPasswordForm.reset();
+    this.loginForm.reset();
+  }
+
+  onSubmitRecovery(): void {
+    if (this.forgotPasswordForm.invalid) {
+      this.forgotPasswordForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.authError = '';
+    this.successMessage = '';
+
+    const email = this.forgotPasswordForm.getRawValue().username;
+
+    this.authService.recuperarPassword(email).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        this.successMessage = response.message;
+        this.forgotPasswordForm.reset();
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.authError = 'Hubo un error al intentar procesar la solicitud. Intenta más tarde.';
+        console.error(err);
+      }
+    });
+  }
 }

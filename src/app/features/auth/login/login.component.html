@@ -15,64 +15,96 @@
         <p>Ingresa con tu cuenta</p>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-        <label class="field-group">
-          <span>Correo electrónico</span>
-          <input type="email" formControlName="username" placeholder="nombre@ejemplo.com" autocomplete="email" />
-          @if (hasError('username', 'required')) {
-            <small class="field-error">El correo electrónico es obligatorio.</small>
+      @if (successMessage) {
+        <p class="auth-success" role="status">{{ successMessage }}</p>
+      }
+
+      @if (!showForgotPassword) {
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+          <label class="field-group">
+            <span>Correo electrónico</span>
+            <input type="email" formControlName="username" placeholder="nombre@ejemplo.com" autocomplete="email" />
+            @if (hasError('username', 'required')) {
+              <small class="field-error">El correo electrónico es obligatorio.</small>
+            }
+            @if (hasError('username', 'email')) {
+              <small class="field-error">Ingresa un correo electrónico válido.</small>
+            }
+          </label>
+
+          <label class="field-group">
+            <span>Contraseña</span>
+            <div class="password-input-wrap">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="********"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="toggle-password-btn"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                @if (showPassword) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (hasError('password', 'required')) {
+              <small class="field-error">La contraseña es obligatoria.</small>
+            }
+          </label>
+
+          @if (authError) {
+            <p class="auth-error" role="alert">{{ authError }}</p>
           }
-          @if (hasError('username', 'email')) {
-            <small class="field-error">Ingresa un correo electrónico válido.</small>
+
+          <button type="submit" class="btn-login" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Validando...' : 'Acceder' }}
+          </button>
+
+          <p class="forgot-password-link">
+            <button type="button" class="link-btn" (click)="toggleForgotPassword()">¿Olvidaste tu contraseña?</button>
+          </p>
+        </form>
+      } @else {
+        <form [formGroup]="forgotPasswordForm" (ngSubmit)="onSubmitRecovery()" novalidate>
+          <p class="recovery-copy">
+            Ingresa tu correo y te enviaremos una contraseña temporal para que puedas recuperar tu acceso.
+          </p>
+
+          <label class="field-group">
+            <span>Correo Electrónico</span>
+            <input type="email" formControlName="username" placeholder="nombre@ejemplo.com" autocomplete="email" />
+            @if (forgotPasswordForm.get('username')?.touched && forgotPasswordForm.get('username')?.invalid) {
+              <small class="field-error">Ingresa un correo válido.</small>
+            }
+          </label>
+
+          @if (authError) {
+            <p class="auth-error" role="alert">{{ authError }}</p>
           }
-        </label>
 
-        <label class="field-group">
-          <span>Contraseña</span>
-          <div class="password-input-wrap">
-            <input
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
-              placeholder="********"
-              autocomplete="current-password"
-            />
-            <button
-              type="button"
-              class="toggle-password-btn"
-              (click)="togglePasswordVisibility()"
-              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-            >
-              @if (showPassword) {
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
-                  <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
-              } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              }
-            </button>
-          </div>
-          @if (hasError('password', 'required')) {
-            <small class="field-error">La contraseña es obligatoria.</small>
-          }
-        </label>
+          <button type="submit" class="btn-login" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Procesando...' : 'Recuperar Contraseña' }}
+          </button>
 
-        @if (authError) {
-          <p class="auth-error" role="alert">{{ authError }}</p>
-        }
-
-        <button type="submit" class="btn-login" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Validando...' : 'Acceder' }}
-        </button>
-
-        <p class="forgot-password-link">
-          <button type="button" class="link-btn" (click)="onForgotPassword()">¿Olvidaste tu contraseña?</button>
-        </p>
-      </form>
+          <p class="forgot-password-link">
+            <button type="button" class="link-btn" (click)="toggleForgotPassword()">Volver a Iniciar Sesión</button>
+          </p>
+        </form>
+      }
     </section>
   </div>
 </div>
