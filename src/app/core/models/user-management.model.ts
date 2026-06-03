@@ -10,6 +10,7 @@ export interface SystemUser {
   createdAt: string;
   updatedAt: string;
   dias_asignados?: string;
+  solicitudes_revisadas?: number;
 }
 
 export interface CreateSystemUserRequest {

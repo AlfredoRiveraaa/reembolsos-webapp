@@ -405,4 +405,18 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   togglePasswordVisibility(): void {
     this.showPasswordEditing = !this.showPasswordEditing;
   }
+
+  getDiasArray(diasStr: string | undefined): {num: string, label: string}[] {
+    if (!diasStr) return [];
+
+    // Mapeo de números a iniciales de días
+    const map: Record<string, string> = {
+      '1': 'Lu', '2': 'Ma', '3': 'Mi', '4': 'Ju', '5': 'Vi', '6': 'Sá', '7': 'Do'
+    };
+
+    return diasStr.split(',')
+      .map(d => d.trim())
+      .filter(d => d)
+      .map(d => ({ num: d, label: map[d] || d }));
+  }
 }
