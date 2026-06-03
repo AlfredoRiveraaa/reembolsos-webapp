@@ -149,6 +149,65 @@ $footer-h:    72px;
   background: rgba(255,255,255,.1);
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,.15);
+  position: relative;
+}
+
+.user-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: $white;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.user-chevron {
+  color: rgba(255,255,255,.7);
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: $white;
+  border: 1px solid $slate-200;
+  border-radius: 12px;
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+  z-index: 120;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dropdown-primary {
+  color: $slate-700;
+  &:hover { background: $slate-100; color: $primary; }
+}
+
+.dropdown-danger {
+  color: #b91c1c;
+  &:hover { background: #fef2f2; color: #991b1b; }
 }
 
 .user-avatar {
@@ -351,6 +410,167 @@ $footer-h:    72px;
 .footer-department { font-size: 0.8125rem; color: $cyan; font-weight: 500; }
 .footer-right { text-align: right; }
 .footer-copyright { font-size: 0.75rem; color: rgba(255,255,255,.6); }
+
+// ── Password Modal ───────────────────────────────────────────────
+.password-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 200;
+}
+
+.password-modal {
+  width: min(520px, 100%);
+  background: $white;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+
+.password-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid $slate-200;
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: $slate-900;
+  }
+}
+
+.modal-close-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: $slate-100;
+  color: $slate-600;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.password-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: 1.25rem;
+}
+
+.password-message {
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &.success {
+    background: #ecfdf5;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  &.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  span {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $slate-700;
+  }
+
+  input {
+    border: 1px solid $slate-300;
+    border-radius: 10px;
+    padding: 0.8rem 0.95rem;
+    font: inherit;
+    color: $slate-900;
+    outline: none;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(0, 59, 92, 0.12);
+    }
+  }
+
+  .password-input-wrap {
+    position: relative;
+
+    input {
+      width: 100%;
+      padding-right: 6.5rem;
+    }
+    .toggle-password-btn {
+      position: absolute;
+      right: 0.45rem;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: $slate-400;
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+
+      &:hover {
+        color: $slate-700;
+        background: $slate-50;
+      }
+
+      &:focus-visible {
+        outline: 2px solid rgba(0, 59, 92, 0.35);
+        outline-offset: 1px;
+      }
+    }
+  }
+}
+
+.password-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.btn-secondary,
+.btn-primary {
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: $slate-100;
+  color: $slate-700;
+}
+
+.btn-primary {
+  background: $primary;
+  color: $white;
+}
 
 // ── Responsive ─────────────────────────────────────────────────────
 @media (max-width: 1024px) {

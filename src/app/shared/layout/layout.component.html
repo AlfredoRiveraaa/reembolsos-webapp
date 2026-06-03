@@ -31,16 +31,29 @@
         <span class="system-name">Sistema de Reembolsos</span>
       </div>
       <div class="user-section">
-        <div class="user-avatar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+        <button type="button" class="user-trigger" (click)="toggleUserDropdown()" [attr.aria-expanded]="isDropdownOpen" aria-label="Abrir menú de usuario">
+          <div class="user-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <span class="user-name">{{ userDisplayName }}</span>
+          <svg class="user-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
           </svg>
-        </div>
-        <span class="user-name">{{ userDisplayName }}</span>
-        <button type="button" class="logout-btn" (click)="logout()" aria-label="Cerrar sesion">
-          Salir
         </button>
+
+        @if (isDropdownOpen) {
+          <div class="user-dropdown">
+            <button type="button" class="dropdown-item dropdown-primary" (click)="openPasswordModal()">
+              Cambiar Contraseña
+            </button>
+            <button type="button" class="dropdown-item dropdown-danger" (click)="logout()" aria-label="Cerrar sesion">
+              Cerrar sesión
+            </button>
+          </div>
+        }
       </div>
     </div>
   </header>
@@ -130,5 +143,107 @@
       </div>
     </div>
   </footer>
+
+  @if (showPasswordModal) {
+    <div class="password-modal-backdrop" (click)="closePasswordModal()">
+      <div class="password-modal" (click)="$event.stopPropagation()">
+        <div class="password-modal-header">
+          <h2>Cambiar Contraseña</h2>
+          <button type="button" class="modal-close-btn" (click)="closePasswordModal()" aria-label="Cerrar modal">×</button>
+        </div>
+
+        <form class="password-modal-body" [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" novalidate>
+          @if (passwordMessage) {
+            <div class="password-message" [class.success]="passwordMessageType === 'success'" [class.error]="passwordMessageType === 'error'">
+              {{ passwordMessage }}
+            </div>
+          }
+
+          <label class="modal-field">
+            <span>Contraseña Actual</span>
+            <div class="password-input-wrap">
+              <input [type]="showPasswordCurrent ? 'text' : 'password'" formControlName="password_actual" autocomplete="current-password" />
+              <button
+                type="button"
+                class="toggle-password-btn"
+                (click)="toggleShowPasswordCurrent()"
+                [attr.aria-label]="showPasswordCurrent ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                @if (showPasswordCurrent) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </label>
+
+          <label class="modal-field">
+            <span>Nueva Contraseña (mínimo 8 caracteres)</span>
+            <div class="password-input-wrap">
+              <input [type]="showPasswordNew ? 'text' : 'password'" formControlName="password_nueva" autocomplete="new-password" />
+              <button
+                type="button"
+                class="toggle-password-btn"
+                (click)="toggleShowPasswordNew()"
+                [attr.aria-label]="showPasswordNew ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                @if (showPasswordNew) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </label>
+
+          <label class="modal-field">
+            <span>Confirmar Nueva Contraseña</span>
+            <div class="password-input-wrap">
+              <input [type]="showPasswordConfirm ? 'text' : 'password'" formControlName="password_confirmar" autocomplete="new-password" />
+              <button
+                type="button"
+                class="toggle-password-btn"
+                (click)="toggleShowPasswordConfirm()"
+                [attr.aria-label]="showPasswordConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                @if (showPasswordConfirm) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.08-6.31"/>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.83 21.83 0 0 1-3.17 4.66"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </label>
+
+          <div class="password-modal-actions">
+            <button type="button" class="btn-secondary" (click)="closePasswordModal()">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 
 </div>

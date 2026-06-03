@@ -85,6 +85,10 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/recuperar-password`, { username });
   }
 
+  cambiarPassword(password_actual: string, password_nueva: string): Observable<{ ok: boolean; message: string }> {
+    return this.http.put<{ ok: boolean; message: string }>(`${this.apiUrl}/usuarios/me/password`, { password_actual, password_nueva });
+  }
+
   logout(): void {
     this.clearStorage();
     this.currentUserSubject.next(null);
