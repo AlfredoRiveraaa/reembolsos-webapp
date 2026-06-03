@@ -41,12 +41,20 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
 
   // Form
   userForm;
+  isSaving = false;
 
   // Messages
   message = '';
   messageType: 'success' | 'error' | '' = '';
 
   currentUserUsername = '';
+
+  // --- VARIABLES PARA EL MODAL DE ELIMINACIÓN ---
+  showDeleteModal = false;
+  userToDelete: SystemUser | null = null;
+  deleteMessage = '';
+  deleteMessageType: 'success' | 'error' | '' = '';
+  isDeleting = false;
 
   readonly roles: UserRole[] = ['admin', 'trabajador'];
 
@@ -214,6 +222,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.userForm.reset();
     this.message = '';
     this.showPasswordEditing = false;
+    this.isSaving = false;
   }
 
   saveUser(): void {
@@ -221,6 +230,8 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       this.userForm.markAllAsTouched();
       return;
     }
+
+    this.isSaving = true;
 
     const formValue = this.userForm.getRawValue();
     const diasObj = formValue.dias as Record<string, boolean>;
@@ -243,13 +254,22 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
         this.selectedUserId,
         updatePayload
       ).pipe(takeUntil(this.destroy$)).subscribe(result => {
+        this.isSaving = false;
         if (result.ok) {
-          this.message = result.message;
+          this.message = 'Usuario actualizado correctamente.';
           this.messageType = 'success';
-          window.setTimeout(() => this.closeModal(), 1200);
+          setTimeout(() => {
+            const modalDialog = document.querySelector('.modal-dialog');
+            if (modalDialog) modalDialog.scrollTop = 0;
+          }, 10);
+          window.setTimeout(() => this.closeModal(), 2500);
         } else {
           this.message = result.message;
           this.messageType = 'error';
+          setTimeout(() => {
+            const modalDialog = document.querySelector('.modal-dialog');
+            if (modalDialog) modalDialog.scrollTop = 0;
+          }, 10);
         }
       });
     } else {
@@ -268,34 +288,74 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       this.userManagementService.createUser(createPayload)
         .pipe(takeUntil(this.destroy$))
         .subscribe(result => {
+          this.isSaving = false;
           if (result.ok) {
-            this.message = result.message;
+            this.message = 'Usuario creado correctamente.';
             this.messageType = 'success';
-            window.setTimeout(() => this.closeModal(), 1200);
+            setTimeout(() => {
+              const modalDialog = document.querySelector('.modal-dialog');
+              if (modalDialog) modalDialog.scrollTop = 0;
+            }, 10);
+            window.setTimeout(() => this.closeModal(), 2500);
           } else {
             this.message = result.message;
             this.messageType = 'error';
+            setTimeout(() => {
+              const modalDialog = document.querySelector('.modal-dialog');
+              if (modalDialog) modalDialog.scrollTop = 0;
+            }, 10);
           }
         });
     }
   }
 
-  deleteUser(user: SystemUser): void {
-    if (!confirm(`¿Eliminar usuario "${user.displayName}"? Esta accion no se puede deshacer.`)) {
-      return;
-    }
+  // --- MÉTODOS DE ELIMINACIÓN ---
+  openDeleteModal(user: SystemUser): void {
+    this.userToDelete = user;
+    this.showDeleteModal = true;
+    this.deleteMessage = '';
+    this.deleteMessageType = '';
+  }
 
-    this.userManagementService.deleteUser(user.id)
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.userToDelete = null;
+    this.deleteMessage = '';
+    this.deleteMessageType = '';
+    this.isDeleting = false;
+  }
+
+  confirmDelete(): void {
+    if (!this.userToDelete) return;
+
+    this.isDeleting = true;
+    this.userManagementService.deleteUser(this.userToDelete.id)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        this.message = result.message;
-        this.messageType = result.ok ? 'success' : 'error';
+      .subscribe({
+        next: (result) => {
+          this.isDeleting = false;
+          this.deleteMessageType = result.ok ? 'success' : 'error';
 
-        if (result.ok) {
-          window.setTimeout(() => {
-            this.message = '';
-            this.messageType = '';
-          }, 3000);
+          if (result.ok) {
+            // Alerta verde de éxito forzada
+            this.deleteMessage = 'Usuario eliminado correctamente.';
+            this.message = 'Usuario eliminado correctamente.';
+
+            // Si tuvo éxito, cerramos el modal después de 2 segundos
+            window.setTimeout(() => {
+              this.closeDeleteModal();
+              this.closeModal();
+            }, 2000);
+          } else {
+            // Alerta roja de error forzada si el backend dice ok: false
+            this.deleteMessage = 'No se puede eliminar porque el usuario tiene un historial de auditoría. Por favor, desactívalo desde la opción Editar.';
+          }
+        },
+        error: (err) => {
+          this.isDeleting = false;
+          // Alerta roja de error forzada si el servidor lanza una excepción
+          this.deleteMessage = 'No se puede eliminar porque el usuario tiene un historial de auditoría. Por favor, desactívalo desde la opción Editar.';
+          this.deleteMessageType = 'error';
         }
       });
   }

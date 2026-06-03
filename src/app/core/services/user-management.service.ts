@@ -61,14 +61,13 @@ export class UserManagementService {
   }
 
   deleteUser(id: string): Observable<UserOperationResult> {
-    return this.http.delete(`${this.apiUrl}/${id}`).pipe(
+    return this.http.delete<UserOperationResult>(`${this.apiUrl}/${id}`).pipe(
       tap(() => {
         void this.loadUsers().subscribe();
       }),
-      map(() => ({ ok: true, message: 'Usuario eliminado correctamente.' })),
-      catchError((error: { error?: { detail?: string } }) => of({
+      catchError((error: any) => of({
         ok: false,
-        message: error.error?.detail || 'No se pudo eliminar el usuario.'
+        message: error.error?.detail || error.error?.message || 'No se pudo eliminar el usuario.'
       }))
     );
   }
