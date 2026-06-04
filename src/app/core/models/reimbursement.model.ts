@@ -20,6 +20,17 @@ export interface Reimbursement {
 
 export type ReimbursementStatus = 'PENDIENTE' | 'EN REVISIÓN' | 'APROBADO' | 'RECHAZADO' | 'INFO_SOLICITADA';
 
+export const ACTIVE_REIMBURSEMENT_STATUSES: readonly ReimbursementStatus[] = [
+  'PENDIENTE',
+  'EN REVISIÓN',
+  'INFO_SOLICITADA'
+];
+
+export const HISTORICAL_REIMBURSEMENT_STATUSES: readonly ReimbursementStatus[] = [
+  'APROBADO',
+  'RECHAZADO'
+];
+
 export interface ReimbursementFilters {
   uuid: string;
   nombre_solicitante: string;

@@ -4,7 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
-import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
+import {
+  HISTORICAL_REIMBURSEMENT_STATUSES,
+  Reimbursement,
+  ReimbursementStatus
+} from '../../../core/models/reimbursement.model';
 
 @Component({
   selector: 'app-historial',
@@ -34,10 +38,10 @@ export class HistorialComponent implements OnInit {
   // Estadísticas
   totalAprobados = 0;
   totalRechazados = 0;
-  totalPendientes = 0;
+  totalProcesadas = 0;
   montoTotalAprobado = 0;
 
-  estados: ReimbursementStatus[] = ['APROBADO', 'PENDIENTE', 'EN REVISIÓN', 'RECHAZADO'];
+  estados: ReimbursementStatus[] = [...HISTORICAL_REIMBURSEMENT_STATUSES];
 
   ngOnInit(): void {
     this.loadHistorial();
@@ -45,7 +49,7 @@ export class HistorialComponent implements OnInit {
 
   private loadHistorial(): void {
     this.reimbursementService.getReimbursements().subscribe(data => {
-      this.reimbursements = data;
+      this.reimbursements = data.filter(r => HISTORICAL_REIMBURSEMENT_STATUSES.includes(r.estatus));
       this.calculateStats();
       this.applyFilters();
     });
@@ -55,7 +59,7 @@ export class HistorialComponent implements OnInit {
     // Sincronización con las propiedades del modelo Reimbursement[cite: 9]
     this.totalAprobados = this.reimbursements.filter(r => r.estatus === 'APROBADO').length;
     this.totalRechazados = this.reimbursements.filter(r => r.estatus === 'RECHAZADO').length;
-    this.totalPendientes = this.reimbursements.filter(r => r.estatus === 'PENDIENTE' || r.estatus === 'EN REVISIÓN').length;
+    this.totalProcesadas = this.totalAprobados + this.totalRechazados;
     this.montoTotalAprobado = this.reimbursements
       .filter(r => r.estatus === 'APROBADO')
       .reduce((sum, r) => sum + Number(r.monto), 0);
@@ -190,6 +194,6 @@ export class HistorialComponent implements OnInit {
   }
 
   navigateToDetail(id: number): void {
-    this.router.navigate(['/reembolso', id]);
+    this.router.navigate(['/reembolso', id], { queryParams: { returnUrl: '/historial' } });
   }
 }

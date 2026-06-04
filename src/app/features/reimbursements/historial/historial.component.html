@@ -30,9 +30,25 @@
 
     <!-- KPI Strip -->
     <div class="kpi-strip">
+      <div class="kpi-card kpi-navy">
+        <div class="kpi-top">
+          <span class="kpi-label">Total procesadas</span>
+          <div class="kpi-ico">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="8" y1="13" x2="16" y2="13"/>
+              <line x1="8" y1="17" x2="14" y2="17"/>
+            </svg>
+          </div>
+        </div>
+        <p class="kpi-value">{{ totalProcesadas }}</p>
+        <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
+      </div>
+
       <div class="kpi-card kpi-green">
         <div class="kpi-top">
-          <span class="kpi-label">Total Aprobados</span>
+          <span class="kpi-label">Aprobadas</span>
           <div class="kpi-ico">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
@@ -41,20 +57,7 @@
           </div>
         </div>
         <p class="kpi-value">{{ totalAprobados }}</p>
-        <div class="kpi-bar"><div class="kpi-fill" style="width: 100%"></div></div>
-      </div>
-
-      <div class="kpi-card kpi-amber">
-        <div class="kpi-top">
-          <span class="kpi-label">Pendientes / En Revisión</span>
-          <div class="kpi-ico">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
-            </svg>
-          </div>
-        </div>
-        <p class="kpi-value">{{ totalPendientes }}</p>
-        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalAprobados + totalPendientes + totalRechazados > 0 ? totalPendientes / (totalAprobados + totalPendientes + totalRechazados) * 100 : 0) + '%'"></div></div>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalProcesadas > 0 ? totalAprobados / totalProcesadas * 100 : 0) + '%'"></div></div>
       </div>
 
       <div class="kpi-card kpi-red">
@@ -68,12 +71,12 @@
           </div>
         </div>
         <p class="kpi-value">{{ totalRechazados }}</p>
-        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalAprobados + totalPendientes + totalRechazados > 0 ? totalRechazados / (totalAprobados + totalPendientes + totalRechazados) * 100 : 0) + '%'"></div></div>
+        <div class="kpi-bar"><div class="kpi-fill" [style.width]="(totalProcesadas > 0 ? totalRechazados / totalProcesadas * 100 : 0) + '%'"></div></div>
       </div>
 
       <div class="kpi-card kpi-blue">
         <div class="kpi-top">
-          <span class="kpi-label">Monto Total Aprobado</span>
+          <span class="kpi-label">Monto total aprobado</span>
           <div class="kpi-ico">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="1" x2="12" y2="23"/>
@@ -174,7 +177,7 @@
                   <span class="badge" [ngClass]="getEstadoClass(r.estatus)">{{ r.estatus }}</span>
                 </td>
                 <td class="td-action">
-                  <a [routerLink]="['/reembolso', r.id]" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.uuid">
+                  <a [routerLink]="['/reembolso', r.id]" [queryParams]="{ returnUrl: '/historial' }" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.uuid">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>

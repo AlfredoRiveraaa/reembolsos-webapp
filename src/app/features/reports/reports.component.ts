@@ -19,12 +19,20 @@ import {
 import * as XLSX from 'xlsx';
 import { Subject, finalize, takeUntil } from 'rxjs';
 import { DashboardStats, DashboardStatsFilters, StatisticsService } from '../../core/services/statistics.service';
+import { Reimbursement } from '../../core/models/reimbursement.model';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, PieController, ArcElement, Tooltip, Legend);
 
-type PeriodMode = 'year' | 'custom';
+type PeriodMode = 'year' | 'day' | 'custom';
 type ProviderStats = DashboardStats['top_proveedores'][number];
 type ExportRow = Record<string, string | number>;
+
+interface AppliedPeriodSelection {
+  mode: PeriodMode;
+  year: number;
+  from: string;
+  to: string;
+}
 
 @Component({
   selector: 'app-reports',
@@ -42,11 +50,13 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly fallbackChartPalette = ['#1e3a5f', '#0ea5e9', '#7c3aed', '#64748b'];
 
   stats: DashboardStats | null = null;
+  filteredReimbursements: Reimbursement[] = [];
   isLoading = false;
   errorMessage = '';
 
   periodMode: PeriodMode = 'year';
   selectedYear = this.currentYear;
+  selectedDay = this.todayFileSuffix;
   dateFrom = `${this.currentYear}-01-01`;
   dateTo = `${this.currentYear}-12-31`;
   availableYears = Array.from({ length: 6 }, (_, index) => this.currentYear - index);
@@ -59,6 +69,7 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   private renderTimer?: ReturnType<typeof setTimeout>;
   private barChartInstance?: Chart<'bar', number[], string>;
   private pieChartInstance?: Chart<'pie', number[], string>;
+  private appliedPeriod: AppliedPeriodSelection = this.defaultPeriod;
 
   private barCanvas?: ElementRef<HTMLCanvasElement>;
   private pieCanvas?: ElementRef<HTMLCanvasElement>;
@@ -172,7 +183,7 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadReports(): void {
-    if (!this.hasValidPeriod()) {
+    if (!this.hasValidPeriod(this.appliedPeriod)) {
       this.stats = null;
       this.errorMessage = 'La fecha inicial no puede ser mayor que la fecha final.';
       this.destroyCharts();
@@ -183,7 +194,7 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.errorMessage = '';
     this.destroyCharts();
 
-    this.statsService.getDashboardStats(this.currentFilters)
+    this.statsService.getDashboardReport(this.currentFilters)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
@@ -191,8 +202,9 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
         })
       )
       .subscribe({
-        next: (data) => {
-          this.stats = this.normalizeStats(data);
+        next: (report) => {
+          this.stats = this.normalizeStats(report.stats);
+          this.filteredReimbursements = report.reimbursements;
           this.selectedMonthIndex = this.highestMonthIndex;
           this.selectedStatus = this.statusEntries[0]?.[0] ?? null;
           this.selectedProviderName = this.stats.top_proveedores[0]?.nombre ?? null;
@@ -201,6 +213,7 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error: () => {
           this.stats = null;
+          this.filteredReimbursements = [];
           this.errorMessage = 'No pudimos cargar los reportes. Revisa la conexion con el backend e intenta de nuevo.';
         }
       });
@@ -211,15 +224,39 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyPeriodFilters(): void {
+    const nextPeriod = this.buildDraftPeriod();
+
+    if (!this.hasValidPeriod(nextPeriod)) {
+      this.stats = null;
+      this.errorMessage = 'La fecha inicial no puede ser mayor que la fecha final.';
+      this.destroyCharts();
+      return;
+    }
+
+    this.appliedPeriod = nextPeriod;
+    this.syncControlsFromPeriod(nextPeriod);
     this.loadReports();
   }
 
   clearPeriodFilters(): void {
-    this.periodMode = 'year';
-    this.selectedYear = this.currentYear;
-    this.dateFrom = `${this.currentYear}-01-01`;
-    this.dateTo = `${this.currentYear}-12-31`;
+    const defaultPeriod = this.defaultPeriod;
+
+    this.appliedPeriod = defaultPeriod;
+    this.syncControlsFromPeriod(defaultPeriod);
     this.loadReports();
+  }
+
+  applyYearFilter(): void {
+    const yearRange = this.getYearRange(this.normalizeYear(this.selectedYear));
+    this.dateFrom = yearRange.from;
+    this.dateTo = yearRange.to;
+    this.applyPeriodFilters();
+  }
+
+  applyDayFilter(): void {
+    this.dateFrom = this.selectedDay;
+    this.dateTo = this.selectedDay;
+    this.applyPeriodFilters();
   }
 
   selectMonth(index: number): void {
@@ -243,42 +280,18 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const workbook = XLSX.utils.book_new();
 
-    this.appendSheet(workbook, 'Resumen', [
-      { Indicador: 'Periodo', Valor: this.activePeriodLabel },
-      { Indicador: 'Solicitudes totales', Valor: this.totalRequests },
-      { Indicador: 'Monto reembolsado', Valor: this.totalAnnualAmount },
-      { Indicador: 'Solicitudes pendientes o en revision', Valor: this.pendingRequests },
-      { Indicador: 'Solicitudes rechazadas', Valor: this.rejectedRequests },
-      { Indicador: 'Solicitudes aprobadas', Valor: this.approvedRequests }
-    ]);
-
-    this.appendSheet(workbook, 'Montos_por_mes', this.monthlyRows.map((row) => ({
-      Mes: row.label,
-      Monto: row.amount
-    })));
-
-    this.appendSheet(workbook, 'Estatus', this.statusEntries.map(([status, count]) => ({
-      Estatus: status,
-      Solicitudes: count,
-      Participacion: this.formatPercent(this.getShare(count, this.totalRequests))
-    })));
-
-    this.appendSheet(workbook, 'Top_proveedores', this.topProviders.map((provider, index) => ({
-      Ranking: index + 1,
-      Proveedor: provider.nombre,
-      Solicitudes: provider.cantidad,
-      Participacion_top: this.formatPercent(this.getShare(provider.cantidad, this.topProviderTotal))
-    })));
+    this.appendSheet(workbook, 'Resumen', this.getExportSummaryRows());
+    this.appendSheet(workbook, 'Solicitudes', this.getExportDetailRows());
+    this.appendSheet(workbook, 'Tabla_Meses', this.getExportMonthlyRows());
+    this.appendSheet(workbook, 'Tabla_Estatus', this.getExportStatusRows());
+    this.appendSheet(workbook, 'Tabla_Proveedores', this.getExportProviderRows());
+    this.appendSheet(workbook, 'Tabla_Dias', this.getExportDailyRows());
 
     XLSX.writeFile(workbook, `reportes_reembolsos_${this.periodFileSuffix}_${this.todayFileSuffix}.xlsx`);
   }
 
   get activePeriodLabel(): string {
-    if (this.periodMode === 'year') {
-      return `Año ${this.selectedYear}`;
-    }
-
-    return `${this.formatShortDate(this.dateFrom)} - ${this.formatShortDate(this.dateTo)}`;
+    return this.formatPeriodLabel(this.appliedPeriod);
   }
 
   get totalAnnualAmount(): number {
@@ -425,13 +438,13 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private get currentFilters(): DashboardStatsFilters {
-    if (this.periodMode === 'year') {
-      return { year: this.selectedYear };
+    if (this.appliedPeriod.mode === 'year') {
+      return { year: this.appliedPeriod.year };
     }
 
     return {
-      from: this.dateFrom || undefined,
-      to: this.dateTo || undefined
+      from: this.appliedPeriod.from || undefined,
+      to: this.appliedPeriod.to || undefined
     };
   }
 
@@ -450,19 +463,112 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private get periodFileSuffix(): string {
-    if (this.periodMode === 'year') {
-      return String(this.selectedYear);
+    if (this.appliedPeriod.mode === 'year') {
+      return String(this.appliedPeriod.year);
     }
 
-    return `${this.dateFrom || 'inicio'}_${this.dateTo || 'fin'}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+    if (this.appliedPeriod.mode === 'day') {
+      return `dia_${this.appliedPeriod.from || 'sin-fecha'}`;
+    }
+
+    return `${this.appliedPeriod.from || 'inicio'}_${this.appliedPeriod.to || 'fin'}`.replace(/[^a-zA-Z0-9_-]/g, '-');
   }
 
   private get todayFileSuffix(): string {
     return new Date().toISOString().slice(0, 10);
   }
 
-  private hasValidPeriod(): boolean {
-    return this.periodMode !== 'custom' || !this.dateFrom || !this.dateTo || this.dateFrom <= this.dateTo;
+  private get defaultPeriod(): AppliedPeriodSelection {
+    return {
+      mode: 'year',
+      year: this.currentYear,
+      ...this.getYearRange(this.currentYear)
+    };
+  }
+
+  private buildDraftPeriod(): AppliedPeriodSelection {
+    const year = this.normalizeYear(this.selectedYear);
+
+    if (this.periodMode === 'year') {
+      return {
+        mode: 'year',
+        year,
+        ...this.getYearRange(year)
+      };
+    }
+
+    if (this.periodMode === 'day') {
+      return {
+        mode: 'day',
+        year: this.getYearFromDateInput(this.selectedDay) ?? year,
+        from: this.selectedDay,
+        to: this.selectedDay
+      };
+    }
+
+    return {
+      mode: 'custom',
+      year,
+      from: this.dateFrom,
+      to: this.dateTo
+    };
+  }
+
+  private syncControlsFromPeriod(period: AppliedPeriodSelection): void {
+    this.periodMode = period.mode;
+    this.selectedYear = period.year;
+    this.selectedDay = period.mode === 'day' ? period.from : this.selectedDay;
+    this.dateFrom = period.from;
+    this.dateTo = period.to;
+  }
+
+  private normalizeYear(year: number | string): number {
+    const numericYear = Number(year);
+    return Number.isFinite(numericYear) ? numericYear : this.currentYear;
+  }
+
+  private getYearRange(year: number): Pick<AppliedPeriodSelection, 'from' | 'to'> {
+    return {
+      from: `${year}-01-01`,
+      to: `${year}-12-31`
+    };
+  }
+
+  private hasValidPeriod(period: AppliedPeriodSelection): boolean {
+    if (period.mode === 'day') {
+      return !!period.from;
+    }
+
+    return period.mode !== 'custom' || !period.from || !period.to || period.from <= period.to;
+  }
+
+  private formatPeriodLabel(period: AppliedPeriodSelection): string {
+    if (period.mode === 'year') {
+      return `Año ${period.year}`;
+    }
+
+    if (period.mode === 'day') {
+      return `Día ${this.formatShortDate(period.from)}`;
+    }
+
+    if (period.from && period.to) {
+      return `Rango ${this.formatShortDate(period.from)} - ${this.formatShortDate(period.to)}`;
+    }
+
+    if (period.from) {
+      return `Desde ${this.formatShortDate(period.from)}`;
+    }
+
+    if (period.to) {
+      return `Hasta ${this.formatShortDate(period.to)}`;
+    }
+
+    return 'Todos los periodos';
+  }
+
+  private getYearFromDateInput(dateInput: string): number | null {
+    const year = Number(dateInput.slice(0, 4));
+    return Number.isFinite(year) ? year : null;
   }
 
   private updateChartData(): void {
@@ -639,9 +745,130 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private getExportSummaryRows(): ExportRow[] {
+    return [
+      { Indicador: 'Periodo aplicado', Valor: this.activePeriodLabel },
+      { Indicador: 'Fecha de exportacion', Valor: this.formatShortDate(this.todayFileSuffix) },
+      { Indicador: 'Solicitudes totales', Valor: this.totalRequests },
+      { Indicador: 'Monto reembolsado', Valor: this.totalAnnualAmount },
+      { Indicador: 'Solicitudes aprobadas', Valor: this.approvedRequests },
+      { Indicador: 'Participacion aprobadas', Valor: this.formatPercent(this.approvedShare) },
+      { Indicador: 'Solicitudes pendientes o en revision', Valor: this.pendingRequests },
+      { Indicador: 'Participacion pendientes o revision', Valor: this.formatPercent(this.pendingShare) },
+      { Indicador: 'Solicitudes rechazadas', Valor: this.rejectedRequests },
+      { Indicador: 'Participacion rechazadas', Valor: this.formatPercent(this.rejectedShare) },
+      { Indicador: 'Mes con mayor monto', Valor: this.selectedMonthLabel },
+      { Indicador: 'Monto del mes destacado', Valor: this.selectedMonthAmount },
+      { Indicador: 'Proveedor principal', Valor: this.topProviders[0]?.nombre ?? 'Sin proveedor' },
+      { Indicador: 'Solicitudes del proveedor principal', Valor: this.topProviders[0]?.cantidad ?? 0 }
+    ];
+  }
+
+  private getExportDetailRows(): ExportRow[] {
+    return this.filteredReimbursements.map((reimbursement) => ({
+      'Folio DRH': reimbursement.uuid,
+      'Fecha recepcion': this.formatDateForExport(reimbursement.fecha_recepcion),
+      'Correo solicitante': reimbursement.correo_solicitante,
+      'Nombre solicitante': reimbursement.nombre_solicitante,
+      'Proveedor': reimbursement.nombre_proveedor || 'Sin proveedor',
+      'RFC emisor': reimbursement.rfc_emisor ?? '',
+      'Forma de pago': reimbursement.forma_pago ?? '',
+      'Fecha factura': this.formatDateForExport(reimbursement.fecha_factura),
+      'Monto': Number(reimbursement.monto) || 0,
+      'Estatus': reimbursement.estatus,
+      'Fecha resolucion': this.formatDateForExport(reimbursement.fecha_resolucion),
+      'Observaciones': reimbursement.mensaje ?? '',
+      'Expediente': reimbursement.link_expediente ?? ''
+    }));
+  }
+
+  private getExportMonthlyRows(): ExportRow[] {
+    return this.monthlyRows.map((row) => ({
+      Mes: row.label,
+      Monto: row.amount,
+      Participacion: this.formatPercent(this.getShare(row.amount, this.totalAnnualAmount)),
+      Solicitudes: this.countReimbursementsByMonth(row.index)
+    }));
+  }
+
+  private getExportStatusRows(): ExportRow[] {
+    return this.statusEntries.map(([status, count]) => ({
+      Estatus: status,
+      Solicitudes: count,
+      Participacion: this.formatPercent(this.getShare(count, this.totalRequests))
+    }));
+  }
+
+  private getExportProviderRows(): ExportRow[] {
+    return this.topProviders.map((provider, index) => ({
+      Ranking: index + 1,
+      Proveedor: provider.nombre,
+      Solicitudes: provider.cantidad,
+      Participacion_top: this.formatPercent(this.getShare(provider.cantidad, this.topProviderTotal))
+    }));
+  }
+
+  private getExportDailyRows(): ExportRow[] {
+    const dailyMap = new Map<string, { solicitudes: number; monto: number }>();
+
+    for (const reimbursement of this.filteredReimbursements) {
+      const date = this.getDatePart(reimbursement.fecha_recepcion);
+
+      if (!date) {
+        continue;
+      }
+
+      const current = dailyMap.get(date) ?? { solicitudes: 0, monto: 0 };
+      current.solicitudes += 1;
+      current.monto += Number(reimbursement.monto) || 0;
+      dailyMap.set(date, current);
+    }
+
+    return Array.from(dailyMap.entries())
+      .sort(([leftDate], [rightDate]) => leftDate.localeCompare(rightDate))
+      .map(([date, value]) => ({
+        Fecha: this.formatShortDate(date),
+        Solicitudes: value.solicitudes,
+        Monto: value.monto,
+        Participacion_monto: this.formatPercent(this.getShare(value.monto, this.totalAnnualAmount))
+      }));
+  }
+
+  private countReimbursementsByMonth(monthIndex: number): number {
+    return this.filteredReimbursements.filter((reimbursement) => {
+      const date = this.parseDateInput(this.getDatePart(reimbursement.fecha_recepcion));
+      return date?.getMonth() === monthIndex;
+    }).length;
+  }
+
+  private formatDateForExport(dateString?: string): string {
+    const datePart = this.getDatePart(dateString);
+    return datePart ? this.formatShortDate(datePart) : '';
+  }
+
+  private getDatePart(dateString?: string): string {
+    return dateString ? dateString.slice(0, 10) : '';
+  }
+
+  private parseDateInput(dateString?: string): Date | null {
+    if (!dateString) {
+      return null;
+    }
+
+    const date = new Date(`${dateString}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
   private appendSheet(workbook: XLSX.WorkBook, name: string, rows: ExportRow[]): void {
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    worksheet['!cols'] = this.getColumnWidths(rows);
+    const safeRows = rows.length > 0 ? rows : [{ Mensaje: 'Sin datos para el periodo aplicado' }];
+    const worksheet = XLSX.utils.json_to_sheet(safeRows);
+    const range = worksheet['!ref'];
+
+    if (range) {
+      worksheet['!autofilter'] = { ref: range };
+    }
+
+    worksheet['!cols'] = this.getColumnWidths(safeRows);
     XLSX.utils.book_append_sheet(workbook, worksheet, name);
   }
 

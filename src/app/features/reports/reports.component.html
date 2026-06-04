@@ -38,6 +38,7 @@
           <span class="filter-label">Periodo</span>
           <select class="filter-control" name="periodMode" [(ngModel)]="periodMode">
             <option value="year">Año</option>
+            <option value="day">Día</option>
             <option value="custom">Rango</option>
           </select>
         </label>
@@ -45,11 +46,16 @@
         @if (periodMode === 'year') {
           <label class="filter-field filter-field--year">
             <span class="filter-label">Año</span>
-            <select class="filter-control" name="selectedYear" [(ngModel)]="selectedYear">
+            <select class="filter-control" name="selectedYear" [(ngModel)]="selectedYear" (ngModelChange)="applyYearFilter()">
               @for (year of availableYears; track year) {
                 <option [ngValue]="year">{{ year }}</option>
               }
             </select>
+          </label>
+        } @else if (periodMode === 'day') {
+          <label class="filter-field">
+            <span class="filter-label">Día</span>
+            <input class="filter-control" type="date" name="selectedDay" [(ngModel)]="selectedDay" (ngModelChange)="applyDayFilter()">
           </label>
         } @else {
           <label class="filter-field">

@@ -22,8 +22,10 @@ $white:    #ffffff;
 
 $blue-kpi:  #3b82f6;
 $amber-kpi: #f59e0b;
+$orange-kpi:#f97316;
 $red-kpi:   #ef4444;
-$green-kpi: #10b981;
+$green-kpi: #16a34a;
+$yellow-kpi:#eab308;
 
 // ── Wrap ───────────────────────────────────────────────────────────
 .dashboard-wrap {
@@ -152,10 +154,13 @@ $green-kpi: #10b981;
 
   &:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); }
 
-  &.kpi-blue::before  { background: $blue-kpi; }
-  &.kpi-amber::before { background: $amber-kpi; }
-  &.kpi-red::before   { background: $red-kpi; }
-  &.kpi-green::before { background: $green-kpi; }
+  &.kpi-navy::before   { background: $navy; }
+  &.kpi-blue::before   { background: $blue-kpi; }
+  &.kpi-amber::before  { background: $amber-kpi; }
+  &.kpi-orange::before { background: $orange-kpi; }
+  &.kpi-red::before    { background: $red-kpi; }
+  &.kpi-green::before  { background: $green-kpi; }
+  &.kpi-yellow::before { background: $yellow-kpi; }
 }
 
 .kpi-top {
@@ -178,10 +183,13 @@ $green-kpi: #10b981;
   align-items: center;
   justify-content: center;
 
+  .kpi-navy &   { background: #eef2f7; color: $navy; }
   .kpi-blue &   { background: #eff6ff; color: $blue-kpi; }
   .kpi-amber &  { background: #fffbeb; color: $amber-kpi; }
+  .kpi-orange & { background: #fff7ed; color: $orange-kpi; }
   .kpi-red &    { background: #fef2f2; color: $red-kpi; }
   .kpi-green &  { background: #ecfdf5; color: $green-kpi; }
+  .kpi-yellow & { background: #fef9c3; color: $yellow-kpi; }
 }
 
 .kpi-value {
@@ -210,10 +218,13 @@ $green-kpi: #10b981;
   border-radius: 4px;
   transition: width 0.5s ease;
 
+  .kpi-navy &   { background: $navy; }
   .kpi-blue &   { background: $blue-kpi; }
   .kpi-amber &  { background: $amber-kpi; }
+  .kpi-orange & { background: $orange-kpi; }
   .kpi-red &    { background: $red-kpi; }
   .kpi-green &  { background: $green-kpi; }
+  .kpi-yellow & { background: $yellow-kpi; }
 }
 
 // ── Table Panel ────────────────────────────────────────────────────
@@ -435,11 +446,11 @@ $green-kpi: #10b981;
   white-space: nowrap;
 }
 
-.estado-aprobado  { background: #dcfce7; color: #15803d; }
-.estado-pendiente { background: #fed7aa; color: #b45309; }
-.estado-revision  { background: #dbeafe; color: #1d4ed8; }
-.estado-rechazado { background: #fee2e2; color: #b91c1c; }
-.estado-info      { background: #fef08a; color: #854d0e; }
+.estado-aprobado  { background: #ecfdf5; color: $green-kpi; }
+.estado-pendiente { background: #fff7ed; color: $orange-kpi; }
+.estado-revision  { background: #eff6ff; color: $blue-kpi; }
+.estado-rechazado { background: #fef2f2; color: $red-kpi; }
+.estado-info      { background: #fef9c3; color: $yellow-kpi; }
 .estado-default   { background: $slate-100; color: $slate-600; }
 
 // ── Action Button ──────────────────────────────────────────────────

@@ -30,6 +30,7 @@ export class ReimbursementDetailComponent implements OnInit {
   estadoActual: ReimbursementStatus = 'PENDIENTE';
   estadoOriginal: ReimbursementStatus = 'PENDIENTE';
   estadoActualizadoMensaje: string | null = null;
+  returnUrl: '/' | '/historial' = '/';
   isLoading = true;
   notFound = false;
 
@@ -53,6 +54,8 @@ export class ReimbursementDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.returnUrl = this.getSafeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       const idNumber = Number(idParam);
@@ -107,7 +110,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
   closeConflictModal(): void {
     this.showConflictModal = false;
-    this.router.navigate(['/']); // Regresa al panel principal
+    this.router.navigateByUrl(this.returnUrl);
   }
 
   confirmarCambioEstado(): void {
@@ -138,7 +141,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
             // Cerramos la caja
             this.cancelarAccion();
-            this.router.navigate(['/']);
+            this.router.navigateByUrl(this.returnUrl);
           }
           this.isSubmittingStatus = false;
         },
@@ -246,5 +249,9 @@ export class ReimbursementDetailComponent implements OnInit {
         if (this.documents.length > 0) this.toggleDocument(this.documents[0].id);
       }
     });
+  }
+
+  private getSafeReturnUrl(value: string | null): '/' | '/historial' {
+    return value === '/historial' ? '/historial' : '/';
   }
 }

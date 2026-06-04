@@ -16,14 +16,11 @@ $slate-800:#1e293b;
 $slate-900:#0f172a;
 $white:    #ffffff;
 
-$green-dk: #15803d;
-$green-bg: #dcfce7;
-$blue-dk:  #1d4ed8;
-$blue-bg:  #dbeafe;
-$red-dk:   #b91c1c;
-$red-bg:   #fee2e2;
-$amber-dk: #a16207;
-$amber-bg: #fef9c3;
+$blue-kpi:  #3b82f6;
+$orange-kpi:#f97316;
+$yellow-kpi:#eab308;
+$red-kpi:   #ef4444;
+$green-kpi: #16a34a;
 
 * { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif; }
 
@@ -208,30 +205,11 @@ $amber-bg: #fef9c3;
   }
 }
 
-.estado-aprobado  {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  color: #166534;
-}
-
-.estado-pendiente {
-  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-  color: #b45309;
-}
-
-.estado-revision  {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #1e40af;
-}
-
-.estado-rechazado {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #b91c1c;
-}
-
-.estado-info {
-  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-  color: #854d0e;
-}
+.estado-aprobado  { background: $green-kpi; color: $white; }
+.estado-pendiente { background: $orange-kpi; color: $white; }
+.estado-revision  { background: $blue-kpi; color: $white; }
+.estado-rechazado { background: $red-kpi; color: $white; }
+.estado-info      { background: $yellow-kpi; color: #422006; }
 
 .estado-default   {
   background: $slate-200;
@@ -530,12 +508,6 @@ $amber-bg: #fef9c3;
   letter-spacing: 0.05em;
 }
 
-.estado-info {
-  background-color: #fef08a; /* Amarillo clarito */
-  color: #854d0e; /* Texto amarillo oscuro/café */
-  border: 1px solid #fde047;
-}
-
 .viewer-dl-btn {
   display: flex;
   align-items: center;
@@ -670,7 +642,8 @@ $amber-bg: #fef9c3;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease-out;
-  color: $white;
+  background: $white;
+  color: $slate-700;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 
   &:disabled {
@@ -697,23 +670,27 @@ $amber-bg: #fef9c3;
   }
 
   &.act-aprobar  {
-    background: #22c55e;
-    border-color: #16a34a;
+    background: $green-kpi;
+    border-color: $green-kpi;
+    color: $white;
   }
 
   &.act-revision {
-    background: #3b82f6;
-    border-color: #2563eb;
+    background: $blue-kpi;
+    border-color: $blue-kpi;
+    color: $white;
   }
 
   &.act-rechazar {
-    background: #ef4444;
-    border-color: #dc2626;
+    background: $red-kpi;
+    border-color: $red-kpi;
+    color: $white;
   }
 
   &.act-info{
-    background: #f59e0b;
-    border-color: #d97706;
+    background: $yellow-kpi;
+    border-color: $yellow-kpi;
+    color: #422006;
   }
 }
 
@@ -1054,51 +1031,5 @@ $amber-bg: #fef9c3;
     background: $slate-100;
     color: $slate-700;
     border-color: $slate-300;
-  }
-}
-
-// ── Modal de Conflicto ─────────────────────────────────────────────
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.52);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.modal-dialog {
-  background: $white;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 420px;
-  max-height: 90vh;
-  text-align: center;
-  overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }

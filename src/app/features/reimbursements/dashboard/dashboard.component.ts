@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
-import { Reimbursement, ReimbursementFilters, ReimbursementStatus } from '../../../core/models/reimbursement.model';
+import {
+  ACTIVE_REIMBURSEMENT_STATUSES,
+  Reimbursement,
+  ReimbursementFilters,
+  ReimbursementStatus
+} from '../../../core/models/reimbursement.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,15 +29,15 @@ export class DashboardComponent implements OnInit {
   // Sincronizado con ReimbursementFilters
   filters: ReimbursementFilters = { uuid: '', nombre_solicitante: '', estatus: '' };
 
-  totalSolicitudesHoy = 0;
+  totalSolicitudes = 0;
   solicitudesPendientes = 0;
-  solicitudesRechazadas = 0;
-  totalAcumulado = 0;
+  solicitudesEnRevision = 0;
+  solicitudesInfoSolicitada = 0;
 
   today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   // Sincronizado con ReimbursementStatus (MAYÚSCULAS)[cite: 1, 9]
-  estados: ReimbursementStatus[] = ['APROBADO', 'PENDIENTE', 'EN REVISIÓN', 'RECHAZADO'];
+  estados: ReimbursementStatus[] = [...ACTIVE_REIMBURSEMENT_STATUSES];
 
   ngOnInit(): void {
     this.loadData();
@@ -40,18 +45,17 @@ export class DashboardComponent implements OnInit {
 
   private loadData(): void {
     this.reimbursementService.getReimbursements().subscribe(data => {
-      this.reimbursements = data;
-      this.filteredReimbursements = data;
+      this.reimbursements = data.filter(r => ACTIVE_REIMBURSEMENT_STATUSES.includes(r.estatus));
+      this.applyFilters();
       this.calculateStats(); // Las estadísticas ahora se calculan con datos reales
     });
   }
 
   private calculateStats(): void {
-    const stats = this.reimbursementService.getStats(this.reimbursements);
-    this.totalSolicitudesHoy = stats.total;
-    this.solicitudesPendientes = stats.pendientes;
-    this.solicitudesRechazadas = stats.rechazados;
-    this.totalAcumulado = stats.acumulado;
+    this.totalSolicitudes = this.reimbursements.length;
+    this.solicitudesPendientes = this.reimbursements.filter(r => r.estatus === 'PENDIENTE').length;
+    this.solicitudesEnRevision = this.reimbursements.filter(r => r.estatus === 'EN REVISIÓN').length;
+    this.solicitudesInfoSolicitada = this.reimbursements.filter(r => r.estatus === 'INFO_SOLICITADA').length;
   }
 
   applyFilters(): void {
@@ -90,7 +94,12 @@ export class DashboardComponent implements OnInit {
   }
 
   exportData(): void {
-    const rows = this.filteredReimbursements.length > 0 ? this.filteredReimbursements : this.reimbursements;
+    if (this.filteredReimbursements.length === 0) {
+      alert('No hay datos para exportar con los filtros actuales.');
+      return;
+    }
+
+    const rows = this.filteredReimbursements;
     const exportRows = rows.map(r => ({
       'Folio DRH': r.uuid,
       'Fecha Recepcion': r.fecha_recepcion,
@@ -110,6 +119,6 @@ export class DashboardComponent implements OnInit {
 
   // El ID ahora es number
   navigateToDetail(id: number): void {
-    this.router.navigate(['/reembolso', id]);
+    this.router.navigate(['/reembolso', id], { queryParams: { returnUrl: '/' } });
   }
 }
