@@ -30,9 +30,9 @@ export class ReimbursementDetailComponent implements OnInit {
   estadoActual: ReimbursementStatus = 'PENDIENTE';
   estadoOriginal: ReimbursementStatus = 'PENDIENTE';
   estadoActualizadoMensaje: string | null = null;
-  returnUrl: '/' | '/historial' = '/';
   isLoading = true;
   notFound = false;
+  returnUrl = '/';
 
   documents: ViewerDocument[] = [];
   activeDocumentId: string | null = null;
@@ -54,7 +54,7 @@ export class ReimbursementDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.returnUrl = this.getSafeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -78,7 +78,10 @@ export class ReimbursementDetailComponent implements OnInit {
           // 1. Lo cambiamos visualmente de inmediato para que el admin sepa que lo está leyendo
           this.estadoActual = 'EN REVISIÓN';
 
-          // ¡SE ELIMINÓ LA LLAMADA AL BACKEND PARA PERMITIR EL BLOQUEO OPTIMISTA!
+          // 2. Avisamos al backend de inmediato para que se refleje en el Dashboard de todos
+          this.reimbursementService.updateReimbursementStatus(data.id, 'EN REVISIÓN', '').subscribe({
+            error: (err) => console.error('Error al cambiar estado a En Revisión', err)
+          });
         } else {
           // Si ya estaba en revisión, aprobado o rechazado, lo dejamos como está
           this.estadoActual = data.estatus;
@@ -110,7 +113,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
   closeConflictModal(): void {
     this.showConflictModal = false;
-    this.router.navigateByUrl(this.returnUrl);
+    this.router.navigate(['/']); // Regresa al panel principal
   }
 
   confirmarCambioEstado(): void {
@@ -141,7 +144,7 @@ export class ReimbursementDetailComponent implements OnInit {
 
             // Cerramos la caja
             this.cancelarAccion();
-            this.router.navigateByUrl(this.returnUrl);
+            this.router.navigate(['/']);
           }
           this.isSubmittingStatus = false;
         },
@@ -249,9 +252,5 @@ export class ReimbursementDetailComponent implements OnInit {
         if (this.documents.length > 0) this.toggleDocument(this.documents[0].id);
       }
     });
-  }
-
-  private getSafeReturnUrl(value: string | null): '/' | '/historial' {
-    return value === '/historial' ? '/historial' : '/';
   }
 }
