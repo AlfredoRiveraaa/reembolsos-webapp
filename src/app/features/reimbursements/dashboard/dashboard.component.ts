@@ -1,8 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
+import { interval, Subscription } from 'rxjs';
+import { startWith, switchMap } from 'rxjs/operators';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
 import {
   ACTIVE_REIMBURSEMENT_STATUSES,
@@ -18,10 +20,13 @@ import {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   // Inyección de dependencias moderna (Angular 19)
   private reimbursementService = inject(ReimbursementService);
   private router = inject(Router);
+
+  // --- NUEVO: Temporizador para la recarga en tiempo real ---
+  private pollingSubscription?: Subscription;
 
   reimbursements: Reimbursement[] = [];
   filteredReimbursements: Reimbursement[] = [];
@@ -36,19 +41,34 @@ export class DashboardComponent implements OnInit {
 
   today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // Sincronizado con ReimbursementStatus (MAYÚSCULAS)[cite: 1, 9]
   estados: ReimbursementStatus[] = [...ACTIVE_REIMBURSEMENT_STATUSES];
 
   ngOnInit(): void {
-    this.loadData();
+    this.iniciarPolling();
   }
 
-  private loadData(): void {
-    this.reimbursementService.getReimbursements().subscribe(data => {
-      this.reimbursements = data.filter(r => ACTIVE_REIMBURSEMENT_STATUSES.includes(r.estatus));
-      this.applyFilters();
-      this.calculateStats(); // Las estadísticas ahora se calculan con datos reales
-    });
+  ngOnDestroy(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+    }
+  }
+
+  private iniciarPolling(): void {
+    this.pollingSubscription = interval(15000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.reimbursementService.getReimbursements())
+      )
+      .subscribe({
+        next: (data) => {
+          this.reimbursements = data.filter(r => ACTIVE_REIMBURSEMENT_STATUSES.includes(r.estatus));
+          this.applyFilters();
+          this.calculateStats();
+        },
+        error: (err) => {
+          console.error('Error recargando el dashboard en tiempo real:', err);
+        }
+      });
   }
 
   private calculateStats(): void {
@@ -60,7 +80,6 @@ export class DashboardComponent implements OnInit {
 
   applyFilters(): void {
     this.filteredReimbursements = this.reimbursements.filter(r => {
-      // Cambio de folioDRH -> uuid y nombreTrabajador -> nombre_solicitante
       if (this.filters.uuid && !r.uuid.toLowerCase().includes(this.filters.uuid.toLowerCase())) return false;
       if (this.filters.nombre_solicitante && !r.nombre_solicitante.toLowerCase().includes(this.filters.nombre_solicitante.toLowerCase())) return false;
       if (this.filters.estatus && r.estatus !== this.filters.estatus) return false;
@@ -117,7 +136,6 @@ export class DashboardComponent implements OnInit {
     XLSX.writeFile(workbook, `reembolsos_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
-  // El ID ahora es number
   navigateToDetail(id: number): void {
     this.router.navigate(['/reembolso', id], { queryParams: { returnUrl: '/' } });
   }
