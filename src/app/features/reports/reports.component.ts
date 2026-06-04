@@ -303,7 +303,7 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get pendingRequests(): number {
-    return this.sumMatchingStatuses(['PENDIENTE', 'REVISI']);
+    return this.sumMatchingStatuses(['PENDIENTE', 'REVISI', 'INFO']);
   }
 
   get rejectedRequests(): number {
@@ -393,6 +393,10 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (normalized.includes('RECHAZADO')) {
       return 'status-rejected';
+    }
+
+    if (normalized.includes('INFO')) {
+      return 'status-info';
     }
 
     if (normalized.includes('PENDIENTE')) {
@@ -711,15 +715,19 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     const normalized = this.normalizeStatus(status);
 
     if (normalized.includes('APROBADO')) {
-      return '#10b981';
+      return '#16a34a';
     }
 
     if (normalized.includes('RECHAZADO')) {
       return '#ef4444';
     }
 
+    if (normalized.includes('INFO')) {
+      return '#eab308';
+    }
+
     if (normalized.includes('PENDIENTE')) {
-      return '#f59e0b';
+      return '#f97316';
     }
 
     if (normalized.includes('REVISI')) {
@@ -753,8 +761,8 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
       { Indicador: 'Monto reembolsado', Valor: this.totalAnnualAmount },
       { Indicador: 'Solicitudes aprobadas', Valor: this.approvedRequests },
       { Indicador: 'Participacion aprobadas', Valor: this.formatPercent(this.approvedShare) },
-      { Indicador: 'Solicitudes pendientes o en revision', Valor: this.pendingRequests },
-      { Indicador: 'Participacion pendientes o revision', Valor: this.formatPercent(this.pendingShare) },
+      { Indicador: 'Solicitudes pendientes, en revision o info solicitada', Valor: this.pendingRequests },
+      { Indicador: 'Participacion pendientes, revision o info solicitada', Valor: this.formatPercent(this.pendingShare) },
       { Indicador: 'Solicitudes rechazadas', Valor: this.rejectedRequests },
       { Indicador: 'Participacion rechazadas', Valor: this.formatPercent(this.rejectedShare) },
       { Indicador: 'Mes con mayor monto', Valor: this.selectedMonthLabel },

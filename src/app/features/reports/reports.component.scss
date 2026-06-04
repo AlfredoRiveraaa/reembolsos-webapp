@@ -261,9 +261,12 @@
     height: 3px;
   }
 
+  &.kpi-navy::before { background: $navy; }
   &.kpi-blue::before { background: $blue-kpi; }
   &.kpi-green::before { background: $green-kpi; }
   &.kpi-amber::before { background: $amber-kpi; }
+  &.kpi-orange::before { background: $orange-kpi; }
+  &.kpi-yellow::before { background: $yellow-kpi; }
   &.kpi-red::before { background: $red-kpi; }
 }
 
@@ -289,9 +292,12 @@
   justify-content: center;
   flex-shrink: 0;
 
+  .kpi-navy & { background: #eef2f7; color: $navy; }
   .kpi-blue & { background: #eff6ff; color: $blue-kpi; }
   .kpi-green & { background: #ecfdf5; color: $green-kpi; }
   .kpi-amber & { background: #fffbeb; color: $amber-kpi; }
+  .kpi-orange & { background: #fff7ed; color: $orange-kpi; }
+  .kpi-yellow & { background: #fef9c3; color: $yellow-kpi; }
   .kpi-red & { background: #fef2f2; color: $red-kpi; }
 }
 
@@ -328,9 +334,12 @@
   height: 100%;
   border-radius: 4px;
 
+  .kpi-navy & { background: $navy; }
   .kpi-blue & { background: $blue-kpi; }
   .kpi-green & { background: $green-kpi; }
   .kpi-amber & { background: $amber-kpi; }
+  .kpi-orange & { background: $orange-kpi; }
+  .kpi-yellow & { background: $yellow-kpi; }
   .kpi-red & { background: $red-kpi; }
 }
 
@@ -504,8 +513,9 @@
 
   &.status-approved { background: $green-kpi; }
   &.status-rejected { background: $red-kpi; }
-  &.status-pending { background: $amber-kpi; }
+  &.status-pending { background: $orange-kpi; }
   &.status-review { background: $blue-kpi; }
+  &.status-info { background: $yellow-kpi; }
 }
 
 .table-panel {
