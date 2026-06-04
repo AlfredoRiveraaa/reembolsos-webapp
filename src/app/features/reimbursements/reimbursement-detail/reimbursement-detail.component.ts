@@ -41,6 +41,10 @@ export class ReimbursementDetailComponent implements OnInit {
   actionComment: string = '';
   isSubmittingStatus: boolean = false;
 
+  // --- VARIABLES PARA EL MODAL DE CONFLICTO ---
+  showConflictModal: boolean = false;
+  conflictMessage: string = '';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -68,13 +72,10 @@ export class ReimbursementDetailComponent implements OnInit {
 
         // --- TRANSICIÓN AUTOMÁTICA ---
         if (data.estatus === 'PENDIENTE') {
-          // 1. Lo cambiamos visualmente de inmediato
+          // 1. Lo cambiamos visualmente de inmediato para que el admin sepa que lo está leyendo
           this.estadoActual = 'EN REVISIÓN';
 
-          // 2. Le avisamos al backend de forma silenciosa (sin comentarios extra)
-          this.reimbursementService.updateReimbursementStatus(id, 'EN REVISIÓN').subscribe({
-            error: (err) => console.error('Error al actualizar a En Revisión automáticamente', err)
-          });
+          // ¡SE ELIMINÓ LA LLAMADA AL BACKEND PARA PERMITIR EL BLOQUEO OPTIMISTA!
         } else {
           // Si ya estaba en revisión, aprobado o rechazado, lo dejamos como está
           this.estadoActual = data.estatus;
@@ -102,6 +103,11 @@ export class ReimbursementDetailComponent implements OnInit {
   cancelarAccion(): void {
     this.pendingAction = null;
     this.actionComment = '';
+  }
+
+  closeConflictModal(): void {
+    this.showConflictModal = false;
+    this.router.navigate(['/']); // Regresa al panel principal
   }
 
   confirmarCambioEstado(): void {
@@ -138,8 +144,16 @@ export class ReimbursementDetailComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          alert('Hubo un error al actualizar el estado y enviar el correo.');
-          this.isSubmittingStatus = false;
+          this.isSubmittingStatus = false; // Movimos esto arriba
+          
+          if (err.status === 409) {
+            // En lugar del alert, llenamos el modal y lo mostramos
+            this.conflictMessage = err.error?.detail || 'Esta solicitud ya fue procesada por otro compañero.';
+            this.showConflictModal = true;
+            this.cancelarAccion(); // Cerramos la cajita de comentarios
+          } else {
+            alert('Hubo un error al actualizar el estado y enviar el correo.');
+          }
         }
       });
   }
