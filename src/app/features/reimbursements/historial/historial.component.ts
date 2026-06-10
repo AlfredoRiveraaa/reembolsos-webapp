@@ -32,7 +32,7 @@ export class HistorialComponent implements OnInit {
 
   // Paginación
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 20;
   totalPages = 1;
 
   // Estadísticas

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { ReimbursementService } from '../../../core/services/reimbursement.servi
 import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
 
 type ViewerDocumentType = 'pdf' | 'txt';
+type FormaPagoValue = string | number | null | undefined;
 
 interface ViewerDocument {
   id: string;
@@ -25,7 +26,7 @@ interface ViewerDocument {
   templateUrl: './reimbursement-detail.component.html',
   styleUrl: './reimbursement-detail.component.scss'
 })
-export class ReimbursementDetailComponent implements OnInit {
+export class ReimbursementDetailComponent implements OnInit, OnDestroy {
   detalle: Reimbursement | undefined;
   estadoActual: ReimbursementStatus = 'PENDIENTE';
   estadoOriginal: ReimbursementStatus = 'PENDIENTE';
@@ -36,6 +37,38 @@ export class ReimbursementDetailComponent implements OnInit {
 
   documents: ViewerDocument[] = [];
   activeDocumentId: string | null = null;
+  isDocumentModalOpen = false;
+  readonly workerIdPlaceholder = 'TRAB-000001';
+
+  private readonly formaPagoLabels: Record<string, string> = {
+    '01': 'Efectivo',
+    '02': 'Cheque nominativo',
+    '03': 'Transferencia electrónica de fondos',
+    '04': 'Tarjeta de crédito',
+    '05': 'Monedero electrónico',
+    '06': 'Dinero electrónico',
+    '08': 'Vales de despensa',
+    '12': 'Dación en pago',
+    '13': 'Pago por subrogación',
+    '14': 'Pago por consignación',
+    '15': 'Condonación',
+    '17': 'Compensación',
+    '23': 'Novación',
+    '24': 'Confusión',
+    '25': 'Remisión de deuda',
+    '26': 'Prescripción o caducidad',
+    '27': 'A satisfacción del acreedor',
+    '28': 'Tarjeta de débito',
+    '29': 'Tarjeta de servicios',
+    '30': 'Aplicación de anticipos',
+    '31': 'Intermediario pagos',
+    '99': 'Por definir'
+  };
+
+  private readonly metodoPagoLabels: Record<string, string> = {
+    PUE: 'Pago en una sola exhibición',
+    PPD: 'Pago en parcialidades o diferido'
+  };
 
   // --- VARIABLES PARA EL FLUJO DE DECISION ---
   pendingAction: ReimbursementStatus | null = null;
@@ -63,6 +96,21 @@ export class ReimbursementDetailComponent implements OnInit {
     } else {
       this.notFound = true;
       this.isLoading = false;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.documents.forEach(document => {
+      if (document.url) {
+        URL.revokeObjectURL(document.url);
+      }
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  closeActiveModal(): void {
+    if (this.isDocumentModalOpen) {
+      this.closeDocumentModal();
     }
   }
 
@@ -213,12 +261,51 @@ export class ReimbursementDetailComponent implements OnInit {
     return new Date(dateString).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
+  getFormaPagoLabel(reimbursement: Reimbursement): string {
+    return this.formatFormaPago(reimbursement.forma_pago ?? reimbursement.foma_pago);
+  }
+
+  getTipoPagoLabel(reimbursement: Reimbursement): string {
+    return this.formatFormaPago(
+      reimbursement.tipo_pago ??
+      reimbursement.tipo_de_pago ??
+      reimbursement.metodo_pago ??
+      reimbursement.forma_pago ??
+      reimbursement.foma_pago
+    );
+  }
+
+  formatFormaPago(value: FormaPagoValue): string {
+    const rawValue = String(value ?? '').trim();
+    if (!rawValue || rawValue.toUpperCase() === 'NULL') {
+      return 'No disponible';
+    }
+
+    const code = /^\d+$/.test(rawValue) ? rawValue.padStart(2, '0') : rawValue.toUpperCase();
+    const label = this.formaPagoLabels[code] ?? this.metodoPagoLabels[code];
+    return label ? `${code} - ${label}` : rawValue;
+  }
+
   get activeDocument(): ViewerDocument | undefined {
     return this.activeDocumentId ? this.documents.find(d => d.id === this.activeDocumentId) : undefined;
   }
 
   descargarDocumentoActivo(): void {
     if (this.activeDocument) this.descargarDocumento(this.activeDocument);
+  }
+
+  openDocumentModal(documentId?: string): void {
+    if (documentId) {
+      this.toggleDocument(documentId);
+    }
+
+    if (this.activeDocument) {
+      this.isDocumentModalOpen = true;
+    }
+  }
+
+  closeDocumentModal(): void {
+    this.isDocumentModalOpen = false;
   }
 
   descargarDocumento(viewerDocument: ViewerDocument): void {

@@ -15,14 +15,6 @@
           <p class="page-sub">Gestión de solicitudes de reembolso — hoy {{ today }}</p>
         </div>
       </div>
-      <button class="btn-export" (click)="exportData()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7,10 12,15 17,10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Exportar
-      </button>
     </div>
   </div>
 
@@ -143,7 +135,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (r of filteredReimbursements; track r.id) {
+            @for (r of paginatedReimbursements; track r.id) {
               <tr
                 class="clickable-row"
                 tabindex="0"
@@ -189,7 +181,22 @@
         </div>
       } @else {
         <div class="table-footer">
-          <span class="result-count">{{ filteredReimbursements.length }} resultado{{ filteredReimbursements.length !== 1 ? 's' : '' }}</span>
+          <span class="result-count">Mostrando {{ paginatedReimbursements.length }} de {{ filteredReimbursements.length }} resultado{{ filteredReimbursements.length !== 1 ? 's' : '' }}</span>
+          @if (totalPages > 1) {
+            <div class="pagination">
+              <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <span class="pagination-info">{{ currentPage }} / {{ totalPages }}</span>
+              <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+          }
         </div>
       }
     </div>

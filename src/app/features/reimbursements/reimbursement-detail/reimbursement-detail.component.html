@@ -53,37 +53,62 @@
     <!-- ── LEFT: Data Panel ── -->
     <div class="data-panel">
       <!-- Solicitante -->
-      <div class="info-card">
+      <div class="info-card detail-summary-card">
         <div class="card-label">Información de la Solicitud</div>
-        <div class="meta-grid">
-          <div class="meta-item">
-            <span class="meta-key">Folio DRH</span>
-            <span class="meta-val meta-name">{{ detalle.uuid }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-key">Correo Electrónico</span>
-            <span class="meta-val mono">{{ detalle.correo_solicitante }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-key">Nombre Trabajador</span>
-            <span class="meta-val meta-name">{{ detalle.nombre_solicitante }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-key">Fecha Recepción</span>
-            <span class="meta-val">{{ formatDate(detalle.fecha_recepcion) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-key">Fecha de Factura</span>
-            <span class="meta-val">{{ detalle.fecha_factura ? formatDate(detalle.fecha_factura) : '—' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-key">Fecha Resolución</span>
-            <span class="meta-val">{{ detalle.fecha_resolucion ? formatDate(detalle.fecha_resolucion) : '—' }}</span>
-          </div>
-          <div class="meta-item full-width">
-            <span class="meta-key">Observaciones de RH</span>
-            <span class="meta-val meta-desc">{{ detalle.mensaje || '—' }}</span>
-          </div>
+        <div class="detail-summary">
+          <section class="summary-group">
+            <h3 class="summary-heading">Trabajador</h3>
+            <dl class="summary-list">
+              <div class="summary-row">
+                <dt>ID trabajador</dt>
+                <dd class="summary-value-code">{{ workerIdPlaceholder }}</dd>
+              </div>
+              <div class="summary-row">
+                <dt>Nombre trabajador</dt>
+                <dd class="summary-value-strong">{{ detalle.nombre_solicitante }}</dd>
+              </div>
+              <div class="summary-row">
+                <dt>Correo electrónico</dt>
+                <dd>{{ detalle.correo_solicitante }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="summary-group">
+            <h3 class="summary-heading">Solicitud</h3>
+            <dl class="summary-list">
+              <div class="summary-row">
+                <dt>Folio DRH</dt>
+                <dd class="summary-value-code">{{ detalle.uuid }}</dd>
+              </div>
+              <div class="summary-row">
+                <dt>Fecha recepción</dt>
+                <dd>{{ formatDate(detalle.fecha_recepcion) }}</dd>
+              </div>
+              <div class="summary-row">
+                <dt>Fecha factura</dt>
+                <dd>{{ detalle.fecha_factura ? formatDate(detalle.fecha_factura) : '—' }}</dd>
+              </div>
+              <div class="summary-row">
+                <dt>Tipo de pago</dt>
+                <dd>{{ getTipoPagoLabel(detalle) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="summary-group summary-group-wide">
+            <h3 class="summary-heading">Seguimiento RH</h3>
+            <dl class="summary-list">
+              <div class="summary-row">
+                <dt>Fecha resolución</dt>
+                <dd>{{ detalle.fecha_resolucion ? formatDate(detalle.fecha_resolucion) : '—' }}</dd>
+              </div>
+              <div class="summary-row summary-row-note">
+                <dt>Observaciones RH</dt>
+                <dd class="summary-value-note">{{ detalle.mensaje || '—' }}</dd>
+              </div>
+            </dl>
+          </section>
         </div>
       </div>
 
@@ -159,14 +184,25 @@
             }
           </div>
           @if (activeDocument) {
-            <button class="viewer-dl-btn" (click)="descargarDocumentoActivo()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Descargar
-            </button>
+            <div class="viewer-actions">
+              <button class="viewer-dl-btn" (click)="openDocumentModal()" aria-label="Abrir documento en visor ampliado">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+                  <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+                  <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+                  <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                </svg>
+                Ampliar
+              </button>
+              <button class="viewer-dl-btn" (click)="descargarDocumentoActivo()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7,10 12,15 17,10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Descargar
+              </button>
+            </div>
           }
         </div>
         <div class="viewer-body">
@@ -270,6 +306,56 @@
       }
 
     </div>
+  </div>
+}
+
+@if (isDocumentModalOpen && activeDocument) {
+  <div class="document-modal-backdrop" (click)="closeDocumentModal()">
+    <section class="document-modal" role="dialog" aria-modal="true" [attr.aria-label]="'Vista ampliada de ' + activeDocument.name" (click)="$event.stopPropagation()">
+      <header class="document-modal-header">
+        <div class="document-modal-title-wrap">
+          <span class="document-modal-kicker">Documento adjunto</span>
+          <h2 class="document-modal-title">{{ activeDocument.name }}</h2>
+        </div>
+        <div class="document-modal-actions">
+          <button class="document-modal-action" (click)="descargarDocumentoActivo()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Descargar
+          </button>
+          <button class="document-modal-close" (click)="closeDocumentModal()" aria-label="Cerrar visor ampliado">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="document-modal-body">
+        @if (activeDocument.type === 'pdf') {
+          @if (activeDocument.url) {
+            <iframe
+              class="document-modal-frame"
+              [title]="activeDocument.name"
+              [src]="activeDocument.safeUrl"
+            ></iframe>
+          } @else {
+            <div class="document-modal-loading">
+              <div class="spinner"></div>
+              <p>Cargando documento...</p>
+            </div>
+          }
+        } @else {
+          <div class="document-modal-xml">
+            <pre><code>{{ activeDocument.xmlContent || 'Cargando contenido...' }}</code></pre>
+          </div>
+        }
+      </div>
+    </section>
   </div>
 }
 

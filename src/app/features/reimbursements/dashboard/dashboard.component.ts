@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
-import * as XLSX from 'xlsx';
 import { interval, Subscription } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
@@ -39,6 +38,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   solicitudesEnRevision = 0;
   solicitudesInfoSolicitada = 0;
 
+  // Paginacion
+  currentPage = 1;
+  itemsPerPage = 20;
+  totalPages = 1;
+
   today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   estados: ReimbursementStatus[] = [...ACTIVE_REIMBURSEMENT_STATUSES];
@@ -62,7 +66,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.reimbursements = data.filter(r => ACTIVE_REIMBURSEMENT_STATUSES.includes(r.estatus));
-          this.applyFilters();
+          this.applyFilters(false);
           this.calculateStats();
         },
         error: (err) => {
@@ -78,18 +82,41 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.solicitudesInfoSolicitada = this.reimbursements.filter(r => r.estatus === 'INFO_SOLICITADA').length;
   }
 
-  applyFilters(): void {
+  applyFilters(resetPage = true): void {
     this.filteredReimbursements = this.reimbursements.filter(r => {
       if (this.filters.uuid && !r.uuid.toLowerCase().includes(this.filters.uuid.toLowerCase())) return false;
       if (this.filters.nombre_solicitante && !r.nombre_solicitante.toLowerCase().includes(this.filters.nombre_solicitante.toLowerCase())) return false;
       if (this.filters.estatus && r.estatus !== this.filters.estatus) return false;
       return true;
-    });
+    }).sort((a, b) =>
+      new Date(b.fecha_recepcion).getTime() - new Date(a.fecha_recepcion).getTime() ||
+      b.id - a.id
+    );
+
+    this.totalPages = Math.max(1, Math.ceil(this.filteredReimbursements.length / this.itemsPerPage));
+
+    if (resetPage) {
+      this.currentPage = 1;
+    } else if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
   }
 
   clearFilters(): void {
     this.filters = { uuid: '', nombre_solicitante: '', estatus: '' };
     this.applyFilters();
+  }
+
+  get paginatedReimbursements(): Reimbursement[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredReimbursements.slice(start, end);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   getEstadoClass(estatus: ReimbursementStatus): string {
@@ -110,30 +137,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   formatDate(dateString: string): string {
     if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
-
-  exportData(): void {
-    if (this.filteredReimbursements.length === 0) {
-      alert('No hay datos para exportar con los filtros actuales.');
-      return;
-    }
-
-    const rows = this.filteredReimbursements;
-    const exportRows = rows.map(r => ({
-      'Folio DRH': r.uuid,
-      'Fecha Recepcion': r.fecha_recepcion,
-      'Correo Solicitante': r.correo_solicitante,
-      'Nombre Solicitante': r.nombre_solicitante,
-      'Estatus': r.estatus,
-      'Monto': r.monto,
-      'Proveedor': r.nombre_proveedor,
-      'Fecha Resolucion': r.fecha_resolucion || 'N/A'
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reembolsos');
-    XLSX.writeFile(workbook, `reembolsos_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   navigateToDetail(id: number): void {

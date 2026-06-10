@@ -22,6 +22,11 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   users: SystemUser[] = [];
   filteredUsers: SystemUser[] = [];
 
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+
   // Filters
   searchTerm = '';
   roleFilter: UserRole | '' = '';
@@ -88,7 +93,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       .subscribe(users => {
         this.users = users;
         this.calculateStats();
-        this.applyFilters();
+        this.applyFilters(false);
       });
 
     this.userManagementService
@@ -109,7 +114,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.adminUsers = this.users.filter(u => (u.role === 'admin' || u.role === 'admin_rh') && u.isActive).length;
   }
 
-  applyFilters(): void {
+  applyFilters(resetPage = true): void {
     let filtered = [...this.users];
 
     if (this.searchTerm.trim()) {
@@ -133,6 +138,14 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.filteredUsers = filtered.sort((a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
+
+    this.totalPages = Math.max(1, Math.ceil(this.filteredUsers.length / this.itemsPerPage));
+
+    if (resetPage) {
+      this.currentPage = 1;
+    } else if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
   }
 
   clearFilters(): void {
@@ -140,6 +153,18 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.roleFilter = '';
     this.statusFilter = 'all';
     this.applyFilters();
+  }
+
+  get paginatedUsers(): SystemUser[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredUsers.slice(start, end);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   openCreateModal(): void {

@@ -8,7 +8,11 @@ export interface Reimbursement {
   estatus: ReimbursementStatus;
   fecha_recepcion: string;
 
-  forma_pago?: string;
+  forma_pago?: string | number | null;
+  foma_pago?: string | number | null;
+  tipo_pago?: string | number | null;
+  tipo_de_pago?: string | number | null;
+  metodo_pago?: string | number | null;
   rfc_emisor?: string;
   fecha_factura?: string;
   mensaje?: string;
