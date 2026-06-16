@@ -31,7 +31,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   filteredReimbursements: Reimbursement[] = [];
 
   // Sincronizado con ReimbursementFilters
-  filters: ReimbursementFilters = { uuid: '', nombre_solicitante: '', estatus: '' };
+  filters: ReimbursementFilters = { uuid: '', nombre_solicitante: '', estatus: '', id_trabajador: '' };
 
   totalSolicitudes = 0;
   solicitudesPendientes = 0;
@@ -87,6 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (this.filters.uuid && !r.uuid.toLowerCase().includes(this.filters.uuid.toLowerCase())) return false;
       if (this.filters.nombre_solicitante && !r.nombre_solicitante.toLowerCase().includes(this.filters.nombre_solicitante.toLowerCase())) return false;
       if (this.filters.estatus && r.estatus !== this.filters.estatus) return false;
+      if (this.filters.id_trabajador && (!r.id_trabajador || !r.id_trabajador.toLowerCase().includes(this.filters.id_trabajador.toLowerCase()))) return false;
       return true;
     }).sort((a, b) =>
       new Date(b.fecha_recepcion).getTime() - new Date(a.fecha_recepcion).getTime() ||
@@ -103,7 +104,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.filters = { uuid: '', nombre_solicitante: '', estatus: '' };
+    this.filters = { uuid: '', nombre_solicitante: '', estatus: '', id_trabajador: '' };
     this.applyFilters();
   }
 

@@ -38,7 +38,6 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
   documents: ViewerDocument[] = [];
   activeDocumentId: string | null = null;
   isDocumentModalOpen = false;
-  readonly workerIdPlaceholder = 'TRAB-000001';
 
   private readonly formaPagoLabels: Record<string, string> = {
     '01': 'Efectivo',
@@ -115,31 +114,38 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadReimbursement(id: number): void {
-    this.reimbursementService.getReimbursementById(id).subscribe(data => {
-      if (data) {
-        this.detalle = data;
-        this.estadoOriginal = data.estatus;
-        this.estadoActualizadoMensaje = null;
+    this.reimbursementService.getReimbursementById(id).subscribe({
+      next: (data) => {
+        if (data) {
+          this.detalle = data;
+          this.estadoOriginal = data.estatus;
+          this.estadoActualizadoMensaje = null;
 
-        // --- TRANSICIÓN AUTOMÁTICA ---
-        if (data.estatus === 'PENDIENTE') {
-          // 1. Lo cambiamos visualmente de inmediato para que el admin sepa que lo está leyendo
-          this.estadoActual = 'EN REVISIÓN';
+          // --- TRANSICIÓN AUTOMÁTICA ---
+          if (data.estatus === 'PENDIENTE') {
+            // 1. Lo cambiamos visualmente de inmediato para que el admin sepa que lo está leyendo
+            this.estadoActual = 'EN REVISIÓN';
 
-          // 2. Avisamos al backend de inmediato para que se refleje en el Dashboard de todos
-          this.reimbursementService.updateReimbursementStatus(data.id, 'EN REVISIÓN', '').subscribe({
-            error: (err) => console.error('Error al cambiar estado a En Revisión', err)
-          });
+            // 2. Avisamos al backend de inmediato para que se refleje en el Dashboard de todos
+            this.reimbursementService.updateReimbursementStatus(data.id, 'EN REVISIÓN', '').subscribe({
+              error: (err) => console.error('Error al cambiar estado a En Revisión', err)
+            });
+          } else {
+            // Si ya estaba en revisión, aprobado o rechazado, lo dejamos como está
+            this.estadoActual = data.estatus;
+          }
+
+          this.cargarArchivosExpediente(data.id);
         } else {
-          // Si ya estaba en revisión, aprobado o rechazado, lo dejamos como está
-          this.estadoActual = data.estatus;
+          this.notFound = true;
         }
-
-        this.cargarArchivosExpediente(data.id);
-      } else {
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar la solicitud de reembolso:', err);
         this.notFound = true;
+        this.isLoading = false;
       }
-      this.isLoading = false;
     });
   }
 
@@ -199,7 +205,7 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error(err);
           this.isSubmittingStatus = false; // Movimos esto arriba
-          
+
           if (err.status === 409) {
             // En lugar del alert, llenamos el modal y lo mostramos
             this.conflictMessage = err.error?.detail || 'Esta solicitud ya fue procesada por otro compañero.';

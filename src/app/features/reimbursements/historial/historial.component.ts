@@ -82,7 +82,8 @@ export class HistorialComponent implements OnInit {
       filtered = filtered.filter(r =>
         r.uuid.toLowerCase().includes(term) ||
         r.nombre_solicitante.toLowerCase().includes(term) ||
-        r.correo_solicitante.toLowerCase().includes(term)
+        r.correo_solicitante.toLowerCase().includes(term) ||
+        (r.id_trabajador && r.id_trabajador.toLowerCase().includes(term))
       );
     }
 
@@ -159,6 +160,7 @@ export class HistorialComponent implements OnInit {
       'Folio DRH': r.uuid,
       'Fecha Recepción': this.formatDate(r.fecha_recepcion),
       'Correo Solicitante': r.correo_solicitante,
+      'ID Trabajador': r.id_trabajador || '—',
       'Nombre Trabajador': r.nombre_solicitante,
       'Observaciones': r.mensaje || '',
       'Proveedor / Hospital': r.nombre_proveedor,
@@ -176,6 +178,7 @@ export class HistorialComponent implements OnInit {
       { wch: 15 }, // Fecha Rec
       { wch: 30 }, // Nombre
       { wch: 30 }, // Correo
+      { wch: 15 }, // ID Trabajador
       { wch: 35 }, // Proveedor
       { wch: 12 }, // Monto
       { wch: 15 }, // Estado

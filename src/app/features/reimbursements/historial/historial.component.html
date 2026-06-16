@@ -148,6 +148,7 @@
               <th>Folio DRH</th>
               <th>Fecha Recepción</th>
               <th>Correo Solicitante</th>
+              <th>ID Trabajador</th>
               <th>Nombre Trabajador</th>
               <th>Observaciones</th>
               <th class="col-right">Monto</th>
@@ -169,6 +170,7 @@
                 <td class="td-folio">{{ r.uuid }}</td>
                 <td class="td-date">{{ formatDate(r.fecha_recepcion) }}</td>
                 <td class="td-id">{{ r.correo_solicitante }}</td>
+                <td><strong>{{ r.id_trabajador || '—' }}</strong></td>
                 <td class="td-name">{{ r.nombre_solicitante }}</td>
                 <td class="td-comment">{{ r.mensaje || '—' }}</td>
                 <td class="td-amount">${{ formatCurrency(r.monto) }}</td>

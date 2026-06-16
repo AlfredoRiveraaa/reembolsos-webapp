@@ -31,11 +31,11 @@
 
     <div class="topbar-center">
       <div class="topbar-content">
-        
+
         <h1 class="topbar-title">
         <span>Nombre de trabajador:</span> {{ detalle.nombre_solicitante }}
         </h1>
-        
+
       </div>
     </div>
 
@@ -61,7 +61,7 @@
             <dl class="summary-list">
               <div class="summary-row">
                 <dt>ID trabajador</dt>
-                <dd class="summary-value-code">{{ workerIdPlaceholder }}</dd>
+                <dd class="summary-value-code"><strong>{{ detalle.id_trabajador || '—' }}</strong></dd>
               </div>
               <div class="summary-row">
                 <dt>Nombre trabajador</dt>
@@ -221,7 +221,7 @@
             </div>
           } @else {
             <div class="file-viewer-wrapper">
-              
+
 
               @if (activeDocument.type === 'pdf') {
                 <iframe
@@ -363,14 +363,14 @@
 @if (showConflictModal) {
   <div class="modal-overlay" (click)="closeConflictModal()">
     <div class="modal-dialog" (click)="$event.stopPropagation()">
-      
+
       <div class="modal-body" style="padding: 30px 24px;">
         <div style="color: #f59e0b; margin-bottom: 16px; display: flex; justify-content: center;">
           <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
         </div>
-        
+
         <h3 style="margin-top: 0; color: #1e293b; font-size: 1.25rem; font-weight: 600;">¡Aviso de Concurrencia!</h3>
         <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5; margin-bottom: 0;">
           {{ conflictMessage }}
@@ -382,7 +382,7 @@
           Entendido, volver a la lista
         </button>
       </div>
-      
+
     </div>
   </div>
 }

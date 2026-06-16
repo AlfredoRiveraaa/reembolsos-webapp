@@ -4,6 +4,7 @@ export interface Reimbursement {
   monto: number;
   correo_solicitante: string;
   nombre_solicitante: string;
+  id_trabajador?: string;
   nombre_proveedor: string;
   estatus: ReimbursementStatus;
   fecha_recepcion: string;
@@ -39,6 +40,7 @@ export interface ReimbursementFilters {
   uuid: string;
   nombre_solicitante: string;
   estatus: string;
+  id_trabajador?: string;
 }
 
 /**
