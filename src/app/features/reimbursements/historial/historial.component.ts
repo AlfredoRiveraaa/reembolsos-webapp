@@ -157,10 +157,10 @@ export class HistorialComponent implements OnInit {
 
     // Mapeamos los datos para que las columnas del Excel tengan nombres bonitos en español
     const exportData = this.filteredReimbursements.map(r => ({
+      'ID Trabajador': r.id_trabajador || '—',
       'Folio DRH': r.uuid,
       'Fecha Recepción': this.formatDate(r.fecha_recepcion),
       'Correo Solicitante': r.correo_solicitante,
-      'ID Trabajador': r.id_trabajador || '—',
       'Nombre Trabajador': r.nombre_solicitante,
       'Observaciones': r.mensaje || '',
       'Proveedor / Hospital': r.nombre_proveedor,
@@ -174,16 +174,16 @@ export class HistorialComponent implements OnInit {
 
     // Ajustar el ancho de las columnas
     const columnWidths = [
+      { wch: 15 }, // ID Trabajador
       { wch: 15 }, // Folio
       { wch: 15 }, // Fecha Rec
-      { wch: 30 }, // Nombre
       { wch: 30 }, // Correo
-      { wch: 15 }, // ID Trabajador
-      { wch: 35 }, // Proveedor
-      { wch: 12 }, // Monto
-      { wch: 15 }, // Estado
-      { wch: 15 }, // Fecha Res
+      { wch: 30 }, // Nombre Trabajador
       { wch: 40 }, // Observaciones
+      { wch: 35 }, // Proveedor / Hospital
+      { wch: 12 }, // Monto ($)
+      { wch: 15 }, // Fecha Res
+      { wch: 15 }, // Estado
     ];
     worksheet['!cols'] = columnWidths;
 
