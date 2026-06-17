@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
+import { UserManagementService } from '../../../core/services/user-management.service';
 import { Reimbursement, ReimbursementStatus } from '../../../core/models/reimbursement.model';
+import { SystemUser } from '../../../core/models/user-management.model';
 
 type ViewerDocumentType = 'pdf' | 'txt';
 type FormaPagoValue = string | number | null | undefined;
@@ -34,6 +36,7 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
   isLoading = true;
   notFound = false;
   returnUrl = '/';
+  reviewerDisplay = '—';
 
   documents: ViewerDocument[] = [];
   activeDocumentId: string | null = null;
@@ -82,6 +85,7 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private reimbursementService: ReimbursementService,
+    private userManagementService: UserManagementService,
     private sanitizer: DomSanitizer
   ) {}
 
@@ -128,6 +132,11 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
 
             // 2. Avisamos al backend de inmediato para que se refleje en el Dashboard de todos
             this.reimbursementService.updateReimbursementStatus(data.id, 'EN REVISIÓN', '').subscribe({
+              next: (updated) => {
+                this.detalle = { ...this.detalle!, ...updated };
+                this.estadoActual = updated.estatus;
+                this.resolveReviewer(updated.revisado_por);
+              },
               error: (err) => console.error('Error al cambiar estado a En Revisión', err)
             });
           } else {
@@ -135,6 +144,7 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
             this.estadoActual = data.estatus;
           }
 
+          this.resolveReviewer(data.revisado_por);
           this.cargarArchivosExpediente(data.id);
         } else {
           this.notFound = true;
@@ -259,12 +269,42 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
     return this.estadoActual !== 'APROBADO' && this.estadoActual !== 'RECHAZADO';
   }
 
+  get isResolved(): boolean {
+    return this.estadoActual === 'APROBADO' || this.estadoActual === 'RECHAZADO';
+  }
+
+  get isHistoryDetail(): boolean {
+    return this.returnUrl === '/historial';
+  }
+
+  get shouldShowReviewer(): boolean {
+    return this.isHistoryDetail && this.isResolved;
+  }
+
+  get shouldShowResolutionDate(): boolean {
+    return this.isHistoryDetail && this.isResolved;
+  }
+
+  get hasRhObservations(): boolean {
+    return Boolean(this.detalle?.mensaje?.trim());
+  }
+
   formatCurrency(value: number): string {
     return value.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  getLastReviewDisplay(): string {
+    const reviewDate =
+      this.detalle?.fecha_ultima_revision ??
+      this.detalle?.ultima_revision ??
+      this.detalle?.fecha_ultima_apertura ??
+      this.detalle?.fecha_revision;
+
+    return reviewDate ? this.formatDate(reviewDate) : '—';
   }
 
   getFormaPagoLabel(reimbursement: Reimbursement): string {
@@ -345,5 +385,38 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
         if (this.documents.length > 0) this.toggleDocument(this.documents[0].id);
       }
     });
+  }
+
+  private resolveReviewer(reviewerId: number | null | undefined): void {
+    if (!this.shouldShowReviewer) {
+      this.reviewerDisplay = '—';
+      return;
+    }
+
+    if (reviewerId === null || reviewerId === undefined) {
+      this.reviewerDisplay = '—';
+      return;
+    }
+
+    const cachedReviewer = this.findReviewerById(this.userManagementService.getUsersSnapshot(), reviewerId);
+    if (cachedReviewer) {
+      this.reviewerDisplay = this.formatReviewerName(cachedReviewer);
+      return;
+    }
+
+    this.reviewerDisplay = `Usuario #${reviewerId}`;
+
+    this.userManagementService.loadUsers().subscribe((users) => {
+      const reviewer = this.findReviewerById(users, reviewerId);
+      this.reviewerDisplay = reviewer ? this.formatReviewerName(reviewer) : `Usuario #${reviewerId}`;
+    });
+  }
+
+  private findReviewerById(users: SystemUser[], reviewerId: number): SystemUser | undefined {
+    return users.find(user => String(user.id) === String(reviewerId));
+  }
+
+  private formatReviewerName(user: SystemUser): string {
+    return user.displayName || user.username || `Usuario #${user.id}`;
   }
 }

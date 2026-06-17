@@ -774,7 +774,7 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private getExportDetailRows(): ExportRow[] {
     return this.filteredReimbursements.map((reimbursement) => ({
-      'Folio DRH': reimbursement.uuid,
+      'ID Trabajador': reimbursement.id_trabajador || '—',
       'Fecha recepcion': this.formatDateForExport(reimbursement.fecha_recepcion),
       'Correo solicitante': reimbursement.correo_solicitante,
       'Nombre solicitante': reimbursement.nombre_solicitante,

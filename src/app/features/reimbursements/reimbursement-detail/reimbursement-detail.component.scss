@@ -326,6 +326,14 @@ $green-kpi: #16a34a;
   min-height: 0;
 }
 
+.summary-group-wide .summary-row-compact {
+  grid-template-columns: max-content minmax(0, max-content);
+  column-gap: 1.5rem;
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .summary-row {
   display: grid;
   grid-template-columns: minmax(120px, 34%) minmax(0, 1fr);
@@ -359,6 +367,7 @@ $green-kpi: #16a34a;
 }
 
 .summary-row-note {
+  grid-column: 1 / -1;
   grid-template-columns: 1fr;
   gap: 0.375rem;
   padding-bottom: 0;

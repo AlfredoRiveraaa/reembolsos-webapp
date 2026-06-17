@@ -99,14 +99,29 @@
           <section class="summary-group summary-group-wide">
             <h3 class="summary-heading">Seguimiento RH</h3>
             <dl class="summary-list">
-              <div class="summary-row">
-                <dt>Fecha resolución</dt>
-                <dd>{{ detalle.fecha_resolucion ? formatDate(detalle.fecha_resolucion) : '—' }}</dd>
-              </div>
-              <div class="summary-row summary-row-note">
-                <dt>Observaciones RH</dt>
-                <dd class="summary-value-note">{{ detalle.mensaje || '—' }}</dd>
-              </div>
+              @if (shouldShowReviewer) {
+                <div class="summary-row summary-row-compact">
+                  <dt>Responsable RH</dt>
+                  <dd class="summary-value-strong">{{ reviewerDisplay }}</dd>
+                </div>
+              }
+              @if (shouldShowResolutionDate) {
+                <div class="summary-row summary-row-compact">
+                  <dt>Fecha resolución</dt>
+                  <dd>{{ detalle.fecha_resolucion ? formatDate(detalle.fecha_resolucion) : '—' }}</dd>
+                </div>
+              } @else {
+                <div class="summary-row summary-row-compact">
+                  <dt>Última revisión</dt>
+                  <dd>{{ getLastReviewDisplay() }}</dd>
+                </div>
+              }
+              @if (hasRhObservations) {
+                <div class="summary-row summary-row-note">
+                  <dt>Observaciones RH</dt>
+                  <dd class="summary-value-note">{{ detalle.mensaje }}</dd>
+                </div>
+              }
             </dl>
           </section>
         </div>

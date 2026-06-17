@@ -20,6 +20,10 @@ export interface Reimbursement {
   link_expediente?: string;
 
   revisado_por?: number;
+  fecha_ultima_revision?: string;
+  ultima_revision?: string;
+  fecha_ultima_apertura?: string;
+  fecha_revision?: string;
   fecha_resolucion?: string;
 }
 
@@ -37,7 +41,6 @@ export const HISTORICAL_REIMBURSEMENT_STATUSES: readonly ReimbursementStatus[] =
 ];
 
 export interface ReimbursementFilters {
-  uuid: string;
   nombre_solicitante: string;
   estatus: string;
   id_trabajador?: string;

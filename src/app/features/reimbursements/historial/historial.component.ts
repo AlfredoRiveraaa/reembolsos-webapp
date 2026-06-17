@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { ReimbursementService } from '../../../core/services/reimbursement.service';
+import { UserManagementService } from '../../../core/services/user-management.service';
 import {
   HISTORICAL_REIMBURSEMENT_STATUSES,
   Reimbursement,
   ReimbursementStatus
 } from '../../../core/models/reimbursement.model';
+import { SystemUser } from '../../../core/models/user-management.model';
 
 @Component({
   selector: 'app-historial',
@@ -19,10 +21,12 @@ import {
 })
 export class HistorialComponent implements OnInit {
   private reimbursementService = inject(ReimbursementService);
+  private userManagementService = inject(UserManagementService);
   private router = inject(Router);
 
   reimbursements: Reimbursement[] = [];
   filteredReimbursements: Reimbursement[] = [];
+  reviewerUsers: SystemUser[] = [];
 
   // Filtros
   fechaInicio = '';
@@ -45,6 +49,7 @@ export class HistorialComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadHistorial();
+    this.loadReviewerUsers();
   }
 
   private loadHistorial(): void {
@@ -52,6 +57,12 @@ export class HistorialComponent implements OnInit {
       this.reimbursements = data.filter(r => HISTORICAL_REIMBURSEMENT_STATUSES.includes(r.estatus));
       this.calculateStats();
       this.applyFilters();
+    });
+  }
+
+  private loadReviewerUsers(): void {
+    this.userManagementService.loadUsers().subscribe(users => {
+      this.reviewerUsers = users;
     });
   }
 
@@ -80,7 +91,6 @@ export class HistorialComponent implements OnInit {
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
-        r.uuid.toLowerCase().includes(term) ||
         r.nombre_solicitante.toLowerCase().includes(term) ||
         r.correo_solicitante.toLowerCase().includes(term) ||
         (r.id_trabajador && r.id_trabajador.toLowerCase().includes(term))
@@ -149,6 +159,17 @@ export class HistorialComponent implements OnInit {
     });
   }
 
+  getReviewerDisplay(reimbursement: Reimbursement): string {
+    const reviewerId = reimbursement.revisado_por;
+
+    if (reviewerId === null || reviewerId === undefined) {
+      return '—';
+    }
+
+    const reviewer = this.reviewerUsers.find(user => String(user.id) === String(reviewerId));
+    return reviewer?.displayName || reviewer?.username || `Usuario #${reviewerId}`;
+  }
+
   exportHistorial(): void {
     if (this.filteredReimbursements.length === 0) {
       alert('No hay datos para exportar con los filtros actuales.');
@@ -158,7 +179,6 @@ export class HistorialComponent implements OnInit {
     // Mapeamos los datos para que las columnas del Excel tengan nombres bonitos en español
     const exportData = this.filteredReimbursements.map(r => ({
       'ID Trabajador': r.id_trabajador || '—',
-      'Folio DRH': r.uuid,
       'Fecha Recepción': this.formatDate(r.fecha_recepcion),
       'Correo Solicitante': r.correo_solicitante,
       'Nombre Trabajador': r.nombre_solicitante,
@@ -166,6 +186,7 @@ export class HistorialComponent implements OnInit {
       'Proveedor / Hospital': r.nombre_proveedor,
       'Monto ($)': Number(r.monto), // Como número para que Excel pueda sumar
       'Fecha de Resolución': r.fecha_resolucion ? this.formatDate(r.fecha_resolucion) : '—',
+      'Responsable RH': this.getReviewerDisplay(r),
       'Estado': r.estatus
     }));
 
@@ -175,7 +196,6 @@ export class HistorialComponent implements OnInit {
     // Ajustar el ancho de las columnas
     const columnWidths = [
       { wch: 15 }, // ID Trabajador
-      { wch: 15 }, // Folio
       { wch: 15 }, // Fecha Rec
       { wch: 30 }, // Correo
       { wch: 30 }, // Nombre Trabajador
@@ -183,6 +203,7 @@ export class HistorialComponent implements OnInit {
       { wch: 35 }, // Proveedor / Hospital
       { wch: 12 }, // Monto ($)
       { wch: 15 }, // Fecha Res
+      { wch: 24 }, // Responsable RH
       { wch: 15 }, // Estado
     ];
     worksheet['!cols'] = columnWidths;

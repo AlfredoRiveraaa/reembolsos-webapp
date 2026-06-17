@@ -31,7 +31,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   filteredReimbursements: Reimbursement[] = [];
 
   // Sincronizado con ReimbursementFilters
-  filters: ReimbursementFilters = { uuid: '', nombre_solicitante: '', estatus: '', id_trabajador: '' };
+  filters: ReimbursementFilters = { nombre_solicitante: '', estatus: '', id_trabajador: '' };
 
   totalSolicitudes = 0;
   solicitudesPendientes = 0;
@@ -84,7 +84,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   applyFilters(resetPage = true): void {
     this.filteredReimbursements = this.reimbursements.filter(r => {
-      if (this.filters.uuid && !r.uuid.toLowerCase().includes(this.filters.uuid.toLowerCase())) return false;
       if (this.filters.nombre_solicitante && !r.nombre_solicitante.toLowerCase().includes(this.filters.nombre_solicitante.toLowerCase())) return false;
       if (this.filters.estatus && r.estatus !== this.filters.estatus) return false;
       if (this.filters.id_trabajador && (!r.id_trabajador || !r.id_trabajador.toLowerCase().includes(this.filters.id_trabajador.toLowerCase()))) return false;
@@ -104,7 +103,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.filters = { uuid: '', nombre_solicitante: '', estatus: '', id_trabajador: '' };
+    this.filters = { nombre_solicitante: '', estatus: '', id_trabajador: '' };
     this.applyFilters();
   }
 
@@ -138,6 +137,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   formatDate(dateString: string): string {
     if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  getLastReviewDisplay(reimbursement: Reimbursement): string {
+    const reviewDate =
+      reimbursement.fecha_ultima_revision ??
+      reimbursement.ultima_revision ??
+      reimbursement.fecha_ultima_apertura ??
+      reimbursement.fecha_revision;
+
+    return reviewDate ? this.formatDate(reviewDate) : '—';
   }
 
   navigateToDetail(id: number): void {

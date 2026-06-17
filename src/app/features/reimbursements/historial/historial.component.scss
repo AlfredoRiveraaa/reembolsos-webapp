@@ -403,12 +403,6 @@ $yellow-kpi:#eab308;
   }
 }
 
-.td-folio {
-  font-family: 'SF Mono', ui-monospace, Consolas, monospace;
-  font-size: 0.8125rem !important;
-  font-weight: 600;
-  color: $navy !important;
-}
 .td-date { color: $slate-500; font-size: 0.8125rem !important; }
 .td-id {
   font-family: 'SF Mono', ui-monospace, Consolas, monospace;
@@ -416,6 +410,13 @@ $yellow-kpi:#eab308;
   color: $slate-400 !important;
 }
 .td-name { font-weight: 600; color: $slate-900 !important; }
+.td-reviewer {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: $slate-700 !important;
+  font-weight: 600;
+}
 .td-comment {
   max-width: 220px;
   overflow: hidden;

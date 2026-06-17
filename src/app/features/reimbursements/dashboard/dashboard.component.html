@@ -89,12 +89,6 @@
             <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" placeholder="Buscar folio DRH..." [(ngModel)]="filters.uuid" (ngModelChange)="applyFilters()" class="filter-input"/>
-          </div>
-          <div class="filter-field">
-            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
             <input type="text" placeholder="Nombre trabajador..." [(ngModel)]="filters.nombre_solicitante" (ngModelChange)="applyFilters()" class="filter-input"/>
           </div>
           <div class="filter-field">
@@ -114,7 +108,7 @@
               }
             </select>
           </div>
-          @if (filters.uuid || filters.nombre_solicitante || filters.estatus || filters.id_trabajador) {
+          @if (filters.nombre_solicitante || filters.estatus || filters.id_trabajador) {
             <button class="btn-clear-filters" (click)="clearFilters()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -130,13 +124,12 @@
           <thead>
             <tr>
               <th>ID Trabajador</th>
-              <th>Folio DRH</th>
               <th>Fecha Recepción</th>
               <th>Correo Solicitante</th>
               <th>Nombre Trabajador</th>
               <th>Observaciones</th>
               <th class="col-right">Monto</th>
-              <th>Resolución</th>
+              <th>Última revisión</th>
               <th class="col-center">Estado</th>
               <th class="col-center">Acción</th>
             </tr>
@@ -152,18 +145,17 @@
                 (keydown.space)="navigateToDetail(r.id); $event.preventDefault()"
               >
                 <td><strong>{{ r.id_trabajador || '—' }}</strong></td>
-                <td class="td-folio">{{ r.uuid }}</td>
                 <td class="td-date">{{ formatDate(r.fecha_recepcion) }}</td>
                 <td class="td-id">{{ r.correo_solicitante }}</td>
                 <td class="td-name">{{ r.nombre_solicitante }}</td>
                 <td class="td-comment">{{ r.mensaje || '—' }}</td>
                 <td class="td-amount">{{ formatCurrency(r.monto) }}</td>
-                <td class="td-date">{{ r.fecha_resolucion ? formatDate(r.fecha_resolucion) : '—' }}</td>
+                <td class="td-date">{{ getLastReviewDisplay(r) }}</td>
                 <td class="td-status">
                   <span class="badge" [ngClass]="getEstadoClass(r.estatus)">{{ r.estatus }}</span>
                 </td>
                 <td class="td-action">
-                  <a [routerLink]="['/reembolso', r.id]" [queryParams]="{ returnUrl: '/' }" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud ' + r.uuid">
+                  <a [routerLink]="['/reembolso', r.id]" [queryParams]="{ returnUrl: '/' }" class="btn-detail" (click)="$event.stopPropagation()" [attr.aria-label]="'Revisar solicitud de ' + r.nombre_solicitante">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>
