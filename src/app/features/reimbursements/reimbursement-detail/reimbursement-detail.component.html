@@ -148,7 +148,27 @@
 
       <!-- Documentos -->
       <div class="info-card">
-        <div class="card-label">Documentos Adjuntos</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="card-label" style="margin-bottom: 0;">Documentos Adjuntos</div>
+          
+          <button class="btn-download-zip"
+                  (click)="descargarExpedienteZip()" 
+                  [disabled]="isDownloadingZip || documents.length === 0"
+                  aria-label="Descargar todo el expediente en ZIP">
+            @if (isDownloadingZip) {
+              <span class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></span>
+              Comprimiendo...
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Descargar ZIP
+            }
+          </button>
+        </div>
+        
         <div class="doc-list">
           @for (document of documents; track document.id) {
             <button class="doc-btn" (click)="toggleDocument(document.id)" [class.doc-active]="activeDocumentId === document.id">

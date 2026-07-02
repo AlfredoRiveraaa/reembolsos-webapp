@@ -34,6 +34,7 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
   estadoOriginal: ReimbursementStatus = 'PENDIENTE';
   estadoActualizadoMensaje: string | null = null;
   isLoading = true;
+  isDownloadingZip = false;
   notFound = false;
   returnUrl = '/';
   reviewerDisplay = '—';
@@ -418,5 +419,32 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
 
   private formatReviewerName(user: SystemUser): string {
     return user.displayName || user.username || `Usuario #${user.id}`;
+  }
+
+  descargarExpedienteZip(): void {
+    if (!this.detalle) return;
+
+    this.isDownloadingZip = true;
+    this.reimbursementService.downloadExpedienteZip(this.detalle.id).subscribe({
+      next: (blob) => {
+        // Crear enlace temporal para forzar la descarga en el navegador
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        // Nombre de fallback por si acaso, el backend también envía su propio nombre
+        a.download = `Expediente_${this.detalle!.uuid.substring(0, 8)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        this.isDownloadingZip = false;
+      },
+      error: (err) => {
+        console.error('Error al descargar el ZIP', err);
+        this.isDownloadingZip = false;
+        alert('Ocurrió un error al generar el ZIP. Verifica que los archivos existan.');
+      }
+    });
   }
 }

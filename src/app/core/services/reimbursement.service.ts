@@ -46,6 +46,12 @@ export class ReimbursementService {
     return this.http.get(urlSegura, { responseType: 'blob' });
   }
 
+  downloadExpedienteZip(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/expediente/zip`, {
+      responseType: 'blob' // Es vital decirle a Angular que esperamos un archivo binario
+    });
+  }
+
   getStats(reimbursements: Reimbursement[]) {
     return {
       total: reimbursements.length,
