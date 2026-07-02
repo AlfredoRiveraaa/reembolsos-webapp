@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { Reimbursement } from '../models/reimbursement.model';
 
 export interface DashboardStats {
@@ -25,7 +26,7 @@ export interface DashboardStatsFilters {
   providedIn: 'root'
 })
 export class StatisticsService {
-  private readonly reimbursementsApiUrl = 'http://localhost:8000/api/reembolsos';
+  private readonly reimbursementsApiUrl = `${environment.apiUrl}/reembolsos`;
   private http = inject(HttpClient);
 
   getDashboardStats(filters: DashboardStatsFilters = {}): Observable<DashboardStats> {

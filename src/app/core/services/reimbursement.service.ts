@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Reimbursement, ReimbursementStatus } from '../models/reimbursement.model';
 
 @Injectable({
@@ -8,7 +9,7 @@ import { Reimbursement, ReimbursementStatus } from '../models/reimbursement.mode
 })
 export class ReimbursementService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8000/api/reembolsos';
+  private readonly apiUrl = `${environment.apiUrl}/reembolsos`;
 
   getReimbursements(): Observable<Reimbursement[]> {
     return this.http.get<Reimbursement[]>(this.apiUrl);

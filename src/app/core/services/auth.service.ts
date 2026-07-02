@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { AuthUser, LoginCredentials } from '../models/auth.model';
 
 interface LoginResponse {
@@ -27,7 +28,7 @@ interface JwtPayload {
 })
 export class AuthService {
   private static readonly STORAGE_KEY = 'reembolsos.auth.user';
-  private readonly apiUrl = 'http://localhost:8000/api';
+  private readonly apiUrl = `${environment.apiUrl}`;
 
   private http = inject(HttpClient);
 

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import {
   CreateSystemUserRequest,
   SystemUser,
@@ -13,7 +14,7 @@ import {
   providedIn: 'root'
 })
 export class UserManagementService {
-  private readonly apiUrl = 'http://127.0.0.1:8000/api/usuarios';
+  private readonly apiUrl = `${environment.apiUrl}/usuarios`;
   private readonly http = inject(HttpClient);
 
   private readonly usersSubject = new BehaviorSubject<SystemUser[]>([]);
