@@ -24,7 +24,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private reimbursementService = inject(ReimbursementService);
   private router = inject(Router);
 
-  // --- NUEVO: Temporizador para la recarga en tiempo real ---
+  // Temporizador para la recarga en tiempo real ---
   private pollingSubscription?: Subscription;
 
   reimbursements: Reimbursement[] = [];
@@ -38,7 +38,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   solicitudesEnRevision = 0;
   solicitudesInfoSolicitada = 0;
 
-  // Paginacion
   currentPage = 1;
   itemsPerPage = 20;
   totalPages = 1;

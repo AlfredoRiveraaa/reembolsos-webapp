@@ -27,18 +27,15 @@ export class HistorialComponent implements OnInit {
   reimbursements: Reimbursement[] = [];
   filteredReimbursements: Reimbursement[] = [];
 
-  // Filtros
   fechaInicio = '';
   fechaFin = '';
   searchTerm = '';
   estadoFilter = '';
 
-  // Paginación
   currentPage = 1;
   itemsPerPage = 20;
   totalPages = 1;
 
-  // Estadísticas
   totalAprobados = 0;
   totalRechazados = 0;
   totalProcesadas = 0;

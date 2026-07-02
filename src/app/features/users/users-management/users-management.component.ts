@@ -22,33 +22,27 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   users: SystemUser[] = [];
   filteredUsers: SystemUser[] = [];
 
-  // Pagination
   currentPage = 1;
   itemsPerPage = 10;
   totalPages = 1;
 
-  // Filters
   searchTerm = '';
   roleFilter: UserRole | '' = '';
   statusFilter: 'all' | 'active' | 'inactive' = 'all';
 
-  // Statistics
   totalUsers = 0;
   activeUsers = 0;
   inactiveUsers = 0;
   adminUsers = 0;
 
-  // Modal state
   showModal = false;
   isEditMode = false;
   selectedUserId: string | null = null;
   showPasswordEditing = false;
 
-  // Form
   userForm;
   isSaving = false;
 
-  // Messages
   message = '';
   messageType: 'success' | 'error' | '' = '';
 

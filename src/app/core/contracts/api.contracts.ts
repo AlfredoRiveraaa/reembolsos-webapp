@@ -2,7 +2,6 @@ import { LoginCredentials, RegisterUserRequest } from '../models/auth.model';
 import { Reimbursement, ReimbursementDetail, ReimbursementStatus } from '../models/reimbursement.model';
 import { CreateSystemUserRequest, SystemUser, UpdateSystemUserRequest } from '../models/user-management.model';
 
-// Frontend contracts to align payloads before backend integration.
 export interface ApiLoginRequest extends LoginCredentials {}
 
 export interface ApiLoginResponse {

@@ -14,6 +14,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(cloned);
   }
 
-  // 3. Si no hay token, la petición sigue su curso normal (como el Login)
+  // 3. Si no hay token, la petición sigue su curso normal
   return next(req);
 };

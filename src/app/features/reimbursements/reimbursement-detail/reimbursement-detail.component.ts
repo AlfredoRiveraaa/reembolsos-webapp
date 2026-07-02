@@ -215,13 +215,13 @@ export class ReimbursementDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error(err);
-          this.isSubmittingStatus = false; // Movimos esto arriba
+          this.isSubmittingStatus = false;
 
           if (err.status === 409) {
             // En lugar del alert, llenamos el modal y lo mostramos
             this.conflictMessage = err.error?.detail || 'Esta solicitud ya fue procesada por otro compañero.';
             this.showConflictModal = true;
-            this.cancelarAccion(); // Cerramos la cajita de comentarios
+            this.cancelarAccion(); // Cerramos la caja de comentarios
           } else {
             alert('Hubo un error al actualizar el estado y enviar el correo.');
           }

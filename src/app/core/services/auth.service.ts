@@ -12,7 +12,7 @@ interface LoginResponse {
   role?: AuthUser['role'];
 }
 
-// 1. Agregamos esta interfaz para que TypeScript conozca qué trae el token
+// Agregamos esta interfaz para que TypeScript conozca qué trae el token
 interface JwtPayload {
   sub?: string;
   rol?: string;
@@ -35,11 +35,11 @@ export class AuthService {
   readonly currentUser$;
 
   constructor() {
-    // 1. Inicializamos en null para prevenir errores
+    // Inicializamos en null para prevenir errores
     this.currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
     this.currentUser$ = this.currentUserSubject.asObservable();
 
-    // 2. Restauramos después de inicializar
+    // Restauramos después de inicializar
     const session = this.restoreAndValidateSession();
     if (session) {
       this.currentUserSubject.next(session);
@@ -118,7 +118,6 @@ export class AuthService {
     try {
       const user = JSON.parse(storedUser) as AuthUser;
 
-      // --- NUEVA VALIDACIÓN ROBUSTA ---
       // Nunca confiamos en el texto viejo, extraemos la verdad absoluta del token actual
       const tokenPayload = this.decodeJwtPayload(token);
       const realRole = (tokenPayload.role ?? tokenPayload.rol ?? 'trabajador') as AuthUser['role'];
@@ -141,7 +140,7 @@ export class AuthService {
     localStorage.removeItem('access_token');
   }
 
-  // 2. Cambiamos el tipo de retorno para que TypeScript sepa qué esperar
+  // Cambiamos el tipo de retorno para que TypeScript sepa qué esperar
   private decodeJwtPayload(token: string): JwtPayload {
     const payloadPart = token.split('.')[1];
 

@@ -45,8 +45,3 @@ export interface ReimbursementFilters {
   estatus: string;
   id_trabajador?: string;
 }
-
-/**
- * Nota: Se eliminaron ReimbursementDetail y Concepto ya que
- * el backend actual no maneja desglose de conceptos por fila
- */

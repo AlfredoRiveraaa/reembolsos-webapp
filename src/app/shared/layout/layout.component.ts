@@ -24,7 +24,6 @@ export class LayoutComponent implements OnInit {
 
   passwordForm!: FormGroup;
 
-  // Flags to toggle visibility of password fields in the modal
   showPasswordCurrent = false;
   showPasswordNew = false;
   showPasswordConfirm = false;
