@@ -3,11 +3,11 @@ name: Despliegue Frontend Angular
 on:
   push:
     branches:
-      - dev  # Se activará automáticamente cuando hagas push a la rama dev
+      - dev
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted # Le dice a GitHub que use el servidor de tu universidad, no los suyos
+    runs-on: self-hosted
 
     steps:
     - name: 1. Descargar el código nuevo
@@ -17,8 +17,8 @@ jobs:
       run: npm install
 
     - name: 3. Compilar Angular para producción
-      run: npx ng build --configuration production
+      run: npx ng build --configuration production --base-href /SistemaReembolsos/
 
     - name: 4. Copiar archivos al servidor IIS (wwwroot)
       run: |
-        Copy-Item -Path "dist\reembolsos-webapp\*" -Destination "C:\inetpub\wwwroot\reembolsos-webapp" -Recurse -Force
+        Copy-Item -Path "dist\reembolsos-webapp\browser\*" -Destination "C:\inetpub\wwwroot\SistemaReembolsos" -Recurse -Force
